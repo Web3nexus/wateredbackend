@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Cinzel', serif;
+
+    --color-sea-deep: #0c1427;
+    --color-sea-light: #1a2b4a;
+    --color-gold-antique: #d4af37;
+    --color-parchment: #f8f1e5;
+    --color-glass: rgba(255, 255, 255, 0.05);
+}
+
+@layer base {
+    body {
+        @apply bg-sea-deep text-parchment font-sans selection:bg-gold-antique selection:text-sea-deep;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading uppercase tracking-widest text-gold-antique;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl;
+    }
+
+    .btn-gold {
+        @apply px-8 py-3 bg-gold-antique text-sea-deep font-bold rounded-full transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95;
+    }
+
+    .nav-link {
+        @apply text-parchment/70 hover:text-gold-antique transition-colors font-medium tracking-wide;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}

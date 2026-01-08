@@ -1,0 +1,272 @@
+PROJECT: WATERED
+Type: Laravel Backend (Admin + API + Web)
+Admin: Filament
+Scope: FEATURES 1 → 11
+EXECUTION MODE: STRICT / PHASED / NO GUESSING
+
+
+
+===============================
+🔹 PRE-PHASE — BACKEND DEPENDENCIES (RUN ONCE)
+===============================
+Install ONLY these packages. No others.
+composer require filament/filament:"^3.0"
+composer require laravel/sanctum
+composer require spatie/laravel-permission:"^6.0"
+composer require spatie/laravel-medialibrary:"^11.0"
+composer require league/flysystem-aws-s3-v3
+
+Publish configs
+php artisan vendor:publish --tag=filament-config
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider"
+
+Run base migrations
+php artisan migrate
+
+⚠️ AFTER THIS POINT → NO MORE DEPENDENCIES
+🛑 STOP. THEN START FEATURE 1.
+
+=================================================
+🔹 FEATURE 1 — ADMIN CORE & GLOBAL CONFIGURATION
+=================================================
+GOAL
+Foundation for entire platform.
+IMPLEMENT IN ORDER
+DB → Models → Policies → Filament → API
+DATABASE
+admin_users
+admin_roles
+admin_role_user
+global_settings (singleton)
+languages
+statuses (draft/published/archived)
+MODELS
+AdminUser
+AdminRole
+GlobalSetting (cached singleton)
+Language
+Status
+ADMIN (FILAMENT)
+AdminUserResource (super_admin only)
+LanguageResource
+StatusResource (system-locked)
+GlobalSettingResource (edit-only)
+API
+GET /api/v1/settings
+RULES
+Admin auth is session-based
+Roles enforced everywhere
+Languages & statuses reusable globally
+🛑 STOP AFTER FEATURE 1.
+
+=================================================
+🔹 FEATURE 2 — TRADITIONS & TEXT CONTENT SYSTEM
+=================================================
+GOAL
+Bible/Quran-style structured reading.
+DATABASE
+traditions
+categories
+text_collections
+chapters
+entries
+entry_translations
+MODELS
+Tradition
+Category
+TextCollection
+Chapter
+Entry
+EntryTranslation
+RELATIONSHIPS
+Tradition → Categories
+Collection → Chapters → Entries
+Entry → Translations
+Language-aware querying
+ADMIN
+Full CRUD via Filament
+Draft → Published workflow
+Ordering controls
+API
+List traditions
+Read collections
+Read chapters
+Read entries
+Filter by language, tradition, category
+🛑 STOP AFTER FEATURE 2.
+
+=================================================
+🔹 FEATURE 3 — VIDEO TEACHING FEED
+=================================================
+GOAL
+Admin-curated vertical teaching feed.
+DATABASE
+videos
+MODELS
+Video (metadata only, CDN URL)
+ADMIN
+Upload metadata
+Assign tradition/category
+Publish control
+Feed ordering (manual / featured / date)
+API
+Paginated feed
+CDN URLs only
+🛑 STOP AFTER FEATURE 3.
+
+=================================================
+🔹 FEATURE 4 — AUDIO TEACHING SYSTEM
+=================================================
+GOAL
+Preserve oral teachings.
+DATABASE
+audios
+MODELS
+AudioTeaching
+ADMIN
+Upload metadata
+Language + tradition tagging
+Publish workflow
+API
+Audio list
+Stream endpoint
+🛑 STOP AFTER FEATURE 4.
+
+=================================================
+🔹 FEATURE 5 — USER AUTH (MOBILE USERS)
+=================================================
+GOAL
+Enable personalization.
+DATABASE
+users (mobile users)
+AUTH
+Laravel Sanctum (token based)
+API
+Register
+Login
+Logout
+Token refresh
+RULES
+Admins ≠ Users
+Tokens only for mobile
+🛑 STOP AFTER FEATURE 5.
+
+=================================================
+🔹 FEATURE 6 — USER LIBRARY & BOOKMARKS
+=================================================
+GOAL
+Save content.
+DATABASE
+bookmarks (polymorphic)
+MODELS
+Bookmark (morphTo)
+API
+Add bookmark
+Remove bookmark
+List bookmarks
+ADMIN
+Read-only visibility
+🛑 STOP AFTER FEATURE 6.
+
+=================================================
+🔹 FEATURE 7 — COMMERCE (SACRED OBJECTS)
+=================================================
+GOAL
+Ethical commerce.
+DATABASE
+products
+product_images
+orders
+order_items
+MODELS
+Product
+Order
+OrderItem
+ADMIN
+Product CRUD
+Stock management
+Order management
+API
+Product listing
+Create order
+Order history
+🛑 STOP AFTER FEATURE 7.
+
+=================================================
+🔹 FEATURE 8 — TEMPLE DISCOVERY
+=================================================
+GOAL
+Discover verified temples.
+DATABASE
+temples
+temple_hours
+temple_teachings
+MODELS
+Temple
+ADMIN
+CRUD
+Publish control
+API
+Temple listing
+Temple details
+🛑 STOP AFTER FEATURE 8.
+
+=================================================
+🔹 FEATURE 9 — CONSULTATION & BOOKINGS
+=================================================
+GOAL
+Spiritual consultations.
+DATABASE
+consultation_types
+availabilities
+bookings
+MODELS
+ConsultationType
+Booking
+ADMIN
+Define consultations
+Approve/decline
+Calendar view
+API
+List consultations
+Create booking
+Booking status
+🛑 STOP AFTER FEATURE 9.
+
+=================================================
+🔹 FEATURE 10 — SEARCH & DAILY WISDOM
+=================================================
+GOAL
+Discovery + engagement.
+DATABASE
+daily_wisdoms
+SEARCH
+Unified search across:
+texts
+videos
+audio
+temples
+products
+ADMIN
+Select daily wisdom content
+API
+/search
+/daily-wisdom
+🛑 STOP AFTER FEATURE 10.
+
+=================================================
+🔹 FEATURE 11 — LANDING WEBSITE CONTENT SYNC
+=================================================
+GOAL
+Public marketing site.
+IMPLEMENT
+Read-only API consumption
+SEO-friendly endpoints
+Featured sections
+RULE
+NO admin CRUD
+API-only
+🛑 STOP. END PROJECT.
+

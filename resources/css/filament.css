@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+    --color-sea-deep: #0c1427;
+    --color-sea-light: #1a2b4a;
+    --color-gold-antique: #d4af37;
+    --color-parchment: #f8f1e5;
+    --color-glass: rgba(255, 255, 255, 0.05);
+
+    /* Safelist colors used in QuickActionsWidget */
+    --color-primary-50: color-mix(in srgb, var(--color-gold-antique) 5%, transparent);
+    --color-primary-100: color-mix(in srgb, var(--color-gold-antique) 10%, transparent);
+    --color-primary-500: var(--color-gold-antique);
+
+    --color-success-50: color-mix(in srgb, var(--color-success-500) 5%, transparent);
+    --color-success-100: color-mix(in srgb, var(--color-success-500) 10%, transparent);
+
+    --color-warning-50: color-mix(in srgb, var(--color-warning-500) 5%, transparent);
+    --color-warning-100: color-mix(in srgb, var(--color-warning-500) 10%, transparent);
+
+    --color-danger-50: color-mix(in srgb, var(--color-danger-500) 5%, transparent);
+    --color-danger-100: color-mix(in srgb, var(--color-danger-500) 10%, transparent);
+
+    /* Filament compatibility colors */
+    --color-custom-50: var(--color-primary-50);
+    --color-custom-500: var(--color-primary-500);
+}
+
+/* FIX: Prevent icons from enlarging due to Tailwind global resets */
+.fi-icon,
+.fi-icon-btn svg,
+.fi-sidebar-item-icon svg,
+.fi-ta-icon svg,
+nav svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+/* Except for our big widget icons */
+.group .h-8.w-8 {
+    width: 2rem !important;
+    height: 2rem !important;
+}
+
+.group .h-6.w-6 {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+}
+
+/* We only want the utilities and components, not the base resets that break icons */
+@layer utilities {
+    /* Custom spacing or effects for the widget if needed */
+}
