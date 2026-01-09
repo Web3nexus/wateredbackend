@@ -6,7 +6,7 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
+:root {
     --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Cinzel', serif;
 
@@ -17,9 +17,56 @@
     --color-glass: rgba(255, 255, 255, 0.05);
 }
 
+@utility bg-sea-deep {
+    background-color: var(--color-sea-deep);
+}
+
+@utility bg-sea-light {
+    background-color: var(--color-sea-light);
+}
+
+@utility bg-gold-antique {
+    background-color: var(--color-gold-antique);
+}
+
+@utility bg-parchment {
+    background-color: var(--color-parchment);
+}
+
+@utility text-sea-deep {
+    color: var(--color-sea-deep);
+}
+
+@utility text-sea-light {
+    color: var(--color-sea-light);
+}
+
+@utility text-gold-antique {
+    color: var(--color-gold-antique);
+}
+
+@utility text-parchment {
+    color: var(--color-parchment);
+}
+
+@utility font-heading {
+    font-family: var(--font-heading);
+}
+
+@utility font-sans {
+    font-family: var(--font-sans);
+}
+
 @layer base {
     body {
-        @apply bg-sea-deep text-parchment font-sans selection:bg-gold-antique selection:text-sea-deep;
+        background-color: var(--color-sea-deep);
+        color: var(--color-parchment);
+        font-family: var(--font-sans);
+    }
+
+    body::selection {
+        background-color: var(--color-gold-antique);
+        color: var(--color-sea-deep);
     }
 
     h1,
@@ -28,21 +75,49 @@
     h4,
     h5,
     h6 {
-        @apply font-heading uppercase tracking-widest text-gold-antique;
+        font-family: var(--font-heading);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-gold-antique);
     }
 }
 
 @layer components {
     .glass-card {
-        @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl;
+        backdrop-filter: blur(12px);
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
     .btn-gold {
-        @apply px-8 py-3 bg-gold-antique text-sea-deep font-bold rounded-full transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95;
+        padding: 0.75rem 2rem;
+        background-color: var(--color-gold-antique);
+        color: var(--color-sea-deep);
+        font-weight: bold;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gold:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-gold:active {
+        transform: scale(0.95);
     }
 
     .nav-link {
-        @apply text-parchment/70 hover:text-gold-antique transition-colors font-medium tracking-wide;
+        color: color-mix(in srgb, var(--color-parchment) 70%, transparent);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--color-gold-antique);
     }
 }
 

@@ -9,6 +9,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Forms\Get;
 
 class VideoForm
 {
@@ -24,11 +25,27 @@ class VideoForm
                         Textarea::make('description')
                             ->rows(3)
                             ->maxLength(1000),
+                        Select::make('video_type')
+                            ->label('Video Source')
+                            ->options([
+                                'youtube' => 'YouTube',
+                                'file' => 'Direct File (Bunny/R2)',
+                            ])
+                            ->default('youtube')
+                            ->reactive()
+                            ->required(),
                         TextInput::make('youtube_url')
                             ->label('YouTube URL')
-                            ->required()
                             ->url()
+                            ->required(fn($get) => $get('video_type') === 'youtube')
+                            ->visible(fn($get) => $get('video_type') === 'youtube')
                             ->helperText('Paste the full YouTube video URL.'),
+                        TextInput::make('storage_url')
+                            ->label('File URL')
+                            ->url()
+                            ->required(fn($get) => $get('video_type') === 'file')
+                            ->visible(fn($get) => $get('video_type') === 'file')
+                            ->helperText('Direct link to MP4 or HLS stream (e.g. from Bunny.net or R2).'),
                         TextInput::make('duration')
                             ->placeholder('e.g. 15:30')
                             ->maxLength(50),

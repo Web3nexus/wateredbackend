@@ -14,6 +14,8 @@ class Video extends Model
         'title',
         'description',
         'youtube_url',
+        'storage_url',
+        'video_type', // 'youtube' or 'file'
         'thumbnail_url',
         'duration',
         'published_at',
