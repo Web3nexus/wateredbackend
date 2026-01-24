@@ -6,29 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Booking extends Model
+class Reminder extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'consultation_type_id',
-        'start_time',
-        'status',
-        'notes',
+        'title',
+        'time',
+        'days',
+        'is_active',
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
+        'is_active' => 'boolean',
+        'days' => 'array',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function consultationType(): BelongsTo
-    {
-        return $this->belongsTo(ConsultationType::class);
     }
 }

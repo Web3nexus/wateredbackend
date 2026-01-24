@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConsultationType extends Model
+class Incantation extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'duration_minutes',
-        'price',
+        'title',
         'description',
-        'is_active',
+        'content',
+        'audio_url',
+        'is_paid',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'price' => 'decimal:2',
+        'is_paid' => 'boolean',
     ];
 }

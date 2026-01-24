@@ -60,6 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // Debug Permission Route (Temporary)
+    require __DIR__ . '/debug_permissions.php';
+
     Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
     // Bookmarks
@@ -69,6 +73,51 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/bookmarks/{bookmark}', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroy']);
 
     // Bookings
+    Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\BookingController::class, 'indexTypes']);
     Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
     Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
+
+    // Community
+    Route::prefix('community')->group(function () {
+        Route::get('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
+        Route::post('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'store']);
+        Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
+
+        Route::get('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
+        Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
+
+        Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
+    });
+
+    // Events
+    Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
+    Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
+    Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);
+    Route::delete('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'cancel']);
+
+    // Rituals
+    Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);
+    Route::get('/rituals/{ritual}', [\App\Http\Controllers\Api\V1\RitualController::class, 'show']);
+
+    // Incantations
+    Route::get('/incantations', [\App\Http\Controllers\Api\V1\IncantationController::class, 'index']);
+    Route::get('/incantations/{incantation}', [\App\Http\Controllers\Api\V1\IncantationController::class, 'show']);
+
+    // Deities
+    Route::get('/deities', [\App\Http\Controllers\Api\V1\DeityController::class, 'index']);
+    Route::get('/deities/{deity}', [\App\Http\Controllers\Api\V1\DeityController::class, 'show']);
+
+    // Subscriptions
+    Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
+    Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
+
+    // Reminders
+    Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);
+    Route::post('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'store']);
+    Route::put('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'update']);
+    Route::delete('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'destroy']);
+
+
+
+
 });

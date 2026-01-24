@@ -31,13 +31,13 @@ class BookingController extends Controller
     {
         $request->validate([
             'consultation_type_id' => 'required|exists:consultation_types,id',
-            'scheduled_at' => 'required|date|after:now',
+            'start_time' => 'required|date|after:now',
             'notes' => 'nullable|string',
         ]);
 
         $booking = $request->user()->bookings()->create([
             'consultation_type_id' => $request->consultation_type_id,
-            'scheduled_at' => $request->scheduled_at,
+            'start_time' => $request->start_time,
             'notes' => $request->notes,
             'status' => 'pending',
         ]);
