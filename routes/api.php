@@ -51,6 +51,10 @@ Route::prefix('v1')->group(function () {
     // Auth Routes (Public)
     Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+
+    // Community Posts (Public Read)
+    Route::get('/community/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
+    Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 });
 
 
@@ -77,13 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
     Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
 
-    // Community
+    // Community (Authenticated Actions Only)
     Route::prefix('community')->group(function () {
-        Route::get('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
         Route::post('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'store']);
         Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
 
-        Route::get('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
         Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
 
         Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
