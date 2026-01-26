@@ -2,52 +2,48 @@
 
 namespace App\Mail;
 
+use App\Models\Booking;
+use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Blade;
 
 class BookingReminderMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public function __construct(public Booking $booking)
     {
-        //
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
+        $template = EmailTemplate::where('key', 'booking_reminder')->first();
         return new Envelope(
-            subject: 'Booking Reminder Mail',
+            subject: $template ? Blade::render($template->subject, ['booking' => $this->booking]) : 'Consultation Reminder',
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            markdown: 'emails.dynamic',
+            with: [
+                'body' => $this->getRenderedBody(),
+            ],
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
+    protected function getRenderedBody(): string
     {
-        return [];
+        $template = EmailTemplate::where('key', 'booking_reminder')->first();
+        if (!$template) {
+            return "Reminder for your consultation at {$this->booking->start_time->format('H:i')}.";
+        }
+
+        return Blade::render($template->body, ['booking' => $this->booking]);
     }
 }

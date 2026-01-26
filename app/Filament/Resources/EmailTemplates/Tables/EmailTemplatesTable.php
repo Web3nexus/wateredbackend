@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Bookings\Tables;
+namespace App\Filament\Resources\EmailTemplates\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -8,27 +8,17 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class BookingsTable
+class EmailTemplatesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('key')
                     ->searchable(),
-                TextColumn::make('consultationType.name')
+                TextColumn::make('subject')
                     ->searchable(),
-                TextColumn::make('start_time')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'confirmed' => 'success',
-                        'pending_payment' => 'warning',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    })
+                TextColumn::make('description')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
