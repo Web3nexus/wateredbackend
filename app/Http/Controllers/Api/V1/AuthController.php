@@ -62,4 +62,42 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out.']);
     }
+
+    public function socialLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'name' => 'required|string',
+            'provider' => 'required|string|in:google,apple',
+            'provider_id' => 'required|string',
+            'device_name' => 'required|string',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make(str()->random(24)), // Random password for social users
+                'provider' => $request->provider,
+                'provider_id' => $request->provider_id,
+            ]);
+        } else {
+            // Update provider info if not set
+            if (!$user->provider) {
+                $user->update([
+                    'provider' => $request->provider,
+                    'provider_id' => $request->provider_id,
+                ]);
+            }
+        }
+
+        $token = $user->createToken($request->device_name)->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
 }

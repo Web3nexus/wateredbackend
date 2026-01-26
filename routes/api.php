@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
     // Auth Routes (Public)
     Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
 
     // Community Posts (Public Read)
     Route::get('/community/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
