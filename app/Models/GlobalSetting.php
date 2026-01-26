@@ -33,11 +33,19 @@ class GlobalSetting extends Model
         'default_language',
         'supported_languages',
         'maintenance_mode',
+        'is_ads_enabled',
+        'ad_unit_id_android',
+        'ad_unit_id_ios',
+        'ads_screens',
+        'notification_sound_path',
+        'alarm_sound_path',
     ];
 
     protected $casts = [
         'social_links' => 'json',
         'supported_languages' => 'json',
         'maintenance_mode' => 'boolean',
+        'is_ads_enabled' => 'boolean',
+        'ads_screens' => 'json',
     ];
 }

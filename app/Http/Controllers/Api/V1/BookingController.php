@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Models\Booking;
-use App\Models\ConsultationType;
-use Illuminate\Http\Request;
+use App\Mail\BookingConfirmationMail;
+use App\Mail\AdminBookingNotificationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class BookingController extends Controller
 {
@@ -35,13 +35,32 @@ class BookingController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $type = ConsultationType::findOrFail($request->consultation_type_id);
+
         $booking = $request->user()->bookings()->create([
             'consultation_type_id' => $request->consultation_type_id,
             'start_time' => $request->start_time,
             'notes' => $request->notes,
-            'status' => 'pending',
+            'status' => 'pending_payment',
+            'amount' => $type->price,
         ]);
 
-        return response()->json(['data' => $booking, 'message' => 'Booking request sent.'], 201);
+use App\Mail\BookingConfirmationMail;
+use Illuminate\Support\Facades\Mail;
+...
+        // Send confirmation mail
+        Mail::to($request->user())->send(new BookingConfirmationMail($booking));
+
+        // Notify Admin (simplification: find first admin or use config)
+        $admin = User::permission('manage_bookings')->first() ?? User::where('id', 1)->first();
+        if ($admin) {
+            Mail::to($admin)->send(new AdminBookingNotificationMail($booking));
+        }
+
+        return response()->json([
+            'data' => $booking,
+            'payment_url' => $paymentUrl,
+            'message' => 'Booking created. Please complete payment.'
+        ], 201);
     }
 }

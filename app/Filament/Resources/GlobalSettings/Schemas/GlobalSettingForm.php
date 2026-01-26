@@ -161,6 +161,46 @@ class GlobalSettingForm
                                             ->default(false),
                                     ]),
                             ]),
+
+                        Tabs\Tab::make('Monetization & Ads')
+                            ->schema([
+                                Section::make('Google AdMob')
+                                    ->schema([
+                                        Toggle::make('is_ads_enabled')
+                                            ->label('Enable Ads')
+                                            ->helperText('Logic: Only free mode has ads.')
+                                            ->default(false),
+                                        TextInput::make('ad_unit_id_android')
+                                            ->label('Android Ad Unit ID'),
+                                        TextInput::make('ad_unit_id_ios')
+                                            ->label('iOS Ad Unit ID'),
+                                        Select::make('ads_screens')
+                                            ->label('Screens to show Ads')
+                                            ->multiple()
+                                            ->options([
+                                                'library' => 'Library',
+                                                'audio' => 'Audio Feed',
+                                                'reels' => 'Reels',
+                                                'community' => 'Community',
+                                                'profile' => 'Profile',
+                                            ]),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Sound & Notifications')
+                            ->schema([
+                                Section::make('Custom App Sounds')
+                                    ->schema([
+                                        FileUpload::make('notification_sound_path')
+                                            ->label('Default Notification Sound')
+                                            ->directory('sounds')
+                                            ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg']),
+                                        FileUpload::make('alarm_sound_path')
+                                            ->label('Alarm Sound')
+                                            ->directory('sounds')
+                                            ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg']),
+                                    ]),
+                            ]),
                     ]),
             ]);
     }

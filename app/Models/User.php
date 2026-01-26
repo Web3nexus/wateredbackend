@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'provider',
         'provider_id',
+        'profile_photo_url',
     ];
 
     public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -45,6 +46,16 @@ class User extends Authenticatable
     public function bookings(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(InAppNotification::class);
     }
 
     public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany

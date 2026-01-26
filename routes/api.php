@@ -89,6 +89,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
+    // Profile
+    Route::get('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
+    Route::post('/profile/update', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);
+    Route::post('/profile/photo', [\App\Http\Controllers\Api\V1\ProfileController::class, 'uploadPhoto']);
+
     // Bookmarks
     Route::get('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'index']);
     Route::post('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'store']);

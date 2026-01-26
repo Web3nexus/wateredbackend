@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class UserForm
@@ -19,9 +20,13 @@ class UserForm
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at'),
+                Toggle::make('is_premium')
+                    ->label('Premium Status')
+                    ->default(false),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
+                    ->required(fn(string $operation): bool => $operation === 'create')
+                    ->dehydrated(fn(?string $state) => filled($state)),
             ]);
     }
 }

@@ -16,6 +16,11 @@ class ConsultationTypeForm
             ->components([
                 TextInput::make('name')
                     ->required(),
+                TextInput::make('price')
+                    ->numeric()
+                    ->prefix('$') // Assuming USD for now
+                    ->required()
+                    ->step(0.01),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 TextInput::make('duration_minutes')
