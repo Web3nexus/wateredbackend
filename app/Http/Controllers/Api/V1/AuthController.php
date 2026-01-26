@@ -66,31 +66,44 @@ class AuthController extends Controller
     public function socialLogin(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'nullable|email',
             'name' => 'required|string',
             'provider' => 'required|string|in:google,apple',
             'provider_id' => 'required|string',
             'device_name' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // 1. Try to find by provider info first (Best for Apple)
+        $user = User::where('provider', $request->provider)
+            ->where('provider_id', $request->provider_id)
+            ->first();
 
-        if (!$user) {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make(str()->random(24)), // Random password for social users
-                'provider' => $request->provider,
-                'provider_id' => $request->provider_id,
-            ]);
-        } else {
-            // Update provider info if not set
-            if (!$user->provider) {
+        // 2. If not found, try to find by email
+        if (!$user && $request->email) {
+            $user = User::where('email', $request->email)->first();
+
+            if ($user) {
+                // Link the account
                 $user->update([
                     'provider' => $request->provider,
                     'provider_id' => $request->provider_id,
                 ]);
             }
+        }
+
+        // 3. If still not found, create new user
+        if (!$user) {
+            // If it's a new user and we don't have an email (rare but possible for Apple), 
+            // we at least need a placeholder to avoid DB errors
+            $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $email,
+                'password' => Hash::make(str()->random(24)),
+                'provider' => $request->provider,
+                'provider_id' => $request->provider_id,
+            ]);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
