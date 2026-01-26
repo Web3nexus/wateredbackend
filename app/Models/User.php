@@ -26,6 +26,7 @@ class User extends Authenticatable
         'provider',
         'provider_id',
         'profile_photo_url',
+        'is_premium',
     ];
 
     public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -25,32 +25,38 @@ class SubscriptionController extends Controller
      */
     public function verify(Request $request)
     {
-        // In real life, validate receipt with Apple/Google
-        // For now, trust the client and set as premium
+        try {
+            $request->validate([
+                'plan_id' => 'required',
+                'provider' => 'required',
+                'provider_subscription_id' => 'required',
+            ]);
 
-        $request->validate([
-            'plan_id' => 'required',
-            'provider' => 'required',
-            'provider_subscription_id' => 'required',
-        ]);
+            $user = $request->user();
 
-        $user = $request->user();
+            // Create Subscription record
+            $user->subscriptions()->create([
+                'plan_id' => $request->plan_id,
+                'provider' => $request->provider,
+                'provider_subscription_id' => $request->provider_subscription_id,
+                'status' => 'active',
+                'starts_at' => now(),
+                'expires_at' => now()->addMonth(),
+            ]);
 
-        // Update or Create
-        $subscription = $user->subscriptions()->create([
-            'plan_id' => $request->plan_id,
-            'provider' => $request->provider,
-            'provider_subscription_id' => $request->provider_subscription_id,
-            'status' => 'active',
-            'starts_at' => now(),
-            'expires_at' => now()->addMonth(), // Mock 1 month
-        ]);
+            // Update user premium status
+            $user->is_premium = true;
+            $user->save();
 
-        $user->update(['is_premium' => true]);
-
-        return response()->json([
-            'message' => 'Subscription verified',
-            'is_premium' => true,
-        ]);
+            return response()->json([
+                'message' => 'Subscription verified and user upgraded to premium',
+                'is_premium' => true,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to verify subscription',
+                'error' => $e->getMessage(),
+            ], 422);
+        }
     }
 }
