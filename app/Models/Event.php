@@ -33,8 +33,11 @@ class Event extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
-    public function isRegistered(User $user): bool
+    public function isRegistered(?User $user): bool
     {
+        if (!$user)
+            return false;
+
         return $this->registrations()
             ->where('user_id', $user->id)
             ->where('status', 'registered')

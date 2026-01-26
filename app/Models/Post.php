@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Post extends Model
 {
@@ -32,13 +33,15 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
-    public function likes(): HasMany
+    public function likes(): MorphMany
     {
-        return $this->hasMany(PostLike::class);
+        return $this->morphMany(Like::class, 'likeable');
     }
-    
-    public function isLikedBy(User $user): bool
+
+    public function isLikedBy(?User $user): bool
     {
+        if (!$user)
+            return false;
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 }

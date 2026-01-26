@@ -49,8 +49,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
     // Auth Routes (Public)
-    Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
-    Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    Route::middleware('throttle:5,1')->post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::middleware('throttle:3,1')->post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
 
     // Community Posts (Public Read)
@@ -64,6 +64,16 @@ Route::prefix('v1')->group(function () {
         Route::get('/special-days', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getSpecialDays']);
         Route::get('/today', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getToday']);
     });
+
+    // Public Content
+    Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
+    Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
+    Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);
+    Route::get('/rituals/{ritual}', [\App\Http\Controllers\Api\V1\RitualController::class, 'show']);
+    Route::get('/deities', [\App\Http\Controllers\Api\V1\DeityController::class, 'index']);
+    Route::get('/deities/{deity}', [\App\Http\Controllers\Api\V1\DeityController::class, 'show']);
+    Route::get('/incantations', [\App\Http\Controllers\Api\V1\IncantationController::class, 'index']);
+    Route::get('/incantations/{incantation}', [\App\Http\Controllers\Api\V1\IncantationController::class, 'show']);
 });
 
 
@@ -100,23 +110,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
     });
 
+    // Unified Interactions
+    Route::post('/interact/like', [\App\Http\Controllers\Api\V1\InteractionController::class, 'toggleLike']);
+    Route::post('/interact/comment', [\App\Http\Controllers\Api\V1\InteractionController::class, 'storeComment']);
+    Route::get('/interact/comments', [\App\Http\Controllers\Api\V1\InteractionController::class, 'indexComments']);
+
     // Events
-    Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
-    Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
     Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);
     Route::delete('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'cancel']);
-
-    // Rituals
-    Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);
-    Route::get('/rituals/{ritual}', [\App\Http\Controllers\Api\V1\RitualController::class, 'show']);
-
-    // Incantations
-    Route::get('/incantations', [\App\Http\Controllers\Api\V1\IncantationController::class, 'index']);
-    Route::get('/incantations/{incantation}', [\App\Http\Controllers\Api\V1\IncantationController::class, 'show']);
-
-    // Deities
-    Route::get('/deities', [\App\Http\Controllers\Api\V1\DeityController::class, 'index']);
-    Route::get('/deities/{deity}', [\App\Http\Controllers\Api\V1\DeityController::class, 'show']);
 
     // Subscriptions
     Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);

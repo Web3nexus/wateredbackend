@@ -7,19 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Comment extends Model
+class Like extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'post_id',
         'user_id',
-        'content',
-        'commentable_type',
-        'commentable_id',
+        'likeable_type',
+        'likeable_id',
     ];
 
-    public function commentable(): MorphTo
+    public function likeable(): MorphTo
     {
         return $this->morphTo();
     }
