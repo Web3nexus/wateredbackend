@@ -19,6 +19,7 @@ class GlobalSettingForm
         return $schema
             ->components([
                 Tabs::make('Settings')
+                    ->columnSpanFull()
                     ->tabs([
                         Tabs\Tab::make('General')
                             ->schema([
@@ -185,6 +186,36 @@ class GlobalSettingForm
                                                 'profile' => 'Profile',
                                             ]),
                                     ]),
+
+                                Section::make('Stripe Payments')
+                                    ->schema([
+                                        TextInput::make('stripe_public_key')
+                                            ->label('Stripe Publishable Key'),
+                                        TextInput::make('stripe_secret_key')
+                                            ->label('Stripe Secret Key')
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                    ])->columns(2),
+
+                                Section::make('Paystack Payments')
+                                    ->schema([
+                                        TextInput::make('paystack_public_key')
+                                            ->label('Paystack Public Key'),
+                                        TextInput::make('paystack_secret_key')
+                                            ->label('Paystack Secret Key')
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                    ])->columns(2),
+
+                                Section::make('In-App Purchase (IAP) Product IDs')
+                                    ->schema([
+                                        TextInput::make('premium_monthly_id')
+                                            ->label('Monthly Subscription ID')
+                                            ->placeholder('e.g. premium_monthly'),
+                                        TextInput::make('premium_yearly_id')
+                                            ->label('Yearly Subscription ID')
+                                            ->placeholder('e.g. premium_yearly'),
+                                    ])->columns(2),
                             ]),
 
                         Tabs\Tab::make('Sound & Notifications')

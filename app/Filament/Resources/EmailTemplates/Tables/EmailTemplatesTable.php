@@ -13,21 +13,22 @@ class EmailTemplatesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 3,
+            ])
             ->columns([
                 TextColumn::make('key')
+                    ->weight('bold')
+                    ->icon('heroicon-o-key')
                     ->searchable(),
                 TextColumn::make('subject')
+                    ->icon('heroicon-o-envelope')
                     ->searchable(),
                 TextColumn::make('description')
+                    ->color('gray')
+                    ->size('sm')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
