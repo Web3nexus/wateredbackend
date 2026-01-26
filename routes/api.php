@@ -55,6 +55,14 @@ Route::prefix('v1')->group(function () {
     // Community Posts (Public Read)
     Route::get('/community/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
     Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
+
+    // Watered Calendar (Public)
+    Route::prefix('calendar')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\CalendarController::class, 'index']);
+        Route::get('/month/{month}', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getMonth']);
+        Route::get('/special-days', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getSpecialDays']);
+        Route::get('/today', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getToday']);
+    });
 });
 
 
