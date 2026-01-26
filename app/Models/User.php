@@ -27,6 +27,10 @@ class User extends Authenticatable
         'provider_id',
         'profile_photo_url',
         'is_premium',
+        'push_notifications',
+        'ritual_reminders',
+        'event_updates',
+        'community_activity',
     ];
 
     public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -97,6 +101,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_premium' => 'boolean',
+            'push_notifications' => 'boolean',
+            'ritual_reminders' => 'boolean',
+            'event_updates' => 'boolean',
+            'community_activity' => 'boolean',
         ];
     }
 }

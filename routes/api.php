@@ -44,28 +44,14 @@ Route::prefix('v1')->group(function () {
     Route::get('/videos/{video}', [\App\Http\Controllers\Api\V1\VideoController::class, 'show']);
 
     // Audio Feed endpoints
-    // Audio Feed endpoints
     Route::get('/audios', [\App\Http\Controllers\Api\V1\AudioController::class, 'index']);
     Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
-    // Auth Routes (Public)
-    Route::middleware('throttle:5,1')->post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
-    Route::middleware('throttle:3,1')->post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
-    Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
-
-    // Community Posts (Public Read)
+    // Public Community
     Route::get('/community/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
     Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 
-    // Watered Calendar (Public)
-    Route::prefix('calendar')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\CalendarController::class, 'index']);
-        Route::get('/month/{month}', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getMonth']);
-        Route::get('/special-days', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getSpecialDays']);
-        Route::get('/today', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getToday']);
-    });
-
-    // Public Content
+    // Public Events/Rituals/etc
     Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
     Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
     Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);
@@ -74,67 +60,75 @@ Route::prefix('v1')->group(function () {
     Route::get('/deities/{deity}', [\App\Http\Controllers\Api\V1\DeityController::class, 'show']);
     Route::get('/incantations', [\App\Http\Controllers\Api\V1\IncantationController::class, 'index']);
     Route::get('/incantations/{incantation}', [\App\Http\Controllers\Api\V1\IncantationController::class, 'show']);
-});
 
-
-
-// Authenticated Routes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    // Calendar
+    Route::prefix('calendar')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\CalendarController::class, 'index']);
+        Route::get('/month/{month}', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getMonth']);
+        Route::get('/special-days', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getSpecialDays']);
+        Route::get('/today', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getToday']);
     });
 
-    // Debug Permission Route (Temporary)
-    require __DIR__ . '/debug_permissions.php';
+    // Auth Public
+    Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
 
-    Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
+    // Authenticated Routes (ALL inside v1 prefix now)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
 
-    // Profile
-    Route::get('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
-    Route::post('/profile/update', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);
-    Route::post('/profile/photo', [\App\Http\Controllers\Api\V1\ProfileController::class, 'uploadPhoto']);
+        Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
-    // Bookmarks
-    Route::get('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'index']);
-    Route::post('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'store']);
-    Route::delete('/bookmarks/item', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroyByItem']);
-    Route::delete('/bookmarks/{bookmark}', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroy']);
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
+        Route::post('/profile/update', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);
+        Route::post('/profile/photo', [\App\Http\Controllers\Api\V1\ProfileController::class, 'uploadPhoto']);
 
-    // Bookings
-    Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\BookingController::class, 'indexTypes']);
-    Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
-    Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
+        // Bookmarks
+        Route::get('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'index']);
+        Route::post('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'store']);
+        Route::delete('/bookmarks/item', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroyByItem']);
+        Route::delete('/bookmarks/{bookmark}', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroy']);
 
-    // Community (Authenticated Actions Only)
-    Route::prefix('community')->group(function () {
-        Route::post('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'store']);
-        Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
+        // Bookings
+        Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
+        Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
 
-        Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
+        // Community Actions
+        Route::prefix('community')->group(function () {
+            Route::post('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'store']);
+            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
+            Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
+            Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
+        });
 
-        Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
+        // Interactions
+        Route::post('/interact/like', [\App\Http\Controllers\Api\V1\InteractionController::class, 'toggleLike']);
+        Route::post('/interact/comment', [\App\Http\Controllers\Api\V1\InteractionController::class, 'storeComment']);
+        Route::get('/interact/comments', [\App\Http\Controllers\Api\V1\InteractionController::class, 'indexComments']);
+
+        // Subscriptions
+        Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
+        Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
+
+        // Reminders
+        Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);
+        Route::post('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'store']);
+        Route::put('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'update']);
+        Route::delete('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'destroy']);
+
+        // Notifications
+        Route::get('/notifications', [\App\Http\Controllers\Api\V1\NotificationController::class, 'index']);
+        Route::post('/notifications/token', [\App\Http\Controllers\Api\V1\NotificationController::class, 'updateToken']);
+        Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
+        Route::get('/notifications/settings', [\App\Http\Controllers\Api\V1\NotificationController::class, 'getSettings']);
+        Route::post('/notifications/settings', [\App\Http\Controllers\Api\V1\NotificationController::class, 'updateSettings']);
     });
 
-    // Unified Interactions
-    Route::post('/interact/like', [\App\Http\Controllers\Api\V1\InteractionController::class, 'toggleLike']);
-    Route::post('/interact/comment', [\App\Http\Controllers\Api\V1\InteractionController::class, 'storeComment']);
-    Route::get('/interact/comments', [\App\Http\Controllers\Api\V1\InteractionController::class, 'indexComments']);
-
-    // Events
-    Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);
-    Route::delete('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'cancel']);
-
-    // Subscriptions
-    Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
-    Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
-
-    // Reminders
-    Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);
-    Route::post('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'store']);
-    Route::put('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'update']);
-    Route::delete('/reminders/{reminder}', [\App\Http\Controllers\Api\V1\ReminderController::class, 'destroy']);
-
-
-
-
+    // Informational Content
+    Route::get('/faqs', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexFaqs']);
+    Route::get('/user-guides', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexUserGuides']);
 });

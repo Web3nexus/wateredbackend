@@ -16,6 +16,7 @@ class Reminder extends Model
         'time',
         'days',
         'is_active',
+        'sound_path',
     ];
 
     protected $casts = [

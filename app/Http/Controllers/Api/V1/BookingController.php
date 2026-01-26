@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
+use App\Models\ConsultationType;
+use App\Models\User;
 use App\Mail\BookingConfirmationMail;
 use App\Mail\AdminBookingNotificationMail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Models\User;
 
 class BookingController extends Controller
 {
@@ -45,21 +48,28 @@ class BookingController extends Controller
             'amount' => $type->price,
         ]);
 
-use App\Mail\BookingConfirmationMail;
-use Illuminate\Support\Facades\Mail;
-...
         // Send confirmation mail
-        Mail::to($request->user())->send(new BookingConfirmationMail($booking));
+        try {
+            Mail::to($request->user())->send(new BookingConfirmationMail($booking));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send booking confirmation mail: ' . $e->getMessage());
+        }
 
-        // Notify Admin (simplification: find first admin or use config)
-        $admin = User::permission('manage_bookings')->first() ?? User::where('id', 1)->first();
-        if ($admin) {
-            Mail::to($admin)->send(new AdminBookingNotificationMail($booking));
+        // Notify Admin
+        try {
+            // Find super admin or fallback to ID 1
+            $admin = User::role('super_admin')->first() ?? User::where('id', 1)->first();
+
+            if ($admin) {
+                Mail::to($admin)->send(new AdminBookingNotificationMail($booking));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to notify admin of new booking: ' . $e->getMessage());
         }
 
         return response()->json([
             'data' => $booking,
-            'payment_url' => $paymentUrl,
+            'payment_url' => null,
             'message' => 'Booking created. Please complete payment.'
         ], 201);
     }
