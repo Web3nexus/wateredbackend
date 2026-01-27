@@ -10,11 +10,20 @@ class DailyWisdomController extends Controller
 {
     public function index()
     {
-        // Get today's wisdom, or random strict if not set, or latest
+        // Get today's wisdom based on active_date
         $wisdom = DailyWisdom::where('is_active', true)
-            ->whereDate('publish_date', now())
+            ->whereDate('active_date', now())
             ->first();
 
+        // Fallback: if no wisdom for today, get the most recent one
+        if (!$wisdom) {
+            $wisdom = DailyWisdom::where('is_active', true)
+                ->whereDate('active_date', '<=', now())
+                ->orderBy('active_date', 'desc')
+                ->first();
+        }
+
+        // Last resort: random wisdom
         if (!$wisdom) {
             $wisdom = DailyWisdom::where('is_active', true)
                 ->inRandomOrder()
