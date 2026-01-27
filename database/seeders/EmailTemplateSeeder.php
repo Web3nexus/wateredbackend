@@ -53,6 +53,46 @@ class EmailTemplateSeeder extends Seeder
     public function run(): void
     {
         $templates = [
+            // Booking/Consultation Templates
+            [
+                'key' => 'booking_confirmation',
+                'subject' => 'Consultation Booking Confirmed - Watered',
+                'description' => 'Sent to users when a booking is confirmed.',
+                'body' => $this->getLayout('Booking Confirmed', "
+                    <h1>Booking Confirmed</h1>
+                    <p>Hello {{ \$booking->user->name }},</p>
+                    <p>Your consultation for <strong>{{ \$booking->consultationType->name }}</strong> has been confirmed.</p>
+                    <p><strong>Date & Time:</strong> {{ \$booking->start_time->format('F j, Y, g:i a') }}</p>
+                    <p>Thank you for choosing Watered.</p>
+                "),
+            ],
+            [
+                'key' => 'admin_booking_notification',
+                'subject' => 'New Consultation Booking - Action Required',
+                'description' => 'Sent to admins when a new booking is made.',
+                'body' => $this->getLayout('New Booking Received', "
+                    <h1>New Booking Received</h1>
+                    <p>A new consultation has been booked.</p>
+                    <p><strong>User:</strong> {{ \$booking->user->name }} ({{ \$booking->user->email }})</p>
+                    <p><strong>Type:</strong> {{ \$booking->consultationType->name }}</p>
+                    <p><strong>Requested Time:</strong> {{ \$booking->start_time->format('F j, Y, g:i a') }}</p>
+                    <p><strong>Notes:</strong><br>{{ \$booking->notes ?? 'No notes provided.' }}</p>
+                "),
+            ],
+            [
+                'key' => 'booking_reminder',
+                'subject' => 'Consultation Reminder - Watered',
+                'description' => 'Sent to users 1 hour and 30 minutes before their booking.',
+                'body' => $this->getLayout('Consultation Reminder', "
+                    <h1>Consultation Reminder</h1>
+                    <p>Hello {{ \$booking->user->name }},</p>
+                    <p>This is a reminder for your upcoming consultation for <strong>{{ \$booking->consultationType->name }}</strong>.</p>
+                    <p><strong>Date & Time:</strong> {{ \$booking->start_time->format('F j, Y, g:i a') }}</p>
+                    <p>We look forward to connecting with you.</p>
+                "),
+            ],
+
+            // Authentication Templates
             [
                 'key' => 'registration_verification',
                 'subject' => 'Verify Your Watered Account',
@@ -77,6 +117,8 @@ class EmailTemplateSeeder extends Seeder
                     <center><a href='{{ \$appUrl }}' class='button'>Open App</a></center>
                 "),
             ],
+
+            // Subscription Templates
             [
                 'key' => 'subscription_confirmed',
                 'subject' => 'Watered+ Subscription Confirmed',
