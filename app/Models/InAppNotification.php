@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InAppNotification extends Model
 {
-    protected  = ['user_id', 'title', 'body', 'type', 'data', 'read_at'];
+    protected $fillable = ['user_id', 'title', 'body', 'type', 'data', 'read_at'];
 
     protected $casts = [
         'data' => 'json',
