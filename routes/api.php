@@ -48,7 +48,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
     // Public Community
-    Route::get('/community/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'index']);
+    Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
+    // keeping comments on CommunityController for now or moving to PostController? 
+    // Let's stick to PostController for consistency if possible, but PostController@comments isn't indexed there.
+    // The previous code had CommunityController@comments. I'll leave comments for now or check CommunityController.
     Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 
     // Public Events/Rituals/etc
@@ -99,10 +102,10 @@ Route::prefix('v1')->group(function () {
 
         // Community Actions
         Route::prefix('community')->group(function () {
-            Route::post('/posts', [\App\Http\Controllers\Api\V1\CommunityController::class, 'store']);
-            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
+            Route::post('/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'store']);
+            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']); // Keep old if not implemented in new
             Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
-            Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\CommunityController::class, 'toggleLike']);
+            Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\PostController::class, 'toggleLike']);
         });
 
         // Interactions

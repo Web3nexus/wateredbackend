@@ -16,11 +16,15 @@ class Post extends Model
         'user_id',
         'content',
         'media_urls',
+        'is_active',
+        'is_flagged',
         'status',
     ];
 
     protected $casts = [
         'media_urls' => 'array',
+        'is_active' => 'boolean',
+        'is_flagged' => 'boolean',
     ];
 
     public function user(): BelongsTo
