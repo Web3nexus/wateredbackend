@@ -15,12 +15,12 @@ class DailyWisdom extends Model
         'quote',
         'author',
         'background_image_url',
-        'publish_date',
+        'active_date',
         'is_active',
     ];
 
     protected $casts = [
-        'publish_date' => 'date',
+        'active_date' => 'date',
         'is_active' => 'boolean',
     ];
 }
