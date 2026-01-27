@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             KemeticCalendarSeeder::class,
+            DailyWisdomSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
     }
 }
