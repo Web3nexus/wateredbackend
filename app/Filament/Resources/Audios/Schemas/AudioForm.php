@@ -54,6 +54,9 @@ class AudioForm
                         Toggle::make('is_active')
                             ->label('Active')
                             ->default(true),
+                        Toggle::make('is_featured')
+                            ->label('Featured Content')
+                            ->default(false),
                     ]),
             ]);
     }

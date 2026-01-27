@@ -27,6 +27,11 @@ class VideoController extends Controller
             $query->search($request->search);
         }
 
+        // Filter by featured
+        if ($request->has('featured')) {
+            $query->where('is_featured', true);
+        }
+
         $perPage = $request->query('per_page', 20);
         $videos = $query->latest('published_at')->paginate($perPage);
 

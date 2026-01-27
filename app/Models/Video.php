@@ -23,11 +23,13 @@ class Video extends Model
         'published_at',
         'tradition_id',
         'is_active',
+        'is_featured',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     protected function storageUrl(): Attribute
