@@ -7,6 +7,7 @@ use App\Models\Product;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class StatsOverviewWidget extends BaseWidget
 {
@@ -18,11 +19,13 @@ class StatsOverviewWidget extends BaseWidget
         // Total Subscribed Users (assuming isPremium field or subscription relationship)
         $subscribedUsers = User::where('is_premium', true)->count();
 
-        // Total Earnings (from subscriptions - assuming a subscriptions table or payment records)
-        // This is a placeholder - adjust based on your actual payment/subscription structure
-        $totalEarnings = DB::table('subscriptions')
-            ->where('status', 'active')
-            ->sum('amount') ?? 0;
+        // Total Earnings (from subscriptions)
+        $totalEarnings = 0;
+        if (Schema::hasColumn('subscriptions', 'amount')) {
+            $totalEarnings = DB::table('subscriptions')
+                ->where('status', 'active')
+                ->sum('amount');
+        }
 
         // Total Products
         $totalProducts = Product::count();
