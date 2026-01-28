@@ -165,6 +165,18 @@ class GlobalSettingForm
 
                         Tabs\Tab::make('Monetization & Ads')
                             ->schema([
+                                Section::make('Currency Settings')
+                                    ->schema([
+                                        Select::make('system_currency')
+                                            ->label('System Currency')
+                                            ->options([
+                                                'USD' => 'USD ($)',
+                                                'NGN' => 'NGN (₦)',
+                                            ])
+                                            ->default('USD')
+                                            ->required(),
+                                    ]),
+
                                 Section::make('Google AdMob')
                                     ->schema([
                                         Toggle::make('is_ads_enabled')

@@ -23,4 +23,11 @@ class DailyWisdom extends Model
         'active_date' => 'date',
         'is_active' => 'boolean',
     ];
+
+    protected $appends = ['publish_date'];
+
+    public function getPublishDateAttribute()
+    {
+        return $this->active_date;
+    }
 }

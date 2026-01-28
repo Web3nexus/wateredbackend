@@ -27,10 +27,6 @@ class ConsultationTypeForm
                     ->required()
                     ->numeric()
                     ->default(60),
-                TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('$'),
                 FileUpload::make('image_url')
                     ->image(),
                 Toggle::make('is_active')
