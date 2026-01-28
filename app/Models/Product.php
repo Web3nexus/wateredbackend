@@ -14,6 +14,8 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'price_ngn',
+        'price_usd',
         'image_url',
         'audio_sample_url',
         'is_digital',
@@ -22,6 +24,8 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'integer', // Stored in cents
+        'price_ngn' => 'decimal:2',
+        'price_usd' => 'decimal:2',
         'is_digital' => 'boolean',
         'is_active' => 'boolean',
     ];

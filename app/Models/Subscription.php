@@ -15,12 +15,14 @@ class Subscription extends Model
         'plan_id',
         'provider',
         'provider_subscription_id',
+        'amount',
         'status',
         'starts_at',
         'expires_at',
     ];
 
     protected $casts = [
+        'amount' => 'decimal:2',
         'starts_at' => 'datetime',
         'expires_at' => 'datetime',
     ];

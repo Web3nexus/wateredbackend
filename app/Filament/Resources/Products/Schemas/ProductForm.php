@@ -21,7 +21,16 @@ class ProductForm
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('$')
+                    ->helperText('Default price in cents'),
+                TextInput::make('price_ngn')
+                    ->numeric()
+                    ->prefix('₦')
+                    ->label('Price in Naira'),
+                TextInput::make('price_usd')
+                    ->numeric()
+                    ->prefix('$')
+                    ->label('Price in USD'),
                 FileUpload::make('image_url')
                     ->image(),
                 TextInput::make('audio_sample_url')

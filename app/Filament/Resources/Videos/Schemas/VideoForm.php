@@ -7,6 +7,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Get;
@@ -49,6 +50,13 @@ class VideoForm
                         TextInput::make('duration')
                             ->placeholder('e.g. 15:30')
                             ->maxLength(50),
+                        FileUpload::make('thumbnail_url')
+                            ->label('Thumbnail Image')
+                            ->image()
+                            ->directory('videos/thumbnails')
+                            ->imageEditor()
+                            ->helperText('Recommended size: 1280x720 (16:9 aspect ratio) for best display quality.')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Publishing')

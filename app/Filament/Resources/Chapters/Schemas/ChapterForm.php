@@ -33,6 +33,12 @@ class ChapterForm
                     ->default(0),
                 Toggle::make('is_active')
                     ->default(true),
+                Textarea::make('verses_content')
+                    ->label('Verses')
+                    ->rows(15)
+                    ->helperText('Write verses in format: "1. First verse text\n2. Second verse text\n3. Third verse text" - Each line starting with a number will become a verse.')
+                    ->columnSpanFull()
+                    ->dehydrated(false), // Don't save to database, we'll process it
             ]);
     }
 }

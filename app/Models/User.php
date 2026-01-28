@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -32,6 +33,13 @@ class User extends Authenticatable
         'event_updates',
         'community_activity',
     ];
+
+    protected function profilePhotoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : asset('storage/' . $value)) : null,
+        );
+    }
 
     public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {

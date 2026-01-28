@@ -21,6 +21,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/temples/near-me', [\App\Http\Controllers\Api\V1\TempleController::class, 'nearMe']);
     Route::get('/temples/{temple}', [\App\Http\Controllers\Api\V1\TempleController::class, 'show']);
 
+    // Event endpoints
+    Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
+    Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
+
     // Consultation Types (Public)
     Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\BookingController::class, 'indexTypes']);
 
@@ -106,6 +110,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']); // Keep old if not implemented in new
             Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
             Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\PostController::class, 'toggleLike']);
+            Route::post('/posts/{post}/share', [\App\Http\Controllers\Api\V1\PostController::class, 'share']);
         });
 
         // Interactions

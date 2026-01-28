@@ -10,6 +10,7 @@ class Entry extends Model
 {
     protected $fillable = [
         'number',
+        'verse_number',
         'text',
         'chapter_id',
         'order',

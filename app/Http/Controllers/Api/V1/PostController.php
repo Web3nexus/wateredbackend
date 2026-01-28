@@ -56,4 +56,14 @@ class PostController extends Controller
 
         return response()->json(['message' => $message]);
     }
+
+    public function share(Post $post, Request $request): JsonResponse
+    {
+        // Track share event (could log to analytics, increment share count, etc.)
+        // For now, just return success
+        return response()->json([
+            'message' => 'Shared successfully',
+            'post_id' => $post->id,
+        ]);
+    }
 }

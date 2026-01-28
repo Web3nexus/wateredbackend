@@ -19,6 +19,7 @@ class Post extends Model
         'is_active',
         'is_flagged',
         'status',
+        'comments_count',
     ];
 
     protected $casts = [

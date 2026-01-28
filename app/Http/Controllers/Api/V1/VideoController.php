@@ -27,6 +27,10 @@ class VideoController extends Controller
             $query->search($request->search);
         }
 
+        if ($request->has('is_featured')) {
+            $query->where('is_featured', true);
+        }
+
         // Filter by featured
         if ($request->has('featured')) {
             $query->where('is_featured', true);
