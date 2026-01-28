@@ -21,11 +21,11 @@ class EditChapter extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load existing verses into the textarea
-        $verses = $this->record->entries()->orderBy('verse_number')->get();
+        $verses = $this->record->entries()->orderBy('number')->get();
 
         if ($verses->isNotEmpty()) {
             $versesContent = $verses->map(function ($entry) {
-                return ($entry->verse_number ?? $entry->number) . '. ' . $entry->text;
+                return $entry->number . '. ' . $entry->text;
             })->implode("\n");
 
             $data['verses_content'] = $versesContent;
@@ -73,7 +73,6 @@ class EditChapter extends EditRecord
                 Entry::create([
                     'chapter_id' => $this->record->id,
                     'number' => $number,
-                    'verse_number' => $number,
                     'text' => $text,
                     'order' => $number,
                     'is_active' => true,
@@ -85,7 +84,6 @@ class EditChapter extends EditRecord
                 Entry::create([
                     'chapter_id' => $this->record->id,
                     'number' => $verseNumber,
-                    'verse_number' => $verseNumber,
                     'text' => $line,
                     'order' => $verseNumber,
                     'is_active' => true,
