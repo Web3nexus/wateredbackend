@@ -27,7 +27,7 @@ class CalendarDayResource extends Resource
 
     protected static ?string $navigationLabel = 'Days & Celebrations';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Watered Calendar';
+    protected static UnitEnum|string|null $navigationGroup = 'Watered Calendar';
 
     public static function form(Schema $schema): Schema
     {

@@ -24,7 +24,7 @@ class CalendarMonthResource extends Resource
 
     protected static ?string $navigationLabel = 'Months (Custom Naming)';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Watered Calendar';
+    protected static UnitEnum|string|null $navigationGroup = 'Watered Calendar';
 
     public static function form(Schema $schema): Schema
     {

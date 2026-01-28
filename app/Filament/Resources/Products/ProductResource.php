@@ -21,7 +21,7 @@ class ProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+    protected static UnitEnum|string|null $navigationGroup = 'Commerce';
 
     protected static ?int $navigationSort = 1;
 

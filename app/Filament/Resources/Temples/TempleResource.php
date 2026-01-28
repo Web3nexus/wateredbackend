@@ -21,7 +21,7 @@ class TempleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-map';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Discovery';
+    protected static UnitEnum|string|null $navigationGroup = 'Discovery';
 
     public static function form(Schema $schema): Schema
     {

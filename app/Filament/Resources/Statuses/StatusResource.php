@@ -21,7 +21,7 @@ class StatusResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFlag;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 3;
 

@@ -21,7 +21,7 @@ class EmailTemplateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 10;
 

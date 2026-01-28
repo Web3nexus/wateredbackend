@@ -21,7 +21,7 @@ class DailyWisdomResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Wisdom';
+    protected static UnitEnum|string|null $navigationGroup = 'Wisdom';
 
     public static function form(Schema $schema): Schema
     {

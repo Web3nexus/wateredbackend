@@ -27,7 +27,7 @@ class TraditionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Library';
+    protected static UnitEnum|string|null $navigationGroup = 'Library';
 
     public static function form(Schema $schema): Schema
     {

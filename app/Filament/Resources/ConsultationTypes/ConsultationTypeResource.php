@@ -21,7 +21,7 @@ class ConsultationTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Consultation';
+    protected static UnitEnum|string|null $navigationGroup = 'Consultation';
 
     protected static ?int $navigationSort = 1;
 

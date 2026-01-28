@@ -21,7 +21,7 @@ class AdminUserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'User Management';
+    protected static UnitEnum|string|null $navigationGroup = 'User Management';
 
     protected static ?int $navigationSort = 2;
 
