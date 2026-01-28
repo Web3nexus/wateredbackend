@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Traditions\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -38,10 +39,20 @@ class TraditionForm
                             ->required()
                             ->default(fn() => \App\Models\Language::where('code', 'en')->first()?->id),
 
+                        FileUpload::make('image_url')
+                            ->label('Cover Image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('traditions')
+                            ->visibility('public')
+                            ->columnSpanFull(),
+
                         Toggle::make('is_active')
                             ->label('Active')
                             ->default(true),
-                    ]),
+                    ])
+                    ->columns(2) // Make section 2 columns for inputs
+                    ->columnSpanFull(), // Make section take full width
             ]);
     }
 }

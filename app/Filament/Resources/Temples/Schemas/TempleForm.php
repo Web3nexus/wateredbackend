@@ -24,7 +24,10 @@ class TempleForm
                 TextInput::make('longitude')
                     ->numeric(),
                 FileUpload::make('image_url')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('temples')
+                    ->visibility('public'),
                 Toggle::make('is_active')
                     ->required(),
             ]);

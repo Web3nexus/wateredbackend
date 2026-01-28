@@ -24,9 +24,10 @@ class DailyWisdomController extends Controller
         }
 
         // Last resort: random wisdom
+        // Last resort: Get the most recently created/updated active one
         if (!$wisdom) {
             $wisdom = DailyWisdom::where('is_active', true)
-                ->inRandomOrder()
+                ->latest('updated_at')
                 ->first();
         }
 
