@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Chapters\Pages;
 
 use App\Filament\Resources\Chapters\ChapterResource;
 use Filament\Actions;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use App\Models\Entry;
 
@@ -14,51 +16,46 @@ class EditChapter extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('bulkAddVerses')
+                ->label('Bulk Add Verses')
+                ->icon('heroicon-o-document-plus')
+                ->modalHeading('Bulk Add Verses')
+                ->modalDescription('Import multiple verses at once. You can choose to either append these to existing verses or replace everything.')
+                ->form([
+                    Textarea::make('verses_content')
+                        ->label('Verses Content')
+                        ->rows(15)
+                        ->required()
+                        ->helperText('Format: "1. Verse text" - Each line starting with a number becomes a verse.'),
+                    Toggle::make('overwrite')
+                        ->label('Overwrite existing verses?')
+                        ->default(false)
+                        ->helperText('If enabled, all existing verses for this chapter will be deleted first.'),
+                ])
+                ->action(function (array $data) {
+                    if ($data['overwrite']) {
+                        $this->record->entries()->delete();
+                    }
+
+                    $this->createVersesFromContent($data['verses_content']);
+
+                    $this->notify('success', 'Verses processed successfully.');
+
+                    return redirect(request()->header('Referer'));
+                }),
             Actions\DeleteAction::make(),
         ];
-    }
-
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        // Load existing verses into the textarea
-        $verses = $this->record->entries()->orderBy('number')->get();
-
-        if ($verses->isNotEmpty()) {
-            $versesContent = $verses->map(function ($entry) {
-                return $entry->number . '. ' . $entry->text;
-            })->implode("\n");
-
-            $data['verses_content'] = $versesContent;
-        }
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        // Store verses_content temporarily
-        $this->versesContent = $data['verses_content'] ?? null;
-        unset($data['verses_content']);
-
-        return $data;
-    }
-
-    protected function afterSave(): void
-    {
-        // Update verses if provided
-        if (!empty($this->versesContent)) {
-            // Delete existing verses
-            $this->record->entries()->delete();
-
-            // Create new verses from content
-            $this->createVersesFromContent($this->versesContent);
-        }
     }
 
     private function createVersesFromContent(string $content): void
     {
         $lines = explode("\n", $content);
         $verseNumber = 1;
+
+        // If not overwriting, start from the last verse number + 1
+        if ($this->record->entries()->exists()) {
+            $verseNumber = $this->record->entries()->max('number') + 1;
+        }
 
         foreach ($lines as $line) {
             $line = trim($line);
@@ -78,9 +75,9 @@ class EditChapter extends EditRecord
                     'is_active' => true,
                 ]);
 
-                $verseNumber++;
+                $verseNumber = max($verseNumber, $number + 1);
             } else {
-                // If line doesn't start with number, treat as continuation or new verse
+                // If line doesn't start with number, treat as continuation
                 Entry::create([
                     'chapter_id' => $this->record->id,
                     'number' => $verseNumber,
@@ -93,6 +90,4 @@ class EditChapter extends EditRecord
             }
         }
     }
-
-    private $versesContent;
 }

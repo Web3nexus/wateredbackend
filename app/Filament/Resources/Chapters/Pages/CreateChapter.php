@@ -45,19 +45,17 @@ class CreateChapter extends CreateRecord
                 Entry::create([
                     'chapter_id' => $this->record->id,
                     'number' => $number,
-                    'verse_number' => $number,
                     'text' => $text,
                     'order' => $number,
                     'is_active' => true,
                 ]);
 
-                $verseNumber++;
+                $verseNumber = max($verseNumber, $number + 1);
             } else {
-                // If line doesn't start with number, treat as continuation or new verse
+                // If line doesn't start with number, treat as continuation
                 Entry::create([
                     'chapter_id' => $this->record->id,
                     'number' => $verseNumber,
-                    'verse_number' => $verseNumber,
                     'text' => $line,
                     'order' => $verseNumber,
                     'is_active' => true,
