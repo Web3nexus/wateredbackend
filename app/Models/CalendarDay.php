@@ -17,10 +17,14 @@ class CalendarDay extends Model
         'celebration_type',
         'is_sacred',
         'ui_color',
+        'activities',
+        'restrictions',
     ];
 
     protected $casts = [
         'associated_deities' => 'array',
+        'activities' => 'array',
+        'restrictions' => 'array',
         'is_sacred' => 'boolean',
     ];
 

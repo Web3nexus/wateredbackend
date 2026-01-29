@@ -15,6 +15,7 @@ class CalendarMonth extends Model
         'season',
         'gregorian_reference',
         'description',
+        'deities',
     ];
 
     public function days(): HasMany

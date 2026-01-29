@@ -56,33 +56,34 @@ class CalendarController extends Controller
     public function getToday()
     {
         $today = now();
-        $year = $today->year;
+        $monthNumber = $today->month;
+        $dayNumber = $today->day;
 
-        // Kemetic New Year (Wepet Renpet) usually around July 19th
-        $newYear = \Carbon\Carbon::create($year, 7, 19);
+        // Static Mapping per User Rules
+        $wateredMonths = [
+            1 => ['name' => 'Djehuti / Odomankoma', 'deity' => 'Djehuti', 'meaning' => 'Beginning, Wisdom'],
+            2 => ['name' => 'Hathor / Yemoja', 'deity' => 'Hathor', 'meaning' => 'Love, Beauty'],
+            3 => ['name' => 'Sekhmet / Amadioha', 'deity' => 'Sekhmet', 'meaning' => 'Power, Healing'],
+            4 => ['name' => 'Ma’at / Ovia', 'deity' => 'Ma’at', 'meaning' => 'Balance, Truth'],
+            5 => ['name' => 'Geb / Osun', 'deity' => 'Geb', 'meaning' => 'Earth, Fertility'],
+            6 => ['name' => 'Nut / Etegbere', 'deity' => 'Nut', 'meaning' => 'Sky, Mystery'],
+            7 => ['name' => 'Auset / Rezi', 'deity' => 'Auset', 'meaning' => 'Magic, Motherhood'],
+            8 => ['name' => 'Ausar / Tiurakh', 'deity' => 'Ausar', 'meaning' => 'Resurrection, Eternity'],
+            9 => ['name' => 'Heru / Sango', 'deity' => 'Heru', 'meaning' => 'Victory, Kingship'],
+            10 => ['name' => 'Seth / Kibuka', 'deity' => 'Seth', 'meaning' => 'Chaos, Transformation'],
+            11 => ['name' => 'Nebeth-Het / Oya', 'deity' => 'Nebeth-Het', 'meaning' => 'Protection, Transition'],
+            12 => ['name' => 'Anpu / Inkosazana', 'deity' => 'Anpu', 'meaning' => 'Guidance, Afterlife'],
+        ];
 
-        if ($today->lt($newYear)) {
-            $newYear = \Carbon\Carbon::create($year - 1, 7, 19);
-        }
+        $currentMonthData = $wateredMonths[$monthNumber] ?? $wateredMonths[1];
 
-        $daysSinceNewYear = $today->diffInDays($newYear);
-
-        // There are 12 months of 30 days
-        $monthNumber = (int) floor($daysSinceNewYear / 30) + 1;
-        $dayInMonth = (int) ($daysSinceNewYear % 30) + 1;
-
-        // Handle Epagomenal days (Month 13)
-        if ($monthNumber > 12) {
-            $monthNumber = 13;
-            $dayInMonth = (int) ($daysSinceNewYear - 360) + 1;
-        }
-
+        // Fetch DB Day Logic
         $month = CalendarMonth::where('number', $monthNumber)->first();
         $day = null;
 
         if ($month) {
             $day = CalendarDay::where('calendar_month_id', $month->id)
-                ->where('day_number', $dayInMonth)
+                ->where('day_number', $dayNumber)
                 ->first();
         }
 
@@ -90,13 +91,14 @@ class CalendarController extends Controller
             'gregorian_date' => $today->toDateString(),
             'kemetic_date' => [
                 'month_number' => $monthNumber,
-                'day_number' => $dayInMonth,
-                'month_name' => $month?->display_name,
-                'season' => $month?->season,
-                'year' => $month?->year,
-                'gregorian_reference' => $day?->gregorian_day,
+                'day_number' => $dayNumber,
+                'month_name' => $currentMonthData['name'],
+                'deities' => $currentMonthData['deity'], // Simplified for UI
+                'meaning' => $currentMonthData['meaning'],
+                'year' => $today->year + 4241, // Optional: Keep Kemetic year offset if desired, or just Gregorian
+                'gregorian_reference' => $today->format('F d'),
             ],
-            'day_details' => $day,
+            'day_details' => $day, // Now includes activities/restrictions if seeded
         ]);
     }
 }
