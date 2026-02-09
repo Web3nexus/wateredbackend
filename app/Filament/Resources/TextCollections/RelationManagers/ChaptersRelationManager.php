@@ -68,7 +68,9 @@ class ChaptersRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make()
                     ->label('Edit Chapter & Verses')
-                    ->icon('heroicon-o-pencil-square'),
+                    ->icon('heroicon-o-pencil-square')
+                    ->url(fn($record) => route('filament.admin.resources.chapters.edit', ['record' => $record->id]))
+                    ->openUrlInNewTab(false),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
