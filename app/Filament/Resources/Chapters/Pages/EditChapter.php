@@ -39,9 +39,10 @@ class EditChapter extends EditRecord
 
                     $this->createVersesFromContent($data['verses_content']);
 
-                    $this->notify('success', 'Verses processed successfully.');
-
-                    return redirect(request()->header('Referer'));
+                    \Filament\Notifications\Notification::make()
+                        ->success()
+                        ->title('Verses processed successfully')
+                        ->send();
                 }),
             Actions\DeleteAction::make(),
         ];
