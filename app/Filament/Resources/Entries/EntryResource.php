@@ -30,6 +30,11 @@ class EntryResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false; // Hide from navigation - verses are managed via Chapters
+    }
+
     public static function form(Schema $schema): Schema
     {
         return EntryForm::configure($schema);
