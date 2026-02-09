@@ -13,9 +13,12 @@ use Illuminate\Support\Facades\Mail;
 class BookingController extends Controller
 {
     // List available types
-    public function indexTypes()
+    public function indexTypes(Request $request)
     {
-        $types = ConsultationType::where('is_active', true)->get();
+        $types = ConsultationType::where('is_active', true)
+            ->when($request->category, function ($query, $category) {
+                return $query->where('category', $category);
+            })->get();
         return response()->json(['data' => $types]);
     }
 

@@ -71,6 +71,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/deities/{deity}', [\App\Http\Controllers\Api\V1\DeityController::class, 'show']);
     Route::get('/incantations', [\App\Http\Controllers\Api\V1\IncantationController::class, 'index']);
     Route::get('/incantations/{incantation}', [\App\Http\Controllers\Api\V1\IncantationController::class, 'show']);
+    Route::get('/holidays', [\App\Http\Controllers\Api\V1\HolidayController::class, 'index']);
 
     // Calendar
     Route::prefix('calendar')->group(function () {

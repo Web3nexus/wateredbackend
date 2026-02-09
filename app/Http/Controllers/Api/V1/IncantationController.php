@@ -11,9 +11,12 @@ class IncantationController extends Controller
     /**
      * List incantations
      */
-    public function index()
+    public function index(Request $request)
     {
-        $incantations = Incantation::latest()->paginate(10);
+        $incantations = Incantation::when($request->category, function ($query, $category) {
+            return $query->where('category', $category);
+        })->latest()->paginate(20);
+
         return response()->json($incantations);
     }
 

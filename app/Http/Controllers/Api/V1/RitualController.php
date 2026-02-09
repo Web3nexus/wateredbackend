@@ -11,9 +11,12 @@ class RitualController extends Controller
     /**
      * List rituals
      */
-    public function index()
+    public function index(Request $request)
     {
-        $rituals = Ritual::latest()->paginate(10);
+        $rituals = Ritual::when($request->category, function ($query, $category) {
+            return $query->where('category', $category);
+        })->latest()->paginate(20);
+
         return response()->json($rituals);
     }
 

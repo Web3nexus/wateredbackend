@@ -39,7 +39,6 @@ class TextCollectionForm
                         Select::make('tradition_id')
                             ->label('Spiritual Path')
                             ->relationship('tradition', 'name')
-                            ->required()
                             ->searchable()
                             ->preload(),
                         Select::make('category_id')
