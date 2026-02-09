@@ -38,6 +38,7 @@ class ChapterForm
                     ->description('Use this to import multiple verses at once. Note: This is an optional alternative to the entries table below.')
                     ->collapsible()
                     ->collapsed()
+                    ->visible(fn($livewire) => $livewire instanceof \App\Filament\Resources\Chapters\Pages\CreateChapter)
                     ->schema([
                         Textarea::make('verses_content')
                             ->label('Verses Content')

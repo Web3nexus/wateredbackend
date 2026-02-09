@@ -33,8 +33,9 @@ class TextCollectionForm
                             ->maxLength(1000),
                     ]),
 
-                Section::make('Organization')
-                    ->description('Link this book to its spiritual path and topic.')
+                Section::make('Classification (Optional)')
+                    ->description('Optionally link this book to a spiritual path or topic. Leave blank for standalone texts like Nima Sedani.')
+                    ->visible(fn($record) => $record === null || !str_contains(strtolower($record->name ?? ''), 'nima sedani'))
                     ->schema([
                         Select::make('tradition_id')
                             ->label('Spiritual Path')
@@ -55,10 +56,12 @@ class TextCollectionForm
                     ]),
 
                 Section::make('Chapters & Verses')
-                    ->description('Once saved, you can add chapters and verses to this book.')
+                    ->description('Manage chapters and verses.')
                     ->visible(fn($record) => $record !== null)
                     ->schema([
-                        // Relation manager will handle this, but we can put a note here
+                        \Filament\Forms\Components\Placeholder::make('note')
+                            ->label('How to add content')
+                            ->content('To add chapters, please save this book first, then use the "Chapters" list found at the bottom of this page.'),
                     ]),
             ]);
     }

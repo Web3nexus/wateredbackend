@@ -28,7 +28,7 @@ class TextCollectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Sacred Texts (Nimasedani)';
+    protected static UnitEnum|string|null $navigationGroup = 'Sacred Texts';
 
     public static function form(Schema $schema): Schema
     {
