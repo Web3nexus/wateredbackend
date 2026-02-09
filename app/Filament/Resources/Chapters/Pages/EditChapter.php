@@ -68,13 +68,17 @@ class EditChapter extends EditRecord
                 $number = (int) $matches[1];
                 $text = trim($matches[2]);
 
-                Entry::create([
-                    'chapter_id' => $this->record->id,
-                    'number' => $number,
-                    'text' => $text,
-                    'order' => $number,
-                    'is_active' => true,
-                ]);
+                Entry::updateOrCreate(
+                    [
+                        'chapter_id' => $this->record->id,
+                        'number' => $number,
+                    ],
+                    [
+                        'text' => $text,
+                        'order' => $number,
+                        'is_active' => true,
+                    ]
+                );
 
                 $verseNumber = max($verseNumber, $number + 1);
             } else {
