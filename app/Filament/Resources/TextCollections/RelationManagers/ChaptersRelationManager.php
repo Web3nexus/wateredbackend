@@ -52,6 +52,10 @@ class ChaptersRelationManager extends RelationManager
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('entries_count')
+                    ->counts('entries')
+                    ->label('Verses')
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
@@ -62,7 +66,9 @@ class ChaptersRelationManager extends RelationManager
                 CreateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->label('Edit Chapter & Verses')
+                    ->icon('heroicon-o-pencil-square'),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
