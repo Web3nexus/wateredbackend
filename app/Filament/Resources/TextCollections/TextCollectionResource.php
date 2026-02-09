@@ -20,15 +20,15 @@ class TextCollectionResource extends Resource
 {
     protected static ?string $model = TextCollection::class;
 
-    protected static ?string $navigationLabel = 'Books & Scriptures';
+    protected static ?string $navigationLabel = 'Nima Sedani';
 
-    protected static ?string $pluralLabel = 'Books & Scriptures';
+    protected static ?string $pluralLabel = 'Books';
 
-    protected static ?string $modelLabel = 'Book/Scripture';
+    protected static ?string $modelLabel = 'Book';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Sacred Texts';
+    protected static UnitEnum|string|null $navigationGroup = 'Nima Sedani';
 
     public static function form(Schema $schema): Schema
     {

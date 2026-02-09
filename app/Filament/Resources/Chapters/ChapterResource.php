@@ -25,6 +25,11 @@ class ChapterResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false; // Hide from navigation - chapters are managed via Books
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ChapterForm::configure($schema);
