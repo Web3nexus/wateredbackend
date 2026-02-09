@@ -33,7 +33,9 @@ class AudioController extends Controller
         }
 
         $perPage = $request->query('per_page', 20);
-        $audios = $query->latest('published_at')->paginate($perPage);
+        $audios = $query->withCount(['likes', 'comments'])
+            ->latest('published_at')
+            ->paginate($perPage);
 
         return response()->json([
             'data' => AudioResource::collection($audios->items()),

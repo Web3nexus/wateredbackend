@@ -12,6 +12,26 @@ use Illuminate\Http\JsonResponse;
 class CollectionController extends Controller
 {
     /**
+     * Get all collections
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $perPage = $request->query('per_page', 20);
+
+        $collections = TextCollection::where('is_active', true)
+            ->orderBy('id')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => TextCollectionResource::collection($collections->items()),
+            'current_page' => $collections->currentPage(),
+            'last_page' => $collections->lastPage(),
+            'per_page' => $collections->perPage(),
+            'total' => $collections->total(),
+        ]);
+    }
+
+    /**
      * Get a single collection
      */
     public function show(TextCollection $collection): JsonResponse

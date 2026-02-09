@@ -33,6 +33,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/daily-wisdom', [\App\Http\Controllers\Api\V1\DailyWisdomController::class, 'index']);
 
     // Collections endpoints
+    Route::get('/text-collections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
+    Route::get('/textcollection', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
+    Route::get('/textcollections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
+    Route::get('/text-collection', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
     Route::get('/collections/{collection}', [\App\Http\Controllers\Api\V1\CollectionController::class, 'show']);
     Route::get('/collections/{collection}/chapters', [\App\Http\Controllers\Api\V1\CollectionController::class, 'chapters']);
 

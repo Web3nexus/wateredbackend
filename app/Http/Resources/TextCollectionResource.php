@@ -14,6 +14,7 @@ class TextCollectionResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
+            'cover_image_url' => $this->cover_image_url,
             'traditionId' => $this->tradition_id,
             'categoryId' => $this->category_id,
             'order' => $this->order,

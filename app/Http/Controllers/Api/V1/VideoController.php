@@ -37,7 +37,9 @@ class VideoController extends Controller
         }
 
         $perPage = $request->query('per_page', 20);
-        $videos = $query->latest('published_at')->paginate($perPage);
+        $videos = $query->withCount(['likes', 'comments'])
+            ->latest('published_at')
+            ->paginate($perPage);
 
         return response()->json([
             'data' => VideoResource::collection($videos->items()),

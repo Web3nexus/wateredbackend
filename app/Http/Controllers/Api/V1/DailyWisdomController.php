@@ -13,48 +13,53 @@ class DailyWisdomController extends Controller
         // Get Nimasedani tradition
         $nimasedani = \App\Models\Tradition::where('slug', 'nima-sedani')->first();
 
-        if (!$nimasedani) {
-            // Fallback to old behavior if Nimasedani doesn't exist
-            $wisdom = DailyWisdom::where('is_active', true)
-                ->whereDate('active_date', now())
-                ->first();
+        if ($nimasedani) {
+            // Get all active entries for Nima Sedani
+            // Joining through collections and chapters
+            $query = \App\Models\Entry::where('is_active', true)
+                ->whereHas('chapter.collection', function ($q) use ($nimasedani) {
+                    $q->where('tradition_id', $nimasedani->id)
+                        ->where('is_active', true);
+                });
 
-            if (!$wisdom) {
-                $wisdom = DailyWisdom::where('is_active', true)
-                    ->latest('updated_at')
+            $totalEntries = $query->count();
+
+            if ($totalEntries > 0) {
+                // Deterministic selection: one per day
+                $dayOfYear = (int) date('z'); // 0 to 365
+                $offset = $dayOfYear % $totalEntries;
+
+                $entry = $query->orderBy('id')
+                    ->offset($offset)
                     ->first();
-            }
 
-            return response()->json(['data' => $wisdom]);
+                if ($entry) {
+                    // Format the entry as daily wisdom
+                    return response()->json([
+                        'data' => [
+                            'id' => $entry->id,
+                            'quote' => $entry->text,
+                            'author' => 'Nima Sedani', // User spelled it "ni maseani" but tradition is "Nima Sedani"
+                            'background_image_url' => null, // We can add logic for backgrounds later
+                            'active_date' => now()->toDateString(),
+                            'is_active' => true,
+                            'publish_date' => now()->toDateString(),
+                        ]
+                    ]);
+                }
+            }
         }
 
-        // Get a random entry from Nimasedani
-        $entry = \App\Models\Entry::whereHas('chapter.collection', function ($query) use ($nimasedani) {
-            $query->where('tradition_id', $nimasedani->id);
-        })
-            ->where('is_active', true)
-            ->inRandomOrder()
+        // Fallback to old behavior if Nimasedani doesn't exist or has no entries
+        $wisdom = DailyWisdom::where('is_active', true)
+            ->whereDate('active_date', now())
             ->first();
 
-        if (!$entry) {
-            // Fallback to old behavior if no entries found
+        if (!$wisdom) {
             $wisdom = DailyWisdom::where('is_active', true)
                 ->latest('updated_at')
                 ->first();
-
-            return response()->json(['data' => $wisdom]);
         }
-
-        // Format the entry as daily wisdom
-        $wisdom = [
-            'id' => $entry->id,
-            'quote' => $entry->text,
-            'author' => 'Nimasedani',
-            'background_image_url' => null,
-            'active_date' => now()->toDateString(),
-            'is_active' => true,
-            'publish_date' => now()->toDateString(),
-        ];
 
         return response()->json(['data' => $wisdom]);
     }

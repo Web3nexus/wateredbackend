@@ -25,6 +25,10 @@ class AudioResource extends JsonResource
             'publishedAt' => $this->published_at?->toIso8601String(),
             'traditionId' => $this->tradition_id,
             'isActive' => $this->is_active,
+            'isFeatured' => $this->is_featured,
+            'is_liked' => $this->isLikedBy($request->user()),
+            'likes_count' => (int) $this->likes_count,
+            'comments_count' => (int) $this->comments_count,
             'createdAt' => $this->created_at?->toIso8601String(),
             'updatedAt' => $this->updated_at?->toIso8601String(),
         ];
