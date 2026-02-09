@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Traditions\Pages;
+namespace App\Filament\Resources\Rituals\Pages;
 
-use App\Filament\Resources\Traditions\TraditionResource;
+use App\Filament\Resources\Rituals\RitualResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditTradition extends EditRecord
+class EditRitual extends EditRecord
 {
-    protected static string $resource = TraditionResource::class;
+    protected static string $resource = RitualResource::class;
 
     protected function getHeaderActions(): array
     {

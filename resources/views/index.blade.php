@@ -4,268 +4,413 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $settings->site_name ?? 'Watered' }} - {{ $settings->tagline ?? 'The Ancient Spirits' }}</title>
+    <title>{{ $settings?->site_name ?? 'Watered' }} - {{ $settings?->tagline ?? 'The Ancient Spirits' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if($settings?->favicon_path)
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $settings?->favicon_path) }}">
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('images/watered-logo.png') }}">
+    @endif
 </head>
 
 <body>
     {{-- Background --}}
     <div class="fixed inset-0 -z-10 bg-sea-deep">
         <div class="absolute inset-0 opacity-5"
-            style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 40px 40px;">
+            style="background-image: radial-gradient(circle at 2px 2px, rgba(30,41,59,0.1) 1px, transparent 0); background-size: 40px 40px;">
         </div>
-        <div class="absolute top-1/4 right-0 w-[800px] h-[800px] bg-gold-antique/5 blur-[200px] rounded-full"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-sea-light/10 blur-[180px] rounded-full"></div>
+        <div class="absolute top-1/4 right-0 w-[800px] h-[800px] bg-gold-antique/10 blur-[200px] rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gold-antique/5 blur-[180px] rounded-full"></div>
     </div>
 
     {{-- Navigation --}}
-    <nav class="border-b border-white/10 backdrop-blur-md bg-sea-deep/60 sticky top-0 z-50">
+    <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                @if($settings->logo_path)
-                    <img src="{{ asset('storage/' . $settings->logo_path) }}" alt="Logo" class="h-10 w-10 object-contain">
+                @if($settings?->logo_path)
+                    <img src="{{ asset('storage/' . $settings?->logo_path) }}" alt="Logo" class="h-10 w-10 object-contain">
                 @else
                     <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
                 @endif
                 <span
-                    class="font-heading text-xl text-gold-antique tracking-wider">{{ $settings->site_name ?? 'Watered' }}</span>
+                    class="font-heading text-xl text-gold-antique tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
             </div>
             <div class="flex items-center gap-8">
-                <a href="#traditions"
-                    class="text-parchment/70 hover:text-gold-antique text-sm transition hidden md:block">Traditions</a>
-                <a href="#rituals"
-                    class="text-parchment/70 hover:text-gold-antique text-sm transition hidden md:block">Rituals</a>
-                @auth('admin')
-                    <a href="{{ url('/securegate') }}"
-                        class="px-5 py-2 bg-gold-antique/10 border border-gold-antique/30 text-gold-antique rounded hover:bg-gold-antique/20 text-sm transition">Dashboard</a>
-                @else
-                    <a href="{{ url('/securegate/login') }}"
-                        class="px-5 py-2 bg-gold-antique/10 border border-gold-antique/30 text-gold-antique rounded hover:bg-gold-antique/20 text-sm transition">Sign
-                        in</a>
-                @endauth
+                <a href="#features"
+                    class="text-parchment/70 hover:text-gold-antique text-sm transition hidden md:block uppercase tracking-widest font-medium">Features</a>
+                <a href="#blog"
+                    class="text-parchment/70 hover:text-gold-antique text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
+                <a href="#download"
+                    class="px-5 py-2.5 bg-gold-antique text-sea-deep text-xs font-bold rounded-full hover:bg-gold-antique/90 transition shadow-lg shadow-gold-antique/10 uppercase tracking-tighter">Get
+                    Watered App</a>
             </div>
         </div>
     </nav>
 
     <main>
-        {{-- Hero Section - Asymmetric Layout --}}
-        <section class="relative overflow-hidden">
-            <div class="max-w-7xl mx-auto px-6 py-16 md:py-24">
-                <div class="grid md:grid-cols-5 gap-12 items-center">
-                    {{-- Content - Takes 3 columns --}}
-                    <div class="md:col-span-3 space-y-8">
+        {{-- Hero Section - App Focused --}}
+        <section class="relative overflow-hidden pt-16 pb-24">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid md:grid-cols-5 gap-16 items-center">
+                    <div class="md:col-span-3 space-y-10">
                         <div>
-                            <p class="text-gold-antique/90 mb-3 text-xs uppercase tracking-[0.2em] font-medium">
-                                {{ $settings->hero_subtitle ?? 'The God of Seas & Voices' }}
+                            <p class="text-gold-antique/90 mb-4 text-sm uppercase tracking-[0.3em] font-bold">
+                                {{ $settings?->hero_subtitle ?? 'Spirituality for the Modern Seeker' }}
                             </p>
-                            <h1 class="text-6xl md:text-8xl mb-6 text-parchment font-heading leading-[0.9]">
-                                {{ $settings->hero_title ?? 'Lord Uzih' }}
+                            <h1
+                                class="text-6xl md:text-8xl mb-6 text-parchment font-heading leading-[0.9] tracking-tight">
+                                {{ $settings?->hero_title ?? 'Experience Divine Clarity' }}
                             </h1>
                         </div>
-                        <p class="text-lg md:text-xl text-parchment/80 leading-relaxed max-w-xl">
-                            {{ $settings->hero_description ?? 'Accept The Reminder as the true Messenger of the Spirits. Through the sacred teachings, we cultivate spiritual, mental, and physical growth.' }}
+                        <p class="text-xl md:text-2xl text-parchment/70 leading-relaxed max-w-2xl">
+                            {{ $settings?->hero_description ?? 'Connect with ancient wisdom and modern teachings. Watered is your daily companion for spiritual growth and a supportive community dedicated to humanity first.' }}
                         </p>
-                        <div class="flex flex-wrap items-center gap-4">
-                            <a href="#traditions"
-                                class="px-8 py-4 bg-gold-antique text-sea-deep font-semibold rounded-lg hover:bg-gold-antique/90 transition shadow-xl shadow-gold-antique/20">
-                                {{ $settings->hero_cta_text ?? 'Explore Sacred Texts' }}
+                        <div class="flex flex-wrap items-center gap-6">
+                            <a href="#download"
+                                class="px-10 py-5 bg-gold-antique text-sea-deep font-bold rounded-xl hover:bg-gold-antique/90 transition-all shadow-2xl shadow-gold-antique/30 scale-110">
+                                {{ $settings?->hero_cta_text ?? 'Start Your Journey' }}
                             </a>
-                            <a href="#rituals"
-                                class="px-8 py-4 border-2 border-white/20 text-parchment font-semibold rounded-lg hover:bg-white/5 transition">
-                                Learn About Rituals
-                            </a>
+                            <a href="#features"
+                                class="text-parchment/60 hover:text-gold-antique transition font-medium">Explore
+                                Features &rarr;</a>
                         </div>
                     </div>
-
-                    {{-- Image - Takes 2 columns --}}
                     <div class="md:col-span-2 relative">
                         <div
-                            class="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                            @if($settings->hero_image)
-                                <img src="{{ asset('storage/' . $settings->hero_image) }}" alt="Lord Uzih"
+                            class="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
+                            @if($settings?->hero_image)
+                                <img src="{{ asset('storage/' . $settings?->hero_image) }}" alt="Watered App"
                                     class="w-full h-full object-cover">
                             @else
-                                <img src="{{ asset('images/lord-uzih-hero.png') }}" alt="Lord Uzih"
-                                    class="w-full h-full object-cover">
+                                <div
+                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-antique/10 to-transparent p-12">
+                                    <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
+                                        class="w-48 h-48 object-contain opacity-50">
+                                </div>
                             @endif
-                            <div
-                                class="absolute inset-0 bg-gradient-to-t from-sea-deep/60 via-transparent to-transparent">
-                            </div>
-                        </div>
-                        {{-- Floating accent --}}
-                        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-gold-antique/20 rounded-full blur-3xl">
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        {{-- Sacred Traditions Section --}}
-        <section id="traditions" class="py-20 border-t border-white/10">
+        {{-- Dynamic Features 1 & 2 --}}
+        <section id="features" class="space-y-32 py-32">
+            @forelse($features->take(2) as $index => $feature)
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid md:grid-cols-2 gap-20 items-center">
+                        <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                            <div
+                                class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
+                                @if($feature->image)
+                                    <img src="{{ asset('storage/' . $feature->image) }}" alt="{{ $feature->title }}"
+                                        class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
+                            </h2>
+                            <p class="text-lg text-parchment/70 leading-relaxed">{{ $feature->description }}</p>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                {{-- Placeholder Features if empty --}}
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid md:grid-cols-2 gap-20 items-center">
+                        <div
+                            class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
+                            <div
+                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-antique/5 to-transparent">
+                                <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">Sacred Wisdom & Daily
+                                Teachings</h2>
+                            <p class="text-lg text-parchment/70 leading-relaxed">Access a vast collection of ancient
+                                spiritual texts and modern interpretations. Receive daily wisdom to nourish your spirit and
+                                guide your growth.</p>
+                        </div>
+                    </div>
+                </div>
+            @endforelse
+        </section>
+
+        {{-- Download Section with Goo Animation --}}
+        <section id="download" class="relative py-32 overflow-hidden">
+            <div class="absolute inset-0 bg-gold-antique/10 -z-10 bg-gradient-to-b from-sea-deep to-gold-antique/5"></div>
+            
+            {{-- Goo Bubbles --}}
+            <div class="absolute top-1/2 left-1/4 w-96 h-96 bg-gold-antique/20 blur-[100px] animate-goo"></div>
+            <div class="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gold-antique/15 blur-[120px] animate-goo" style="animation-delay: -4s;"></div>
+
+            <div class="max-w-5xl mx-auto px-6">
+                {{-- The "Box" --}}
+                <div class="bg-sea-deep/80 backdrop-blur-xl border border-parchment/10 rounded-[4rem] p-12 md:p-20 text-center space-y-12 shadow-3xl relative overflow-hidden">
+                    {{-- Inner subtle glow --}}
+                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-gold-antique/10 blur-[80px] rounded-full"></div>
+                    
+                    <div class="relative z-10 space-y-6">
+                        <div class="space-y-4">
+                            <h2 class="text-5xl md:text-7xl text-parchment font-heading leading-tight">Begin Your Path <br/> Today</h2>
+                            <p class="text-xl text-parchment/60 max-w-2xl mx-auto">Download Watered and join a global community seeking truth, clarity, and spiritual evolution.</p>
+                        </div>
+
+                        {{-- Actual Download Buttons - Side by Side --}}
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+                            <a href="{{ $settings?->android_download_url ?? '#' }}" target="_blank"
+                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-gold-antique transition-all shadow-xl hover:-translate-y-1">
+                                <svg class="w-10 h-10 text-gold-antique" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.523 15.3414C16.92 15.3414 16.4297 15.8317 16.4297 16.4347C16.4297 17.0377 16.92 17.528 17.523 17.528C18.126 17.528 18.6163 17.0377 18.6163 16.4347C18.6163 15.8317 18.126 15.3414 17.523 15.3414ZM6.47702 15.3414C5.87402 15.3414 5.38372 15.8317 5.38372 16.4347C5.38372 17.0377 5.87402 17.528 6.47702 17.528C7.08002 17.528 7.57031 17.0377 7.57031 16.4347C7.57031 15.8317 7.08002 15.3414 6.47702 15.3414ZM17.9613 11.6256L19.7226 8.57463C19.8398 8.37135 19.7698 8.11142 19.5665 7.99424C19.3631 7.87706 19.1033 7.94703 18.9861 8.15042L17.2001 11.244C15.6841 10.5529 13.9189 10.1506 12 10.1506C10.0811 10.1506 8.31592 10.5529 6.7999 11.244L5.0139 8.15042C4.89672 7.94703 4.63689 7.87713 4.4335 7.99424C4.23011 8.11142 4.16013 8.37135 4.27731 8.57463L6.0387 11.6256C3.1207 13.2081 1.13401 16.148 1.01162 19.5912H22.9883C22.8659 16.148 20.8793 13.2081 17.9613 11.6256Z" />
+                                </svg>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-parchment/40 uppercase font-bold tracking-widest mb-1">Get it on</p>
+                                    <p class="text-xl font-bold text-parchment leading-none">Google Play</p>
+                                </div>
+                            </a>
+
+                            <a href="{{ $settings?->ios_download_url ?? '#' }}" target="_blank"
+                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-gold-antique transition-all shadow-xl hover:-translate-y-1">
+                                <svg class="w-10 h-10 text-gold-antique" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                                </svg>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-parchment/40 uppercase font-bold tracking-widest mb-1">Download on</p>
+                                    <p class="text-xl font-bold text-parchment leading-none">App Store</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- Dynamic Features 3 & 4 --}}
+        <section class="space-y-32 py-32">
+            @forelse($features->skip(2)->take(2) as $index => $feature)
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid md:grid-cols-2 gap-20 items-center">
+                        <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                            <div
+                                class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
+                                @if($feature->image)
+                                    <img src="{{ asset('storage/' . $feature->image) }}" alt="{{ $feature->title }}"
+                                        class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m9-10a4 4 0 100-8 4 4 0 000 8zm6 5h6m-3-3v6" />
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
+                            </h2>
+                            <p class="text-lg text-parchment/70 leading-relaxed">{{ $feature->description }}</p>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                {{-- Placeholder Features if empty --}}
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid md:grid-cols-2 gap-20 items-center">
+                        <div
+                            class="md:order-2 relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
+                            <div
+                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-antique/5 to-transparent">
+                                <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m9-10a4 4 0 100-8 4 4 0 000 8zm6 5h6m-3-3v6" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">Sacred Rituals &
+                                Community</h2>
+                            <p class="text-lg text-parchment/70 leading-relaxed">Join a vibrant family of seekers.
+                                Participate in guided rituals and connect with others on the same spiritual path wherever
+                                you are in the world.</p>
+                        </div>
+                    </div>
+                </div>
+            @endforelse
+        </section>
+
+        {{-- Blog Section --}}
+        <section id="blog" class="py-32 bg-parchment/[0.02] border-y border-parchment/10">
             <div class="max-w-7xl mx-auto px-6">
-                <div class="mb-16 max-w-2xl">
-                    <h2 class="text-4xl md:text-5xl mb-4 text-parchment font-heading">Sacred Traditions</h2>
-                    <p class="text-parchment/60 text-lg">The foundational texts that guide our spiritual journey through
-                        the ages</p>
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+                    <div class="max-w-2xl">
+                        <h2 class="text-5xl md:text-6xl text-parchment font-heading mb-4">Latest Insights</h2>
+                        <p class="text-lg text-parchment/60">Thoughts and teachings from our spiritual leaders and
+                            community explorers.</p>
+                    </div>
+                    <a href="#" class="text-gold-antique font-bold hover:underline mb-2">View All Posts &rarr;</a>
                 </div>
 
-                @if($traditions->count() > 0)
-                    <div class="grid md:grid-cols-3 gap-8">
-                        @foreach($traditions as $index => $tradition)
-                            <div
-                                class="group relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-gold-antique/40 transition-all duration-300 {{ $index === 0 ? 'md:col-span-2 md:row-span-2' : '' }}">
-                                {{-- Icon --}}
+                @if($blogPosts->count() > 0)
+                    <div class="grid md:grid-cols-3 gap-10">
+                        @foreach($blogPosts as $post)
+                            <article class="group relative space-y-6">
                                 <div
-                                    class="w-14 h-14 bg-gold-antique/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-gold-antique/20 group-hover:scale-110 transition-all">
-                                    <svg class="w-7 h-7 text-gold-antique" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                    </svg>
+                                    class="relative aspect-video rounded-3xl overflow-hidden border border-parchment/10 shadow-lg mb-6">
+                                    @if($post->featured_image)
+                                        <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                    @else
+                                        <div class="w-full h-full bg-parchment/10 flex items-center justify-center">
+                                            <svg class="w-12 h-12 text-gold-antique/30" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2zM3 8h10M9 12h5M9 16h5" />
+                                            </svg>
+                                        </div>
+                                    @endif
                                 </div>
-
-                                <h3
-                                    class="text-2xl {{ $index === 0 ? 'md:text-3xl' : '' }} mb-4 text-parchment font-heading group-hover:text-gold-antique transition-colors">
-                                    {{ $tradition->name }}
-                                </h3>
-                                <p class="text-parchment/70 leading-relaxed mb-6 {{ $index === 0 ? 'text-lg' : 'text-sm' }}">
-                                    {{ $tradition->description }}
-                                </p>
+                                <div class="space-y-3">
+                                    <p class="text-xs text-gold-antique font-bold uppercase tracking-widest">
+                                        {{ $post->published_at?->format('F d, Y') ?? $post->created_at->format('F d, Y') }}</p>
+                                    <h3 class="text-2xl text-parchment font-heading group-hover:text-gold-antique transition">
+                                        {{ $post->title }}</h3>
+                                    <p class="text-parchment/60 text-sm line-clamp-3 leading-relaxed">{{ $post->summary }}</p>
+                                </div>
                                 <a href="#"
-                                    class="inline-flex items-center gap-2 text-gold-antique text-sm font-medium hover:gap-3 transition-all">
-                                    <span>Explore this tradition</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </a>
-
-                                {{-- Decorative corner --}}
-                                <div
-                                    class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gold-antique/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                </div>
-                            </div>
+                                    class="inline-block pt-2 text-gold-antique font-semibold border-b border-transparent hover:border-gold-antique transition">Read
+                                    More</a>
+                            </article>
                         @endforeach
                     </div>
                 @else
-                    <div class="text-center py-24 bg-white/5 rounded-2xl border border-dashed border-white/10">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gold-antique/10 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gold-antique/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
-                        <p class="text-parchment/40 text-lg">Sacred texts are being prepared...</p>
+                    <div class="text-center py-24 bg-parchment/5 rounded-3xl border border-dashed border-parchment/10">
+                        <p class="text-parchment/40">Our scribes are currently crafting new insights. Please check back
+                            soon.</p>
                     </div>
                 @endif
             </div>
         </section>
 
-        {{-- Rituals Section - Split Layout --}}
-        <section id="rituals" class="py-20 border-t border-white/10 bg-gradient-to-b from-transparent to-sea-light/20">
+        {{-- Sacred Practices Section --}}
+        <section id="rituals" class="py-32">
             <div class="max-w-7xl mx-auto px-6">
-                <div class="grid md:grid-cols-2 gap-16 items-center">
-                    {{-- Image Side --}}
-                    <div class="order-2 md:order-1">
-                        <div
-                            class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                            @if($settings->rituals_image)
-                                <img src="{{ asset('storage/' . $settings->rituals_image) }}" alt="Sacred Rituals"
-                                    class="w-full h-full object-cover">
-                            @else
-                                <img src="{{ asset('images/acceptance-ritual.png') }}" alt="Acceptance Ritual"
-                                    class="w-full h-full object-cover">
-                            @endif
+                <div class="grid md:grid-cols-2 gap-20 items-center">
+                    <div class="space-y-10">
+                        <div>
+                            <h2 class="text-5xl md:text-6xl text-parchment font-heading mb-6 tracking-tight">Sacred
+                                Practices</h2>
+                            <p class="text-xl text-parchment/60 leading-relaxed">Experience a connection to the divine
+                                through guided rituals and spiritual disciplines developed over generations.</p>
+                        </div>
+                        <div class="space-y-6">
                             <div
-                                class="absolute inset-0 bg-gradient-to-tr from-sea-deep/80 via-sea-deep/40 to-transparent">
+                                class="p-8 bg-parchment/5 border border-parchment/10 rounded-3xl hover:border-gold-antique/30 transition shadow-inner">
+                                <h3 class="text-2xl text-parchment font-heading mb-3">
+                                    {{ $settings?->ritual_acceptance_title ?? 'The Acceptance Ritual' }}</h3>
+                                <p class="text-parchment/60 leading-relaxed">
+                                    {{ $settings?->ritual_acceptance_description ?? 'Initiation into the deep mysteries through sacred water ceremonies and spiritual teachings.' }}
+                                </p>
                             </div>
-
-                            {{-- Floating quote card --}}
                             <div
-                                class="absolute bottom-6 left-6 right-6 bg-sea-deep/90 backdrop-blur-md border border-gold-antique/30 rounded-xl p-6">
-                                <p class="text-parchment/90 italic text-sm leading-relaxed">
-                                    {{ $settings->about_quote ?? '"Humanity first. Worshipping the Ancient Spirits, cultivating growth, and rejecting the paths of old."' }}
+                                class="p-8 bg-parchment/5 border border-parchment/10 rounded-3xl hover:border-gold-antique/30 transition shadow-inner">
+                                <h3 class="text-2xl text-parchment font-heading mb-3">
+                                    {{ $settings?->ritual_witnesses_title ?? 'The Watered Four Witnesses' }}</h3>
+                                <p class="text-parchment/60 leading-relaxed">
+                                    {{ $settings?->ritual_witnesses_description ?? 'Ancient proofs of spiritual truth that connect the physical and spiritual realms.' }}
                                 </p>
                             </div>
                         </div>
                     </div>
-
-                    {{-- Content Side --}}
-                    <div class="order-1 md:order-2 space-y-8">
-                        <div>
-                            <h2 class="text-4xl md:text-5xl mb-4 text-parchment font-heading leading-tight">
-                                {{ $settings->rituals_title ?? 'Sacred Practices' }}
-                            </h2>
-                            <p class="text-parchment/70 text-lg leading-relaxed">
-                                {{ $settings->about_description ?? 'Through ancient ceremonies and spiritual teachings, we connect with the divine forces that guide our path.' }}
-                            </p>
-                        </div>
-
-                        {{-- Ritual Cards --}}
-                        <div class="space-y-6">
-                            <div
-                                class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-gold-antique/30 transition-all group">
-                                <div class="flex items-start gap-4">
-                                    <div
-                                        class="w-10 h-10 flex-shrink-0 bg-gold-antique/10 rounded-lg flex items-center justify-center group-hover:bg-gold-antique/20 transition">
-                                        <svg class="w-5 h-5 text-gold-antique" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-xl text-parchment font-heading mb-2">
-                                            {{ $settings->ritual_acceptance_title ?? 'The Acceptance Ritual' }}
-                                        </h3>
-                                        <p class="text-parchment/70 text-sm leading-relaxed">
-                                            {{ $settings->ritual_acceptance_description ?? 'Initiation into the deep mysteries through sacred water ceremonies and spiritual teachings.' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-gold-antique/30 transition-all group">
-                                <div class="flex items-start gap-4">
-                                    <div
-                                        class="w-10 h-10 flex-shrink-0 bg-gold-antique/10 rounded-lg flex items-center justify-center group-hover:bg-gold-antique/20 transition">
-                                        <svg class="w-5 h-5 text-gold-antique" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-xl text-parchment font-heading mb-2">
-                                            {{ $settings->ritual_witnesses_title ?? 'The Watered Four Witnesses' }}
-                                        </h3>
-                                        <p class="text-parchment/70 text-sm leading-relaxed">
-                                            {{ $settings->ritual_witnesses_description ?? 'Ancient proofs of spiritual truth that connect the physical and spiritual realms.' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="relative">
+                        <div class="aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl border border-parchment/10">
+                            @if($settings?->rituals_image)
+                                <img src="{{ asset('storage/' . $settings?->rituals_image) }}" alt="Sacred Rituals"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <img src="{{ asset('images/acceptance-ritual.png') }}" alt="Acceptance Ritual"
+                                    class="w-full h-full object-cover grayscale brightness-75">
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        {{-- About Uzih Section --}}
+        <section id="uzih" class="py-32 bg-gold-antique/[0.03] rounded-[5rem] mx-6 mb-32 border border-gold-antique/10">
+            <div class="max-w-5xl mx-auto px-6 text-center space-y-12">
+                <div
+                    class="w-32 h-32 mx-auto overflow-hidden rounded-full border-2 border-gold-antique p-1 bg-sea-deep">
+                    <img src="{{ asset('images/lord-uzih-hero.png') }}" alt="Lord Uzih"
+                        class="w-full h-full object-cover rounded-full">
+                </div>
+                <div class="space-y-6">
+                    <h2 class="text-4xl md:text-5xl text-parchment font-heading">The Messenger: Lord Uzih</h2>
+                    <p class="text-xl text-parchment/70 leading-relaxed italic">
+                        "{{ $settings?->about_quote ?? 'Accept The Reminder as the true Messenger of the Spirits. Through the sacred teachings, we cultivate spiritual, mental, and physical growth.' }}"
+                    </p>
+                </div>
+                <p class="text-parchment/60 max-w-3xl mx-auto leading-relaxed">
+                    {{ $settings?->about_description ?? 'Through ancient ceremonies and spiritual teachings, we connect with the divine forces that guide our path. Lord Uzih serves as the vessel for these timeless truths, bringing clarity to those who seek.' }}
+                </p>
+            </div>
+        </section>
     </main>
 
     {{-- Footer --}}
-    <footer class="border-t border-white/10 mt-32 bg-sea-deep/50 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="text-center md:text-left">
-                    <p class="text-parchment/40 text-sm">&copy; {{ date('Y') }}
-                        {{ $settings->site_name ?? 'The Hudorian Family' }}. All rights reserved.</p>
+    <footer class="border-t border-parchment/10 bg-sea-deep py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-16 mb-20 text-center md:text-left">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="flex items-center gap-4 justify-center md:justify-start">
+                        <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
+                            class="h-12 w-12 object-contain">
+                        <span
+                            class="font-heading text-2xl text-gold-antique tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
+                    </div>
+                    <p class="text-parchment/50 max-w-sm">Elevating humanity through ancient wisdom, community, and
+                        divine connection. Your journey to clarity starts here.</p>
                 </div>
-                <div class="flex gap-8 text-sm">
-                    <a href="/securegate" class="text-parchment/40 hover:text-gold-antique transition">Admin Portal</a>
-                    <a href="#" class="text-parchment/40 hover:text-gold-antique transition">Privacy Policy</a>
-                    <a href="#" class="text-parchment/40 hover:text-gold-antique transition">Contact Us</a>
+                <div class="space-y-6">
+                    <h4 class="text-parchment font-bold uppercase tracking-widest text-sm">Navigation</h4>
+                    <ul class="space-y-4 text-parchment/50 text-sm">
+                        <li><a href="#" class="hover:text-gold-antique transition">Home</a></li>
+                        <li><a href="#features" class="hover:text-gold-antique transition">Features</a></li>
+                        <li><a href="#blog" class="hover:text-gold-antique transition">Insights</a></li>
+                        <li><a href="#download" class="hover:text-gold-antique transition">Get the App</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-6">
+                    <h4 class="text-parchment font-bold uppercase tracking-widest text-sm">Support</h4>
+                    <ul class="space-y-4 text-parchment/50 text-sm">
+                        <li><a href="#" class="hover:text-gold-antique transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-gold-antique transition">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-gold-antique transition">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-10 border-t border-parchment/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }}
+                    {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.</p>
+                <div class="flex gap-6">
+                    {{-- Social Icons could go here --}}
                 </div>
             </div>
         </div>

@@ -30,15 +30,15 @@ class FeatureTwoSeeder extends Seeder
                 'language_id' => $english->id,
             ],
             [
-                'name' => ['en' => 'Ancient Spirits'],
-                'slug' => 'ancient-spirits',
+                'name' => ['en' => 'The Gods'],
+                'slug' => 'the-gods',
                 'description' => ['en' => 'Sacred teachings from the Hidorian Family regarding life, growth, and the rejection of witchcraft.'],
                 'language_id' => $english->id,
             ],
             [
                 'name' => ['en' => 'The Four Witnesses'],
                 'slug' => 'the-four-witnesses',
-                'description' => ['en' => 'The foundational proofs behind the existence and power of the Ancient Spirits in secular and spiritual realms.'],
+                'description' => ['en' => 'The foundational proofs behind the existence and power of The Gods in secular and spiritual realms.'],
                 'language_id' => $english->id,
             ],
         ];

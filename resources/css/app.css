@@ -6,15 +6,15 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-:root {
+@theme {
     --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Cinzel', serif;
 
-    --color-sea-deep: #0c1427;
-    --color-sea-light: #1a2b4a;
-    --color-gold-antique: #d4af37;
-    --color-parchment: #f8f1e5;
-    --color-glass: rgba(255, 255, 255, 0.05);
+    --color-sea-deep: #FCF9F1;
+    --color-sea-light: #F5F1E9;
+    --color-gold-antique: #B48A32;
+    --color-parchment: #1E293B;
+    --color-glass: rgba(0, 0, 0, 0.05);
 }
 
 @utility bg-sea-deep {
@@ -137,4 +137,30 @@
 
 .animate-float {
     animation: float 6s ease-in-out infinite;
+}
+
+@utility animate-goo {
+    animation: goo 8s infinite alternate;
+}
+
+@keyframes goo {
+    0% {
+        border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        border-radius: 60% 40% 40% 60% / 60% 60% 40% 40%;
+        transform: translate(10px, -20px) scale(1.1);
+    }
+
+    66% {
+        border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+        transform: translate(-15px, 15px) scale(0.9);
+    }
+
+    100% {
+        border-radius: 60% 40% 40% 60% / 60% 60% 40% 40%;
+        transform: translate(0, 0) scale(1);
+    }
 }

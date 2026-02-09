@@ -14,9 +14,14 @@ class Ritual extends Model
         'description',
         'content',
         'media_urls',
+        'category',
+        'steps',
+        'time_of_day',
+        'symbolic_meaning',
     ];
 
     protected $casts = [
         'media_urls' => 'array',
+        'steps' => 'array',
     ];
 }

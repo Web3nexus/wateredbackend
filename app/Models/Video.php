@@ -24,6 +24,7 @@ class Video extends Model
         'tradition_id',
         'is_active',
         'is_featured',
+        'category',
     ];
 
     protected $casts = [
@@ -48,7 +49,7 @@ class Video extends Model
 
     public function tradition(): BelongsTo
     {
-        return $this->belongsTo(Tradition::class);
+        return $this->belongsTo(Tradition::class)->withDefault();
     }
 
     public function likes(): MorphMany

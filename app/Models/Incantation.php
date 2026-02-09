@@ -15,6 +15,9 @@ class Incantation extends Model
         'content',
         'audio_url',
         'is_paid',
+        'category',
+        'spoken_text',
+        'intended_outcome',
     ];
 
     protected $casts = [

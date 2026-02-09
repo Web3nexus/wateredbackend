@@ -26,7 +26,7 @@ class CategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Library';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     public static function form(Schema $schema): Schema
     {

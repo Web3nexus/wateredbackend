@@ -10,26 +10,51 @@ class DailyWisdomController extends Controller
 {
     public function index()
     {
-        // Get today's wisdom based on active_date
-        $wisdom = DailyWisdom::where('is_active', true)
-            ->whereDate('active_date', now())
-            ->first();
+        // Get Nimasedani tradition
+        $nimasedani = \App\Models\Tradition::where('slug', 'nima-sedani')->first();
 
-        // Fallback: if no wisdom for today, get the most recent one
-        if (!$wisdom) {
+        if (!$nimasedani) {
+            // Fallback to old behavior if Nimasedani doesn't exist
             $wisdom = DailyWisdom::where('is_active', true)
-                ->whereDate('active_date', '<=', now())
-                ->orderBy('active_date', 'desc')
+                ->whereDate('active_date', now())
                 ->first();
+
+            if (!$wisdom) {
+                $wisdom = DailyWisdom::where('is_active', true)
+                    ->latest('updated_at')
+                    ->first();
+            }
+
+            return response()->json(['data' => $wisdom]);
         }
 
-        // Last resort: random wisdom
-        // Last resort: Get the most recently created/updated active one
-        if (!$wisdom) {
+        // Get a random entry from Nimasedani
+        $entry = \App\Models\Entry::whereHas('chapter.collection', function ($query) use ($nimasedani) {
+            $query->where('tradition_id', $nimasedani->id);
+        })
+            ->where('is_active', true)
+            ->inRandomOrder()
+            ->first();
+
+        if (!$entry) {
+            // Fallback to old behavior if no entries found
             $wisdom = DailyWisdom::where('is_active', true)
                 ->latest('updated_at')
                 ->first();
+
+            return response()->json(['data' => $wisdom]);
         }
+
+        // Format the entry as daily wisdom
+        $wisdom = [
+            'id' => $entry->id,
+            'quote' => $entry->text,
+            'author' => 'Nimasedani',
+            'background_image_url' => null,
+            'active_date' => now()->toDateString(),
+            'is_active' => true,
+            'publish_date' => now()->toDateString(),
+        ];
 
         return response()->json(['data' => $wisdom]);
     }

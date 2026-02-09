@@ -15,6 +15,7 @@ class ConsultationType extends Model
         'price',
         'description',
         'is_active',
+        'category',
     ];
 
     protected $casts = [

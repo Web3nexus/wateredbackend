@@ -15,10 +15,15 @@ class Deity extends Model
         'description',
         'image_url',
         'tradition_id',
+        'origin',
+        'mythology_story',
+        'symbols',
+        'domains',
+        'sacred_elements',
     ];
 
     public function tradition(): BelongsTo
     {
-        return $this->belongsTo(Tradition::class);
+        return $this->belongsTo(Tradition::class)->withDefault();
     }
 }

@@ -36,6 +36,10 @@ class GlobalSettingForm
                                             ->label('Logo')
                                             ->image()
                                             ->directory('branding'),
+                                        FileUpload::make('favicon_path')
+                                            ->label('Favicon')
+                                            ->image()
+                                            ->directory('branding'),
                                     ]),
 
                                 Section::make('Contact Information')
@@ -51,6 +55,24 @@ class GlobalSettingForm
 
                         Tabs\Tab::make('Landing Page')
                             ->schema([
+                                Section::make('Configuration')
+                                    ->schema([
+                                        Toggle::make('is_landing_page_enabled')
+                                            ->label('Enable Landing Page')
+                                            ->helperText('If disabled, visitors will see a coming soon page or be redirected.')
+                                            ->default(true),
+                                    ]),
+                                Section::make('App Download Links')
+                                    ->schema([
+                                        TextInput::make('android_download_url')
+                                            ->label('Android Download URL (Play Store)')
+                                            ->url()
+                                            ->placeholder('https://play.google.com/store/apps/details?id=...'),
+                                        TextInput::make('ios_download_url')
+                                            ->label('iOS Download URL (App Store)')
+                                            ->url()
+                                            ->placeholder('https://apps.apple.com/app/...'),
+                                    ]),
                                 Section::make('Hero Section')
                                     ->schema([
                                         TextInput::make('hero_title')
@@ -87,7 +109,7 @@ class GlobalSettingForm
                                         Textarea::make('about_quote')
                                             ->label('Featured Quote')
                                             ->rows(2)
-                                            ->default('"Humanity first. Worshipping the Ancient Spirits, cultivating growth, and rejecting the paths of old."'),
+                                            ->default('"Humanity first. Worshipping The Gods, cultivating growth, and rejecting the paths of old."'),
                                     ]),
 
                                 Section::make('Rituals Section')
@@ -219,6 +241,16 @@ class GlobalSettingForm
                                             ->dehydrated(fn(?string $state) => filled($state)),
                                     ])->columns(2),
 
+                                Section::make('Flutterwave Payments')
+                                    ->schema([
+                                        TextInput::make('flutterwave_public_key')
+                                            ->label('Flutterwave Public Key'),
+                                        TextInput::make('flutterwave_secret_key')
+                                            ->label('Flutterwave Secret Key')
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                    ])->columns(2),
+
                                 Section::make('In-App Purchase (IAP) Product IDs')
                                     ->schema([
                                         TextInput::make('premium_monthly_id')
@@ -228,6 +260,29 @@ class GlobalSettingForm
                                             ->label('Yearly Subscription ID')
                                             ->placeholder('e.g. premium_yearly'),
                                     ])->columns(2),
+                            ]),
+
+                        Tabs\Tab::make('App Stores')
+                            ->schema([
+                                Section::make('Apple App Store')
+                                    ->schema([
+                                        TextInput::make('apple_shared_secret')
+                                            ->label('App Store Shared Secret')
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                    ]),
+
+                                Section::make('Google Play Store')
+                                    ->schema([
+                                        TextInput::make('google_play_package_name')
+                                            ->label('Package Name')
+                                            ->placeholder('com.example.app'),
+                                        Textarea::make('google_play_service_account_json')
+                                            ->label('Service Account JSON')
+                                            ->rows(5)
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                    ]),
                             ]),
 
                         Tabs\Tab::make('Sound & Notifications')

@@ -12,7 +12,11 @@ class GlobalSetting extends Model
         'contact_email',
         'contact_phone',
         'social_links',
+        'is_landing_page_enabled',
+        'android_download_url',
+        'ios_download_url',
         'logo_path',
+        'favicon_path',
         'tagline',
         'hero_title',
         'hero_subtitle',
@@ -45,14 +49,26 @@ class GlobalSetting extends Model
         'flutterwave_secret_key',
         'premium_monthly_id',
         'premium_yearly_id',
+        'apple_shared_secret',
+        'google_play_package_name',
+        'google_play_service_account_json',
         'notification_sound_path',
         'alarm_sound_path',
+    ];
+
+    protected $hidden = [
+        'stripe_secret_key',
+        'paystack_secret_key',
+        'flutterwave_secret_key',
+        'apple_shared_secret',
+        'google_play_service_account_json',
     ];
 
     protected $casts = [
         'social_links' => 'json',
         'supported_languages' => 'json',
         'maintenance_mode' => 'boolean',
+        'is_landing_page_enabled' => 'boolean',
         'is_ads_enabled' => 'boolean',
         'ads_screens' => 'json',
     ];

@@ -24,7 +24,7 @@ class TextCollection extends Model
 
     public function tradition(): BelongsTo
     {
-        return $this->belongsTo(Tradition::class);
+        return $this->belongsTo(Tradition::class)->withDefault();
     }
 
     public function category(): BelongsTo

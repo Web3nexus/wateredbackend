@@ -19,6 +19,8 @@ class Event extends Model
         'image_url',
         'is_paid',
         'price',
+        'recurrence',
+        'cultural_origin',
     ];
 
     protected $casts = [

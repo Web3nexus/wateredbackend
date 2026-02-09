@@ -1,26 +1,31 @@
 <?php
 
-namespace App\Filament\Resources\Traditions\Tables;
+namespace App\Filament\Resources\BlogPosts\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class TraditionsTable
+class BlogPostsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
+                TextColumn::make('title')
+                    ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                TextColumn::make('language.name')
-                    ->searchable(),
-                IconColumn::make('is_active')
+                ImageColumn::make('featured_image'),
+                IconColumn::make('is_published')
                     ->boolean(),
+                TextColumn::make('published_at')
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
