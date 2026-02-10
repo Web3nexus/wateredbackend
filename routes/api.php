@@ -97,12 +97,12 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
 
-    }); // End of Sanctum middleware
+    });
 
     Route::get('/auth-debug', function (Request $request) {
         $email = $request->query('email');
         $user = $email ? \App\Models\User::where('email', $email)->first() : null;
-        
+
         return response()->json([
             'database_config' => [
                 'connection' => config('database.default'),
@@ -119,6 +119,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Authenticated Routes (ALL inside v1 prefix now)
+    Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
