@@ -115,15 +115,16 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid credentials.'],
-            ]);
+            return response()->json([
+                'message' => 'Invalid credentials.',
+                'errors' => ['email' => ['Invalid credentials.']]
+            ], 401);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
             'token' => $token,
         ]);
@@ -182,7 +183,7 @@ class AuthController extends Controller
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
             'token' => $token,
         ]);
