@@ -9,8 +9,8 @@ class Newsletter extends Model
     protected $fillable = [
         'subject',
         'content',
-        'status',
         'recipients_type',
+        'status',
         'sent_at',
     ];
 

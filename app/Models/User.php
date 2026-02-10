@@ -10,10 +10,34 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+use App\Notifications\AppVerifyEmail;
+use App\Notifications\AppResetPassword;
+use Illuminate\Support\Facades\URL;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    public function sendEmailVerificationNotification()
+    {
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(config('auth.verification.expire', 60)),
+            [
+                'id' => $this->getKey(),
+                'hash' => sha1($this->getEmailForVerification()),
+            ]
+        );
+
+        $this->notify(new AppVerifyEmail($verificationUrl));
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new AppResetPassword($token));
+    }
+
 
     /**
      * The attributes that are mass assignable.

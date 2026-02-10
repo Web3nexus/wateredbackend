@@ -85,28 +85,25 @@ class NewsletterResource extends Resource
                 //
             ])
             ->actions([
-                \Filament\Tables\Actions\EditAction::make(),
-                \Filament\Tables\Actions\Action::make('send')
+                EditAction::make(),
+                Action::make('send')
                     ->label('Send Now')
                     ->icon('heroicon-o-paper-airplane')
                     ->requiresConfirmation()
                     ->action(function (Newsletter $record) {
-                        // Logic to send email would go here (e.g., dispatch Job)
-                        $record->update([
-                            'status' => 'sent',
-                            'sent_at' => now(),
-                        ]);
+                        \App\Jobs\SendNewsletterJob::dispatch($record);
 
                         \Filament\Notifications\Notification::make()
-                            ->title('Newsletter Sent')
+                            ->title('Newsletter Sending Initiated')
+                            ->body('The newsletter is being sent to recipients in the background.')
                             ->success()
                             ->send();
                     })
                     ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
             ])
             ->bulkActions([
-                \Filament\Tables\Actions\BulkActionGroup::make([
-                    \Filament\Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

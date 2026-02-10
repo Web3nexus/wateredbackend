@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,6 +12,11 @@ return new class extends Migration
     {
         Schema::create('newsletters', function (Blueprint $table) {
             $table->id();
+            $table->string('subject');
+            $table->text('content');
+            $table->string('recipients_type')->default('all'); // all, subscribers
+            $table->string('status')->default('draft'); // draft, sent
+            $table->timestamp('sent_at')->nullable();
             $table->timestamps();
         });
     }

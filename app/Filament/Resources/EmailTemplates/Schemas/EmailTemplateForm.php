@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\EmailTemplates\Schemas;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Get;
 use Filament\Schemas\Schema;
 
 class EmailTemplateForm
@@ -13,13 +15,40 @@ class EmailTemplateForm
         return $schema
             ->components([
                 TextInput::make('key')
-                    ->required(),
+                    ->required()
+                    ->disabled(fn($record) => $record !== null)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('subject')
                     ->required(),
-                Textarea::make('body')
+                RichEditor::make('body')
                     ->required()
+                    ->columnSpanFull()
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'undo',
+                    ]),
+                TextInput::make('description')
                     ->columnSpanFull(),
-                TextInput::make('description'),
+                Placeholder::make('placeholders_hint')
+                    ->label('Available Placeholders')
+                    ->content(fn($get) => match ($get('key')) {
+                        'verification' => '{{ name }}, {{ verification_url }}, {{ app_name }}',
+                        'welcome' => '{{ name }}, {{ app_name }}',
+                        'newsletter' => '{{ name }}, {{ app_name }}, {{ unsubscribe_url }}',
+                        default => '{{ name }}, {{ app_name }}',
+                    })
+                    ->visible(fn($get) => !empty($get('key'))),
             ]);
     }
 }
