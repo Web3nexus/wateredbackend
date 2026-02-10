@@ -18,6 +18,8 @@ class ProfileController extends Controller
         return response()->json([
             'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
+            'verified' => $user->hasVerifiedEmail(),
+            'email_verified' => $user->hasVerifiedEmail(),
         ]);
     }
 
@@ -39,6 +41,8 @@ class ProfileController extends Controller
             'message' => 'Profile updated successfully.',
             'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
+            'verified' => $user->hasVerifiedEmail(),
+            'email_verified' => $user->hasVerifiedEmail(),
         ]);
     }
 
@@ -79,6 +83,8 @@ class ProfileController extends Controller
             'profile_photo_url' => $url,
             'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
+            'verified' => $user->hasVerifiedEmail(),
+            'email_verified' => $user->hasVerifiedEmail(),
         ]);
     }
 }

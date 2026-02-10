@@ -101,6 +101,8 @@ class AuthController extends Controller
         return response()->json([
             'user' => $freshUser,
             'is_verified' => $freshUser->hasVerifiedEmail(),
+            'verified' => $freshUser->hasVerifiedEmail(),
+            'email_verified' => $freshUser->hasVerifiedEmail(),
             'token' => $token,
         ]);
     }
@@ -132,6 +134,8 @@ class AuthController extends Controller
         $responseData = [
             'user' => $freshUser,
             'is_verified' => $isVerified,
+            'verified' => $isVerified,
+            'email_verified' => $isVerified,
             'token' => $token,
         ];
 
@@ -200,7 +204,9 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $freshUser,
-            'is_verified' => $freshUser->fresh()->hasVerifiedEmail(),
+            'is_verified' => $freshUser->hasVerifiedEmail(),
+            'verified' => $freshUser->hasVerifiedEmail(),
+            'email_verified' => $freshUser->hasVerifiedEmail(),
             'token' => $token,
         ]);
     }
