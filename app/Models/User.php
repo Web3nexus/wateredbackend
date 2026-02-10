@@ -39,6 +39,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
+    protected $appends = [
+        'is_verified',
+    ];
+
+    public function getIsVerifiedAttribute()
+    {
+        return $this->hasVerifiedEmail();
+    }
+
     /**
      * The attributes that are mass assignable.
      *

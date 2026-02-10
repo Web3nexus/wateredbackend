@@ -93,13 +93,14 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
+        \Illuminate\Support\Facades\Log::info("[REGISTER] Success for email: " . $user->email);
 
         $token = $user->createToken($request->device_name ?? 'flutter_app')->plainTextToken;
+        $freshUser = $user->fresh();
 
         return response()->json([
-            'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
+            'user' => $freshUser,
+            'is_verified' => $freshUser->hasVerifiedEmail(),
             'token' => $token,
         ]);
     }
@@ -112,22 +113,36 @@ class AuthController extends Controller
             'device_name' => 'required',
         ]);
 
+        \Illuminate\Support\Facades\Log::info("[LOGIN] Attempt for email: " . $request->email);
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            \Illuminate\Support\Facades\Log::warning("[LOGIN] Failed for email: " . $request->email);
             return response()->json([
                 'message' => 'Invalid credentials.',
                 'errors' => ['email' => ['Invalid credentials.']]
-            ], 401);
+            ], 422); // Using 422 for better snackbar compatibility in many Flutter setups
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
+        $freshUser = $user->fresh();
+        $isVerified = $user->hasVerifiedEmail();
 
-        return response()->json([
-            'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
+        $responseData = [
+            'user' => $freshUser,
+            'is_verified' => $isVerified,
             'token' => $token,
-        ]);
+        ];
+
+        \Illuminate\Support\Facades\Log::info("[LOGIN] SUCCESS for User {$user->id}. Response: " . json_encode([
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'is_verified_root' => $isVerified,
+            'email_verified_at' => $freshUser->email_verified_at,
+        ]));
+
+        return response()->json($responseData);
     }
 
     public function logout(Request $request)
@@ -178,13 +193,14 @@ class AuthController extends Controller
                 'provider' => $request->provider,
                 'provider_id' => $request->provider_id,
             ]);
-        }
+        \Illuminate\Support\Facades\Log::info("[SOCIAL_LOGIN] Success for email: " . $user->email . " (Provider: {$request->provider})");
 
         $token = $user->createToken($request->device_name)->plainTextToken;
+        $freshUser = $user->fresh();
 
         return response()->json([
-            'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
+            'user' => $freshUser,
+            'is_verified' => $freshUser->hasVerifiedEmail(),
             'token' => $token,
         ]);
     }
