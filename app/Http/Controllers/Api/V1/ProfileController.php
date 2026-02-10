@@ -14,15 +14,8 @@ class ProfileController extends Controller
      */
     public function show(Request $request)
     {
-        $user = $request->user();
-        $freshUser = $user->fresh();
-
-        return response()->json([
-            'user' => $freshUser,
-            'is_verified' => $freshUser->hasVerifiedEmail(),
-            'verified' => $freshUser->hasVerifiedEmail(),
-            'email_verified' => $freshUser->hasVerifiedEmail(),
-        ]);
+        // The app's getUser() expects the User object directly, not wrapped
+        return response()->json($request->user()->fresh());
     }
 
     /**
@@ -42,9 +35,6 @@ class ProfileController extends Controller
         return response()->json([
             'message' => 'Profile updated successfully.',
             'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
-            'verified' => $user->hasVerifiedEmail(),
-            'email_verified' => $user->hasVerifiedEmail(),
         ]);
     }
 
@@ -84,9 +74,6 @@ class ProfileController extends Controller
             'message' => 'Profile photo uploaded successfully.',
             'profile_photo_url' => $url,
             'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
-            'verified' => $user->hasVerifiedEmail(),
-            'email_verified' => $user->hasVerifiedEmail(),
         ]);
     }
 }

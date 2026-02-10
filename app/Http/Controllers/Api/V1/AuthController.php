@@ -97,15 +97,11 @@ class AuthController extends Controller
         Log::info("[REGISTER] Success for email: " . $user->email);
 
         $token = $user->createToken($request->device_name)->plainTextToken;
-        $freshUser = $user->fresh();
-        $isVerified = $freshUser->hasVerifiedEmail();
 
+        // Return exactly what AuthResponse model expects
         return response()->json([
-            'user' => $freshUser,
+            'user' => $user->fresh(),
             'token' => $token,
-            'is_verified' => $isVerified,
-            'verified' => $isVerified,
-            'email_verified' => $isVerified,
         ]);
     }
 
@@ -131,16 +127,13 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
-        $isVerified = $freshUser->hasVerifiedEmail();
 
-        Log::info("[LOGIN] SUCCESS User {$user->id}. Verified: " . ($isVerified ? 'YES' : 'NO'));
+        Log::info("[LOGIN] SUCCESS User {$user->id}.");
 
+        // Return exactly what AuthResponse model expects
         return response()->json([
             'user' => $freshUser,
             'token' => $token,
-            'is_verified' => $isVerified,
-            'verified' => $isVerified,
-            'email_verified' => $isVerified,
         ]);
     }
 
@@ -187,17 +180,13 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
-        $freshUser = $user->fresh();
-        $isVerified = $freshUser->hasVerifiedEmail();
 
         Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
 
+        // Return exactly what AuthResponse model expects
         return response()->json([
-            'user' => $freshUser,
+            'user' => $user->fresh(),
             'token' => $token,
-            'is_verified' => $isVerified,
-            'verified' => $isVerified,
-            'email_verified' => $isVerified,
         ]);
     }
 }
