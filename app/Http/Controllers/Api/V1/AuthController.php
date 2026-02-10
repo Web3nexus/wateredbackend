@@ -98,7 +98,7 @@ class AuthController extends Controller
         $token = $user->createToken($request->device_name ?? 'flutter_app')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->fresh(),
             'is_verified' => $user->hasVerifiedEmail(),
             'token' => $token,
         ]);
