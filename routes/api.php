@@ -97,18 +97,28 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
 
-        Route::get('/auth-debug', function (Request $request) {
-            $user = $request->user();
-            return response()->json([
-                'database' => config('database.connections.' . config('database.default') . '.database'),
-                'user_id' => $user?->id,
-                'email' => $user?->email,
-                'verified_at' => $user?->email_verified_at,
-                'is_verified_method' => $user?->hasVerifiedEmail(),
-            ]);
-        })->middleware('auth:sanctum');
+    }); // End of Sanctum middleware
 
-        // Authenticated Routes (ALL inside v1 prefix now)
+    Route::get('/auth-debug', function (Request $request) {
+        $email = $request->query('email');
+        $user = $email ? \App\Models\User::where('email', $email)->first() : null;
+        
+        return response()->json([
+            'database_config' => [
+                'connection' => config('database.default'),
+                'database' => config('database.connections.' . config('database.default') . '.database'),
+            ],
+            'searching_for' => $email,
+            'user_found' => $user ? true : false,
+            'user_id' => $user?->id,
+            'email' => $user?->email,
+            'verified_at' => $user?->email_verified_at,
+            'is_verified_method' => $user?->hasVerifiedEmail(),
+            'server_time' => now()->toDateTimeString(),
+        ]);
+    });
+
+    // Authenticated Routes (ALL inside v1 prefix now)
 
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
