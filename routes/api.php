@@ -58,9 +58,6 @@ Route::prefix('v1')->group(function () {
 
     // Public Community
     Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
-    // keeping comments on CommunityController for now or moving to PostController? 
-    // Let's stick to PostController for consistency if possible, but PostController@comments isn't indexed there.
-    // The previous code had CommunityController@comments. I'll leave comments for now or check CommunityController.
     Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 
     // Public Events/Rituals/etc
@@ -87,18 +84,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
 
-    // Authenticated Routes (ALL inside v1 prefix now)
+    // Verification Logic (Signed Routes)
     Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/email/resend', [\App\Http\Controllers\Api\V1\AuthController::class, 'resend'])
-            ->middleware('throttle:6,1')
-            ->name('verification.send');
-
-    });
-
+    // Public Debug Tool
     Route::get('/auth-debug', function (Request $request) {
         $email = $request->query('email');
         $user = $email ? \App\Models\User::where('email', $email)->first() : null;
@@ -118,8 +109,11 @@ Route::prefix('v1')->group(function () {
         ]);
     });
 
-    // Authenticated Routes (ALL inside v1 prefix now)
+    // Protected Routes (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/email/resend', [\App\Http\Controllers\Api\V1\AuthController::class, 'resend'])
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
 
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
@@ -141,7 +135,7 @@ Route::prefix('v1')->group(function () {
         // Community Actions
         Route::prefix('community')->group(function () {
             Route::post('/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'store']);
-            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']); // Keep old if not implemented in new
+            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
             Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
             Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\PostController::class, 'toggleLike']);
             Route::post('/posts/{post}/share', [\App\Http\Controllers\Api\V1\PostController::class, 'share']);
@@ -170,7 +164,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/settings', [\App\Http\Controllers\Api\V1\NotificationController::class, 'updateSettings']);
     });
 
-    // Informational Content
+    // Informational Content (Public)
     Route::get('/faqs', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexFaqs']);
     Route::get('/user-guides', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexUserGuides']);
-});
+
+}); // End of v1 Prefix
