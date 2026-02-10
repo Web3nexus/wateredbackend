@@ -115,15 +115,18 @@ class AuthController extends Controller
             'device_name' => 'required',
         ]);
 
-        Log::info("[LOGIN] Attempt for email: " . $request->email);
+        $email = strtolower(trim($request->email));
+        Log::info("[LOGIN] Attempt for email: {$email}");
 
-        $user = User::where('email', $request->email)->first();
+        // Case-insensitive search
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            Log::warning("[LOGIN] Failed for email: " . $request->email);
+            Log::warning("[LOGIN] Failed credentials for: {$email}");
             return response()->json([
-                'message' => 'Invalid credentials.',
-                'errors' => ['email' => ['Invalid credentials.']]
+                'status' => false,
+                'message' => 'Invalid email or password.',
+                'errors' => ['email' => ['Invalid email or password.']]
             ], 401);
         }
 
@@ -132,6 +135,8 @@ class AuthController extends Controller
         $isVerified = $user->hasVerifiedEmail();
 
         $responseData = [
+            'status' => true,
+            'message' => 'Success',
             'user' => $freshUser,
             'is_verified' => $isVerified,
             'verified' => $isVerified,
@@ -142,7 +147,7 @@ class AuthController extends Controller
         Log::info("[LOGIN] SUCCESS for User {$user->id}. Response: " . json_encode([
             'user_id' => $user->id,
             'email' => $user->email,
-            'is_verified_root' => $isVerified,
+            'is_verified' => $isVerified,
             'email_verified_at' => $freshUser->email_verified_at,
         ]));
 
