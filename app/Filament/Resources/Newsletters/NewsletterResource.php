@@ -118,7 +118,7 @@ class NewsletterResource extends Resource
                     ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
 
                 Action::make('send')
-                    ->label('Send Now')
+                    ->label('Send Now (Queue)')
                     ->icon('heroicon-o-paper-airplane')
                     ->requiresConfirmation()
                     ->action(function (Newsletter $record) {
@@ -126,9 +126,36 @@ class NewsletterResource extends Resource
 
                         \Filament\Notifications\Notification::make()
                             ->title('Newsletter Sending Initiated')
-                            ->body('The newsletter is being sent to recipients in the background.')
+                            ->body('The newsletter is being sent to recipients in the background. Ensure your queue worker is running.')
                             ->success()
                             ->send();
+                    })
+                    ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
+
+                Action::make('sendDirect')
+                    ->label('Emergency Direct Send')
+                    ->icon('heroicon-o-bolt')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Send Immediately?')
+                    ->modalDescription('This will send the newsletter immediately WITHOUT using a queue. Only use this for small updates or if the queue is not working. It may take a minute to process.')
+                    ->action(function (Newsletter $record) {
+                        try {
+                            \App\Jobs\SendNewsletterJob::dispatchSync($record);
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Newsletter Sent')
+                                ->body('The newsletter has been sent successfully to all recipients.')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Send Failed')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
                     })
                     ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
             ])

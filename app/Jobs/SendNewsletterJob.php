@@ -28,9 +28,9 @@ class SendNewsletterJob implements ShouldQueue
         $users = User::query();
 
         if ($this->newsletter->recipients_type === 'subscribers') {
-            // Assuming there's a newsletter_subscription column or similar
-            // For now, let's just use all users if column not found, but I'll check first
-            // $users->where('subscribed_to_newsletter', true);
+            // Default to all users since no specific subscriber column exists yet
+            // but we could filter by notification preferences if needed.
+            // $users->where('is_premium', true);
         }
 
         $users->chunk(100, function ($chunk) {
