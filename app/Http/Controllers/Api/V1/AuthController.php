@@ -15,18 +15,22 @@ class AuthController extends Controller
 {
     public function resend(Request $request)
     {
-        \Illuminate\Support\Facades\Log::info('Resend verification requested for user: ' . $request->user()->id);
+        $userId = $request->user()->id;
+        \Illuminate\Support\Facades\Log::info("[RESEND] Request started for User ID: {$userId}");
 
         if ($request->user()->hasVerifiedEmail()) {
+            \Illuminate\Support\Facades\Log::info("[RESEND] User {$userId} already verified.");
             return response()->json(['message' => 'Email already verified.']);
         }
 
         try {
+            \Illuminate\Support\Facades\Log::info("[RESEND] Calling sendEmailVerificationNotification for User {$userId}");
             $request->user()->sendEmailVerificationNotification();
-            \Illuminate\Support\Facades\Log::info('Verification notification sent successfully for user: ' . $request->user()->id);
+            \Illuminate\Support\Facades\Log::info("[RESEND] sendEmailVerificationNotification finished for User {$userId}");
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to send verification email for user: ' . $request->user()->id . '. Error: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to send verification link. Please check mail settings.'], 500);
+            \Illuminate\Support\Facades\Log::error("[RESEND] CRITICAL FAILURE for User {$userId}: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            return response()->json(['message' => 'Failed to send verification link. Error: ' . $e->getMessage()], 500);
         }
 
         return response()->json(['message' => 'Verification link sent.']);
@@ -34,30 +38,44 @@ class AuthController extends Controller
 
     public function verify(Request $request, $id, $hash)
     {
-        \Illuminate\Support\Facades\Log::info("Verification attempt for User ID: {$id}");
+        \Illuminate\Support\Facades\Log::info("[VERIFY] --- START --- Request for User ID: {$id}");
 
-        $user = User::findOrFail($id);
+        $user = User::find($id);
 
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            \Illuminate\Support\Facades\Log::warning("Invalid verification hash for User ID: {$id}");
+        if (!$user) {
+            \Illuminate\Support\Facades\Log::error("[VERIFY] User NOT FOUND in database for ID: {$id}");
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        \Illuminate\Support\Facades\Log::info("[VERIFY] User {$id} found: {$user->email}. Current verified_at: " . ($user->email_verified_at ?: 'NULL'));
+
+        $expectedHash = sha1($user->getEmailForVerification());
+        if (!hash_equals((string) $hash, $expectedHash)) {
+            \Illuminate\Support\Facades\Log::warning("[VERIFY] HASH MISMATCH. Received: {$hash}, Expected: {$expectedHash}");
             return response()->json(['message' => 'Invalid verification link.'], 403);
         }
 
         if ($user->hasVerifiedEmail()) {
-            \Illuminate\Support\Facades\Log::info("User ID: {$id} is already verified.");
+            \Illuminate\Support\Facades\Log::info("[VERIFY] User {$id} already verified in DB. Returning success view.");
             return view('auth.verify-success');
         }
 
+        \Illuminate\Support\Facades\Log::info("[VERIFY] Attempting markEmailAsVerified() for User {$id}");
         if ($user->markEmailAsVerified()) {
-            \Illuminate\Support\Facades\Log::info("User ID: {$id} marked as verified successfully.");
-            $user->save();
+            \Illuminate\Support\Facades\Log::info("[VERIFY] markEmailAsVerified() returned TRUE for User {$id}");
+            $user->email_verified_at = now(); // Double force it
+            $saved = $user->save();
+            \Illuminate\Support\Facades\Log::info("[VERIFY] Database save() result for User {$id}: " . ($saved ? 'SUCCESS' : 'FAILURE'));
+
+            \Illuminate\Support\Facades\Log::info("[VERIFY] Triggering Verified event and Success Email for User {$id}");
             event(new Verified($user));
             $user->notify(new \App\Notifications\WelcomeNotification());
         } else {
-            \Illuminate\Support\Facades\Log::error("Failed to mark User ID: {$id} as verified.");
+            \Illuminate\Support\Facades\Log::error("[VERIFY] markEmailAsVerified() returned FALSE for User {$id}");
         }
 
-        return view('auth.verify-success');
+        \Illuminate\Support\Facades\Log::info("[VERIFY] --- END --- Request for User ID: {$id}");
+        return view('auth.verify-success', ['user' => $user]);
     }
 
 
