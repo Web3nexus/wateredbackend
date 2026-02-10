@@ -10,26 +10,27 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
     public function resend(Request $request)
     {
         $userId = $request->user()->id;
-        \Illuminate\Support\Facades\Log::info("[RESEND] Request started for User ID: {$userId}");
+        Log::info("[RESEND] Request started for User ID: {$userId}");
 
         if ($request->user()->hasVerifiedEmail()) {
-            \Illuminate\Support\Facades\Log::info("[RESEND] User {$userId} already verified.");
+            Log::info("[RESEND] User {$userId} already verified.");
             return response()->json(['message' => 'Email already verified.']);
         }
 
         try {
-            \Illuminate\Support\Facades\Log::info("[RESEND] Calling sendEmailVerificationNotification for User {$userId}");
+            Log::info("[RESEND] Calling sendEmailVerificationNotification for User {$userId}");
             $request->user()->sendEmailVerificationNotification();
-            \Illuminate\Support\Facades\Log::info("[RESEND] sendEmailVerificationNotification finished for User {$userId}");
+            Log::info("[RESEND] sendEmailVerificationNotification finished for User {$userId}");
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("[RESEND] CRITICAL FAILURE for User {$userId}: " . $e->getMessage());
-            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            Log::error("[RESEND] CRITICAL FAILURE for User {$userId}: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
             return response()->json(['message' => 'Failed to send verification link. Error: ' . $e->getMessage()], 500);
         }
 
@@ -38,46 +39,45 @@ class AuthController extends Controller
 
     public function verify(Request $request, $id, $hash)
     {
-        \Illuminate\Support\Facades\Log::info("[VERIFY] --- START --- Request for User ID: {$id}");
+        Log::info("[VERIFY] --- START --- Request for User ID: {$id}");
 
         $user = User::find($id);
 
         if (!$user) {
-            \Illuminate\Support\Facades\Log::error("[VERIFY] User NOT FOUND in database for ID: {$id}");
+            Log::error("[VERIFY] User NOT FOUND in database for ID: {$id}");
             return response()->json(['message' => 'User not found.'], 404);
         }
 
-        \Illuminate\Support\Facades\Log::info("[VERIFY] User {$id} found: {$user->email}. Current verified_at: " . ($user->email_verified_at ?: 'NULL'));
+        Log::info("[VERIFY] User {$id} found: {$user->email}. Current verified_at: " . ($user->email_verified_at ?: 'NULL'));
 
         $expectedHash = sha1($user->getEmailForVerification());
         if (!hash_equals((string) $hash, $expectedHash)) {
-            \Illuminate\Support\Facades\Log::warning("[VERIFY] HASH MISMATCH. Received: {$hash}, Expected: {$expectedHash}");
+            Log::warning("[VERIFY] HASH MISMATCH. Received: {$hash}, Expected: {$expectedHash}");
             return response()->json(['message' => 'Invalid verification link.'], 403);
         }
 
         if ($user->hasVerifiedEmail()) {
-            \Illuminate\Support\Facades\Log::info("[VERIFY] User {$id} already verified in DB. Returning success view.");
+            Log::info("[VERIFY] User {$id} already verified in DB. Returning success view.");
             return view('auth.verify-success');
         }
 
-        \Illuminate\Support\Facades\Log::info("[VERIFY] Attempting markEmailAsVerified() for User {$id}");
+        Log::info("[VERIFY] Attempting markEmailAsVerified() for User {$id}");
         if ($user->markEmailAsVerified()) {
-            \Illuminate\Support\Facades\Log::info("[VERIFY] markEmailAsVerified() returned TRUE for User {$id}");
+            Log::info("[VERIFY] markEmailAsVerified() returned TRUE for User {$id}");
             $user->email_verified_at = now(); // Double force it
             $saved = $user->save();
-            \Illuminate\Support\Facades\Log::info("[VERIFY] Database save() result for User {$id}: " . ($saved ? 'SUCCESS' : 'FAILURE'));
+            Log::info("[VERIFY] Database save() result for User {$id}: " . ($saved ? 'SUCCESS' : 'FAILURE'));
 
-            \Illuminate\Support\Facades\Log::info("[VERIFY] Triggering Verified event and Success Email for User {$id}");
+            Log::info("[VERIFY] Triggering Verified event and Success Email for User {$id}");
             event(new Verified($user));
             $user->notify(new \App\Notifications\WelcomeNotification());
         } else {
-            \Illuminate\Support\Facades\Log::error("[VERIFY] markEmailAsVerified() returned FALSE for User {$id}");
+            Log::error("[VERIFY] markEmailAsVerified() returned FALSE for User {$id}");
         }
 
-        \Illuminate\Support\Facades\Log::info("[VERIFY] --- END --- Request for User ID: {$id}");
+        Log::info("[VERIFY] --- END --- Request for User ID: {$id}");
         return view('auth.verify-success', ['user' => $user]);
     }
-
 
     public function register(Request $request)
     {
@@ -93,7 +93,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        \Illuminate\Support\Facades\Log::info("[REGISTER] Success for email: " . $user->email);
+        Log::info("[REGISTER] Success for email: " . $user->email);
 
         $token = $user->createToken($request->device_name ?? 'flutter_app')->plainTextToken;
         $freshUser = $user->fresh();
@@ -113,16 +113,16 @@ class AuthController extends Controller
             'device_name' => 'required',
         ]);
 
-        \Illuminate\Support\Facades\Log::info("[LOGIN] Attempt for email: " . $request->email);
+        Log::info("[LOGIN] Attempt for email: " . $request->email);
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            \Illuminate\Support\Facades\Log::warning("[LOGIN] Failed for email: " . $request->email);
+            Log::warning("[LOGIN] Failed for email: " . $request->email);
             return response()->json([
                 'message' => 'Invalid credentials.',
                 'errors' => ['email' => ['Invalid credentials.']]
-            ], 422); // Using 422 for better snackbar compatibility in many Flutter setups
+            ], 422);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
@@ -135,7 +135,7 @@ class AuthController extends Controller
             'token' => $token,
         ];
 
-        \Illuminate\Support\Facades\Log::info("[LOGIN] SUCCESS for User {$user->id}. Response: " . json_encode([
+        Log::info("[LOGIN] SUCCESS for User {$user->id}. Response: " . json_encode([
             'user_id' => $user->id,
             'email' => $user->email,
             'is_verified_root' => $isVerified,
@@ -182,8 +182,6 @@ class AuthController extends Controller
 
         // 3. If still not found, create new user
         if (!$user) {
-            // If it's a new user and we don't have an email (rare but possible for Apple), 
-            // we at least need a placeholder to avoid DB errors
             $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
 
             $user = User::create([
@@ -193,14 +191,16 @@ class AuthController extends Controller
                 'provider' => $request->provider,
                 'provider_id' => $request->provider_id,
             ]);
-        \Illuminate\Support\Facades\Log::info("[SOCIAL_LOGIN] Success for email: " . $user->email . " (Provider: {$request->provider})");
+        }
+
+        Log::info("[SOCIAL_LOGIN] Success for email: " . $user->email . " (Provider: {$request->provider})");
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
 
         return response()->json([
             'user' => $freshUser,
-            'is_verified' => $freshUser->hasVerifiedEmail(),
+            'is_verified' => $freshUser->fresh()->hasVerifiedEmail(),
             'token' => $token,
         ]);
     }
