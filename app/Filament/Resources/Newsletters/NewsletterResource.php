@@ -96,15 +96,24 @@ class NewsletterResource extends Resource
                             ->label('Recipient Email')
                             ->default(auth()->user()?->email),
                     ])
-                    ->action(function (Newsletter $record, array $data) {
-                        \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
-                            ->notify(new \App\Notifications\NewsletterNotification($record->subject, $record->content));
+                    ->action(function ($record, array $data) {
+                        try {
+                            \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
+                                ->notify(new \App\Notifications\TemplateTestNotification('newsletter'));
 
-                        \Filament\Notifications\Notification::make()
-                            ->title('Test Newsletter Sent')
-                            ->body('A test newsletter has been sent to ' . $data['email'])
-                            ->success()
-                            ->send();
+                            Notification::make()
+                                ->title('Test Newsletter Sent')
+                                ->body('A test newsletter has been sent to ' . $data['email'])
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Email Failed to Send')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
                     })
                     ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
 

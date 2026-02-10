@@ -47,14 +47,23 @@ class EmailTemplatesTable
                             ->default(auth()->user()?->email),
                     ])
                     ->action(function ($record, array $data) {
-                        \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
-                            ->notify(new \App\Notifications\TemplateTestNotification($record->key));
+                        try {
+                            \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
+                                ->notify(new \App\Notifications\TemplateTestNotification($record->key));
 
-                        \Filament\Notifications\Notification::make()
-                            ->title('Test Email Sent')
-                            ->body('A test email using this template has been sent to ' . $data['email'])
-                            ->success()
-                            ->send();
+                            \Filament\Notifications\Notification::make()
+                                ->title('Test Email Sent')
+                                ->body('A test email using this template has been sent to ' . $data['email'])
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Email Failed to Send')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
                     }),
             ])
             ->toolbarActions([
