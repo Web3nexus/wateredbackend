@@ -43,9 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_verified',
         'verified',
         'email_verified',
-        'emailVerifiedAt',
-        'createdAt',
-        'updatedAt',
     ];
 
     public function getIsVerifiedAttribute()
@@ -63,30 +60,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasVerifiedEmail();
     }
 
-    public function getEmailVerifiedAtAttribute()
-    {
-        return $this->email_verified_at ? $this->email_verified_at->toIso8601String() : null;
-    }
-
-    public function getCreatedAtAttribute()
-    {
-        return $this->created_at ? $this->created_at->toIso8601String() : null;
-    }
-
-    public function getUpdatedAtAttribute()
-    {
-        return $this->updated_at ? $this->updated_at->toIso8601String() : null;
-    }
-
     /**
      * Overriding toArray to provide both snake_case and CamelCase for Flutter
+     * without creating accessor conflicts.
      */
     public function toArray()
     {
         $array = parent::toArray();
+        // Provide CamelCase aliases for Flutter models that haven't been rebuilt
         $array['emailVerifiedAt'] = $this->email_verified_at ? $this->email_verified_at->toIso8601String() : null;
         $array['createdAt'] = $this->created_at ? $this->created_at->toIso8601String() : null;
         $array['updatedAt'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
+
+        // Also ensure snake_case for the rebuilt models
+        $array['email_verified_at'] = $this->email_verified_at ? $this->email_verified_at->toIso8601String() : null;
+        $array['created_at'] = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $array['updated_at'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
+
         return $array;
     }
 
