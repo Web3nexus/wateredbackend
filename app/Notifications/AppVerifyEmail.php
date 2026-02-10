@@ -9,9 +9,8 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 
-class AppVerifyEmail extends Notification implements ShouldQueue
+class AppVerifyEmail extends Notification
 {
-    use Queueable;
 
     public $verificationUrl;
 

@@ -9,9 +9,8 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 
-class AppResetPassword extends Notification implements ShouldQueue
+class AppResetPassword extends Notification
 {
-    use Queueable;
 
     public $token;
 
