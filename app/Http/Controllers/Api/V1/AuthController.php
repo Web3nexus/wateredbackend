@@ -34,20 +34,27 @@ class AuthController extends Controller
 
     public function verify(Request $request, $id, $hash)
     {
+        \Illuminate\Support\Facades\Log::info("Verification attempt for User ID: {$id}");
+
         $user = User::findOrFail($id);
 
         if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            \Illuminate\Support\Facades\Log::warning("Invalid verification hash for User ID: {$id}");
             return response()->json(['message' => 'Invalid verification link.'], 403);
         }
 
         if ($user->hasVerifiedEmail()) {
+            \Illuminate\Support\Facades\Log::info("User ID: {$id} is already verified.");
             return view('auth.verify-success');
         }
 
         if ($user->markEmailAsVerified()) {
-            $user->save(); // Explicitly save to ensure state is persisted
+            \Illuminate\Support\Facades\Log::info("User ID: {$id} marked as verified successfully.");
+            $user->save();
             event(new Verified($user));
             $user->notify(new \App\Notifications\WelcomeNotification());
+        } else {
+            \Illuminate\Support\Facades\Log::error("Failed to mark User ID: {$id} as verified.");
         }
 
         return view('auth.verify-success');
