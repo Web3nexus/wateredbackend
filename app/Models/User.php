@@ -43,6 +43,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_verified',
         'verified',
         'email_verified',
+        'emailVerifiedAt',
+        'createdAt',
+        'updatedAt',
     ];
 
     public function getIsVerifiedAttribute()
@@ -58,6 +61,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getEmailVerifiedAttribute()
     {
         return $this->hasVerifiedEmail();
+    }
+
+    public function getEmailVerifiedAtAttribute()
+    {
+        return $this->email_verified_at ? $this->email_verified_at->toIso8601String() : null;
+    }
+
+    public function getCreatedAtAttribute()
+    {
+        return $this->created_at ? $this->created_at->toIso8601String() : null;
+    }
+
+    public function getUpdatedAtAttribute()
+    {
+        return $this->updated_at ? $this->updated_at->toIso8601String() : null;
     }
 
     /**
