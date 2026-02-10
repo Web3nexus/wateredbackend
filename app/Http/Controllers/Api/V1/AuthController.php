@@ -124,7 +124,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Invalid credentials.',
                 'errors' => ['email' => ['Invalid credentials.']]
-            ], 422);
+            ], 401);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
