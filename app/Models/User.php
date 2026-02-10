@@ -41,9 +41,21 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $appends = [
         'is_verified',
+        'verified',
+        'email_verified',
     ];
 
     public function getIsVerifiedAttribute()
+    {
+        return $this->hasVerifiedEmail();
+    }
+
+    public function getVerifiedAttribute()
+    {
+        return $this->hasVerifiedEmail();
+    }
+
+    public function getEmailVerifiedAttribute()
     {
         return $this->hasVerifiedEmail();
     }
