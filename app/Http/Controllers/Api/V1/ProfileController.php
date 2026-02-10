@@ -15,11 +15,13 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
+        $freshUser = $user->fresh();
+
         return response()->json([
-            'user' => $user->fresh(),
-            'is_verified' => $user->hasVerifiedEmail(),
-            'verified' => $user->hasVerifiedEmail(),
-            'email_verified' => $user->hasVerifiedEmail(),
+            'user' => $freshUser,
+            'is_verified' => $freshUser->hasVerifiedEmail(),
+            'verified' => $freshUser->hasVerifiedEmail(),
+            'email_verified' => $freshUser->hasVerifiedEmail(),
         ]);
     }
 
