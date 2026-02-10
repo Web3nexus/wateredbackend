@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
+    Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
 
     // Traditions endpoints
     Route::get('/traditions', [\App\Http\Controllers\Api\V1\TraditionController::class, 'index']);
@@ -87,7 +88,15 @@ Route::prefix('v1')->group(function () {
     Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
 
     // Authenticated Routes (ALL inside v1 prefix now)
+    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/email/resend', [\App\Http\Controllers\Api\V1\AuthController::class, 'resend'])
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
+
         Route::get('/user', function (Request $request) {
             return $request->user();
         });

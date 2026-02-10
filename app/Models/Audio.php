@@ -23,9 +23,10 @@ class Audio extends Model
         'duration',
         'published_at',
         'tradition_id',
+        'category_id',
         'is_active',
         'is_featured',
-        'category',
+        // 'category',
     ];
 
     protected $casts = [
@@ -33,6 +34,13 @@ class Audio extends Model
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
     ];
+
+    protected $with = ['category'];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ContentCategory::class);
+    }
 
     protected function audioUrl(): Attribute
     {

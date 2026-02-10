@@ -61,11 +61,28 @@ class VideoForm
 
                 Section::make('Publishing')
                     ->schema([
-                        Select::make('tradition_id')
-                            ->relationship('tradition', 'name')
+                        Select::make('category_id')
+                            ->relationship('category', 'name', fn($query) => $query->whereIn('type', ['video', 'both']))
+                            ->label('Category')
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('slug')
+                                    ->required()
+                                    ->maxLength(255),
+                                Select::make('type')
+                                    ->options([
+                                        'video' => 'Video',
+                                        'audio' => 'Audio',
+                                        'both' => 'Both',
+                                    ])
+                                    ->default('video')
+                                    ->required(),
+                            ]),
                         DateTimePicker::make('published_at')
                             ->required()
                             ->default(now()),

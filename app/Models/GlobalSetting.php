@@ -54,6 +54,8 @@ class GlobalSetting extends Model
         'google_play_service_account_json',
         'notification_sound_path',
         'alarm_sound_path',
+        'privacy_policy',
+        'terms_of_service',
     ];
 
     protected $hidden = [

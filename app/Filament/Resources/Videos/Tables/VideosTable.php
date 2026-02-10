@@ -19,7 +19,8 @@ class VideosTable
                 TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('tradition.name')
+                TextColumn::make('category.name')
+                    ->label('Category')
                     ->sortable(),
                 TextColumn::make('published_at')
                     ->dateTime()

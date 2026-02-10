@@ -18,4 +18,13 @@ class SettingsController extends Controller
             'statuses' => Status::all(),
         ]);
     }
+
+    public function legalDocuments(): JsonResponse
+    {
+        $settings = GlobalSetting::select(['privacy_policy', 'terms_of_service'])->first();
+        return response()->json([
+            'privacy_policy' => $settings?->privacy_policy,
+            'terms_of_service' => $settings?->terms_of_service,
+        ]);
+    }
 }

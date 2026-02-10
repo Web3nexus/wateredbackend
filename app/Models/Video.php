@@ -21,10 +21,12 @@ class Video extends Model
         'thumbnail_url',
         'duration',
         'published_at',
+        'published_at',
         'tradition_id',
+        'category_id',
         'is_active',
         'is_featured',
-        'category',
+        // 'category', // Deprecated in favor of category_id? Or keep for sync?
     ];
 
     protected $casts = [
@@ -32,6 +34,13 @@ class Video extends Model
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
     ];
+
+    protected $with = ['category'];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ContentCategory::class);
+    }
 
     protected function storageUrl(): Attribute
     {

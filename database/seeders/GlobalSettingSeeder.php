@@ -22,6 +22,8 @@ class GlobalSettingSeeder extends Seeder
                 'default_language' => 'en',
                 'supported_languages' => ['en', 'es', 'fr', 'ar'],
                 'maintenance_mode' => false,
+                'privacy_policy' => '<h1>Privacy Policy</h1><p>This is the privacy policy for Watered.</p>',
+                'terms_of_service' => '<h1>Terms of Service</h1><p>These are the terms of service for Watered.</p>',
             ]
         );
     }

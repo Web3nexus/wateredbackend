@@ -22,7 +22,8 @@ class AudiosTable
                 TextColumn::make('author')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('tradition.name')
+                TextColumn::make('category.name')
+                    ->label('Category')
                     ->sortable(),
                 TextColumn::make('published_at')
                     ->dateTime()

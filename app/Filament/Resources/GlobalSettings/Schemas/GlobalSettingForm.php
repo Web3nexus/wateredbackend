@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Forms\Components\RichEditor;
 
 class GlobalSettingForm
 {
@@ -297,6 +298,22 @@ class GlobalSettingForm
                                             ->label('Alarm Sound')
                                             ->directory('sounds')
                                             ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg']),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Legal Documents')
+                            ->schema([
+                                Section::make('Privacy Policy')
+                                    ->schema([
+                                        RichEditor::make('privacy_policy')
+                                            ->label('Privacy Policy Content')
+                                            ->columnSpanFull(),
+                                    ]),
+                                Section::make('Terms of Service')
+                                    ->schema([
+                                        RichEditor::make('terms_of_service')
+                                            ->label('Terms of Service Content')
+                                            ->columnSpanFull(),
                                     ]),
                             ]),
                     ]),
