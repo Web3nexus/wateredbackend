@@ -15,11 +15,19 @@ class AuthController extends Controller
 {
     public function resend(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('Resend verification requested for user: ' . $request->user()->id);
+
         if ($request->user()->hasVerifiedEmail()) {
             return response()->json(['message' => 'Email already verified.']);
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        try {
+            $request->user()->sendEmailVerificationNotification();
+            \Illuminate\Support\Facades\Log::info('Verification notification sent successfully for user: ' . $request->user()->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send verification email for user: ' . $request->user()->id . '. Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to send verification link. Please check mail settings.'], 500);
+        }
 
         return response()->json(['message' => 'Verification link sent.']);
     }
