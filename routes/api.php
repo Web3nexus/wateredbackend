@@ -97,9 +97,18 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
 
-        Route::get('/user', function (Request $request) {
-            return $request->user();
-        });
+        Route::get('/auth-debug', function (Request $request) {
+            $user = $request->user();
+            return response()->json([
+                'database' => config('database.connections.' . config('database.default') . '.database'),
+                'user_id' => $user?->id,
+                'email' => $user?->email,
+                'verified_at' => $user?->email_verified_at,
+                'is_verified_method' => $user?->hasVerifiedEmail(),
+            ]);
+        })->middleware('auth:sanctum');
+
+        // Authenticated Routes (ALL inside v1 prefix now)
 
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
