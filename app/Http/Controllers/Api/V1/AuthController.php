@@ -41,15 +41,16 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.']);
+            return view('auth.verify-success');
         }
 
         if ($user->markEmailAsVerified()) {
+            $user->save(); // Explicitly save to ensure state is persisted
             event(new Verified($user));
             $user->notify(new \App\Notifications\WelcomeNotification());
         }
 
-        return response()->json(['message' => 'Email has been verified.']);
+        return view('auth.verify-success');
     }
 
 
