@@ -86,6 +86,28 @@ class NewsletterResource extends Resource
             ])
             ->actions([
                 EditAction::make(),
+                \Filament\Tables\Actions\Action::make('sendTest')
+                    ->label('Send Test')
+                    ->icon('heroicon-o-beaker')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->label('Recipient Email')
+                            ->default(auth()->user()?->email),
+                    ])
+                    ->action(function (Newsletter $record, array $data) {
+                        \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
+                            ->notify(new \App\Notifications\NewsletterNotification($record->subject, $record->content));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Test Newsletter Sent')
+                            ->body('A test newsletter has been sent to ' . $data['email'])
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn(Newsletter $record) => $record->status !== 'sent'),
+
                 Action::make('send')
                     ->label('Send Now')
                     ->icon('heroicon-o-paper-airplane')

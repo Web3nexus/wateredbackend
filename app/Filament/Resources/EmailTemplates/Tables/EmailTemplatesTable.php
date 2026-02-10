@@ -33,8 +33,28 @@ class EmailTemplatesTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
+                \Filament\Tables\Actions\Action::make('sendTest')
+                    ->label('Send Test')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->label('Recipient Email')
+                            ->default(auth()->user()?->email),
+                    ])
+                    ->action(function ($record, array $data) {
+                        \Illuminate\Support\Facades\Notification::route('mail', $data['email'])
+                            ->notify(new \App\Notifications\TemplateTestNotification($record->key));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Test Email Sent')
+                            ->body('A test email using this template has been sent to ' . $data['email'])
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
