@@ -9,7 +9,7 @@ if (
     Chart.register(...window.filamentChartJsGlobalPlugins)
 }
 
-export default function chart({ cachedData, options, type }) {
+export default function chart({ cachedData, maxHeight, options, type }) {
     return {
         userPointBackgroundColor: options?.pointBackgroundColor,
         userXGridColor: options?.scales?.x?.grid?.color,
@@ -21,7 +21,13 @@ export default function chart({ cachedData, options, type }) {
             this.initChart()
 
             this.$wire.$on('updateChartData', ({ data }) => {
-                chart = this.getChart()
+                const chart = this.getChart()
+
+                if (!chart) {
+                    return
+                }
+
+                cachedData = data
                 chart.data = data
                 chart.update('resize')
             })
@@ -30,11 +36,13 @@ export default function chart({ cachedData, options, type }) {
                 Alpine.store('theme')
 
                 this.$nextTick(() => {
-                    if (!this.getChart()) {
+                    const chart = this.getChart()
+
+                    if (!chart) {
                         return
                     }
 
-                    this.getChart().destroy()
+                    chart.destroy()
                     this.initChart()
                 })
             })
@@ -47,13 +55,25 @@ export default function chart({ cachedData, options, type }) {
                     }
 
                     this.$nextTick(() => {
-                        this.getChart().destroy()
+                        const chart = this.getChart()
+
+                        if (!chart) {
+                            return
+                        }
+
+                        chart.destroy()
                         this.initChart()
                     })
                 })
 
             this.resizeHandler = Alpine.debounce(() => {
-                this.getChart().destroy()
+                const chart = this.getChart()
+
+                if (!chart) {
+                    return
+                }
+
+                chart.destroy()
                 this.initChart()
             }, 250)
 
@@ -101,7 +121,7 @@ export default function chart({ cachedData, options, type }) {
 
             options ??= {}
             options.borderWidth ??= 2
-            options.maintainAspectRatio ??= false
+            options.maintainAspectRatio ??= !!maxHeight
             options.pointBackgroundColor =
                 this.userPointBackgroundColor ?? borderColor
             options.pointHitRadius ??= 4

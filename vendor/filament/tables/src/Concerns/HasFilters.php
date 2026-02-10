@@ -2,6 +2,7 @@
 
 namespace Filament\Tables\Concerns;
 
+use Filament\Facades\Filament;
 use Filament\QueryBuilder\Forms\Components\RuleBuilder;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
@@ -165,12 +166,15 @@ trait HasFilters
         $this->handleTableFilterUpdates();
     }
 
-    protected function applyFiltersToTableQuery(Builder $query): Builder
+    protected function applyFiltersToTableQuery(Builder $query, bool $isResolvingRecord = false): Builder
     {
         $table = $this->getTable();
 
         if ($table->hasDeferredFilters()) {
-            $this->getTableFiltersForm()->statePath('tableFilters')->flushCachedAbsoluteStatePaths();
+            $filtersForm = $this->getTableFiltersForm()->statePath('tableFilters');
+
+            $filtersForm->flushCachedAbsoluteStatePaths();
+            $filtersForm->clearCachedDefaultChildSchemas();
         }
 
         try {
@@ -181,8 +185,12 @@ trait HasFilters
                 );
             }
 
-            return $query->where(function (Builder $query) use ($table): void {
+            return $query->where(function (Builder $query) use ($table, $isResolvingRecord): void {
                 foreach ($table->getFilters() as $filter) {
+                    if ($isResolvingRecord && $filter->shouldExcludeWhenResolvingRecord()) {
+                        continue;
+                    }
+
                     $filter->apply(
                         $query,
                         $this->getTableFilterState($filter->getName()) ?? [],
@@ -191,7 +199,10 @@ trait HasFilters
             });
         } finally {
             if ($table->hasDeferredFilters()) {
-                $this->getTableFiltersForm()->statePath('tableDeferredFilters')->flushCachedAbsoluteStatePaths();
+                $filtersForm = $this->getTableFiltersForm()->statePath('tableDeferredFilters');
+
+                $filtersForm->flushCachedAbsoluteStatePaths();
+                $filtersForm->clearCachedDefaultChildSchemas();
             }
         }
     }
@@ -221,7 +232,19 @@ trait HasFilters
 
     public function getTableFiltersSessionKey(): string
     {
-        $table = md5($this::class);
+        $namespace = $this::class;
+
+        $tenantKey = null;
+
+        if (class_exists(Filament::class)) {
+            $tenantKey = Filament::getTenant()?->getKey();
+        }
+
+        if (filled($tenantKey)) {
+            $namespace .= '|' . $tenantKey;
+        }
+
+        $table = md5($namespace);
 
         return "tables.{$table}_filters";
     }

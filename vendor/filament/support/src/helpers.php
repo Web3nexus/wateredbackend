@@ -116,7 +116,13 @@ if (! function_exists('Filament\Support\is_slot_empty')) {
 if (! function_exists('Filament\Support\is_app_url')) {
     function is_app_url(string $url): bool
     {
-        return str($url)->startsWith(request()->root());
+        if (str($url)->startsWith('/') && ! str($url)->startsWith('//')) {
+            return true;
+        }
+
+        $urlHost = parse_url($url, PHP_URL_HOST);
+
+        return (! $urlHost) || $urlHost === request()->getHost();
     }
 }
 
