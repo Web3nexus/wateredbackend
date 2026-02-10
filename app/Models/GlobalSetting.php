@@ -56,6 +56,14 @@ class GlobalSetting extends Model
         'alarm_sound_path',
         'privacy_policy',
         'terms_of_service',
+        'mail_mailer',
+        'mail_host',
+        'mail_port',
+        'mail_username',
+        'mail_password',
+        'mail_encryption',
+        'mail_from_address',
+        'mail_from_name',
     ];
 
     protected $hidden = [
@@ -64,6 +72,7 @@ class GlobalSetting extends Model
         'flutterwave_secret_key',
         'apple_shared_secret',
         'google_play_service_account_json',
+        'mail_password',
     ];
 
     protected $casts = [

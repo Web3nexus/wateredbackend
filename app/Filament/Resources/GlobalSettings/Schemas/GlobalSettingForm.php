@@ -315,6 +315,50 @@ class GlobalSettingForm
                                             ->columnSpanFull(),
                                     ]),
                             ]),
+
+                        Tabs\Tab::make('Mail Settings')
+                            ->schema([
+                                Section::make('SMTP Configuration')
+                                    ->schema([
+                                        Select::make('mail_mailer')
+                                            ->label('Mailer')
+                                            ->options([
+                                                'smtp' => 'SMTP',
+                                                'log' => 'Log (Debug)',
+                                            ])
+                                            ->default('smtp')
+                                            ->required(),
+                                        TextInput::make('mail_host')
+                                            ->label('SMTP Host')
+                                            ->placeholder('smtp.mailtrap.io'),
+                                        TextInput::make('mail_port')
+                                            ->label('SMTP Port')
+                                            ->placeholder('2525'),
+                                        TextInput::make('mail_username')
+                                            ->label('SMTP Username'),
+                                        TextInput::make('mail_password')
+                                            ->label('SMTP Password')
+                                            ->password()
+                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        Select::make('mail_encryption')
+                                            ->label('Encryption')
+                                            ->options([
+                                                'tls' => 'TLS',
+                                                'ssl' => 'SSL',
+                                                null => 'None',
+                                            ]),
+                                    ])->columns(2),
+                                Section::make('Sender Information')
+                                    ->schema([
+                                        TextInput::make('mail_from_address')
+                                            ->label('From Email Address')
+                                            ->email()
+                                            ->placeholder('hello@mywatered.com'),
+                                        TextInput::make('mail_from_name')
+                                            ->label('From Name')
+                                            ->placeholder('Watered Team'),
+                                    ])->columns(2),
+                            ]),
                     ]),
             ]);
     }
