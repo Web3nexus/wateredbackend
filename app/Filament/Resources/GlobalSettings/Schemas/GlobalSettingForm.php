@@ -281,7 +281,6 @@ class GlobalSettingForm
                                         Textarea::make('google_play_service_account_json')
                                             ->label('Service Account JSON')
                                             ->rows(5)
-                                            ->password()
                                             ->dehydrated(fn(?string $state) => filled($state)),
                                     ]),
                             ]),
