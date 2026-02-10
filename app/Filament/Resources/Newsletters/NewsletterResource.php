@@ -16,10 +16,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class NewsletterResource extends Resource
@@ -86,7 +86,7 @@ class NewsletterResource extends Resource
             ])
             ->actions([
                 EditAction::make(),
-                \Filament\Tables\Actions\Action::make('sendTest')
+                Action::make('sendTest')
                     ->label('Send Test')
                     ->icon('heroicon-o-beaker')
                     ->form([

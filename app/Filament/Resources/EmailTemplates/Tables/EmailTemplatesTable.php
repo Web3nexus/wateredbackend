@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EmailTemplates\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -35,7 +36,7 @@ class EmailTemplatesTable
             ])
             ->actions([
                 EditAction::make(),
-                \Filament\Tables\Actions\Action::make('sendTest')
+                Action::make('sendTest')
                     ->label('Send Test')
                     ->icon('heroicon-o-paper-airplane')
                     ->form([
