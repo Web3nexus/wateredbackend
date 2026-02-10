@@ -85,6 +85,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'device_name' => 'required|string',
         ]);
 
         $user = User::create([
@@ -95,14 +96,17 @@ class AuthController extends Controller
 
         Log::info("[REGISTER] Success for email: " . $user->email);
 
-        $token = $user->createToken($request->device_name ?? 'flutter_app')->plainTextToken;
+        $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
+        $isVerified = $freshUser->hasVerifiedEmail();
 
         return response()->json([
+            'status' => true,
+            'message' => 'Successfully registered.',
             'user' => $freshUser,
-            'is_verified' => $freshUser->hasVerifiedEmail(),
-            'verified' => $freshUser->hasVerifiedEmail(),
-            'email_verified' => $freshUser->hasVerifiedEmail(),
+            'is_verified' => $isVerified,
+            'verified' => $isVerified,
+            'email_verified' => $isVerified,
             'token' => $token,
         ]);
     }
@@ -144,12 +148,7 @@ class AuthController extends Controller
             'token' => $token,
         ];
 
-        Log::info("[LOGIN] SUCCESS for User {$user->id}. Response: " . json_encode([
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'is_verified' => $isVerified,
-            'email_verified_at' => $freshUser->email_verified_at,
-        ]));
+        Log::info("[LOGIN] SUCCESS for User {$user->id}. Response payload checks: is_verified={$isVerified}, email_verified_at={$freshUser->email_verified_at}");
 
         return response()->json($responseData);
     }
@@ -158,7 +157,10 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out.'
+        ]);
     }
 
     public function socialLogin(Request $request)
@@ -206,12 +208,15 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
+        $isVerified = $freshUser->hasVerifiedEmail();
 
         return response()->json([
+            'status' => true,
+            'message' => 'Success',
             'user' => $freshUser,
-            'is_verified' => $freshUser->hasVerifiedEmail(),
-            'verified' => $freshUser->hasVerifiedEmail(),
-            'email_verified' => $freshUser->hasVerifiedEmail(),
+            'is_verified' => $isVerified,
+            'verified' => $isVerified,
+            'email_verified' => $isVerified,
             'token' => $token,
         ]);
     }
