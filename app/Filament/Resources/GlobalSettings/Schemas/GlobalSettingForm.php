@@ -26,9 +26,7 @@ class GlobalSettingForm
                             ->schema([
                                 Section::make('Site Information')
                                     ->schema([
-                                        TextInput::make('site_name')
-                                            ->required()
-                                            ->default('Watered'),
+                                        TextInput::make('site_name'),
                                         TextInput::make('tagline')
                                             ->maxLength(255),
                                         Textarea::make('site_description')
@@ -164,8 +162,7 @@ class GlobalSettingForm
                                                 'pt' => 'Portuguese',
                                                 'fr' => 'French',
                                             ])
-                                            ->default('en')
-                                            ->required(),
+                                            ->default('en'),
                                         Select::make('supported_languages')
                                             ->label('Supported Languages')
                                             ->multiple()
@@ -196,8 +193,7 @@ class GlobalSettingForm
                                                 'USD' => 'USD ($)',
                                                 'NGN' => 'NGN (₦)',
                                             ])
-                                            ->default('USD')
-                                            ->required(),
+                                            ->default('USD'),
                                     ]),
 
                                 Section::make('Google AdMob')
@@ -326,8 +322,7 @@ class GlobalSettingForm
                                                 'smtp' => 'SMTP',
                                                 'log' => 'Log (Debug)',
                                             ])
-                                            ->default('smtp')
-                                            ->required(),
+                                            ->default('smtp'),
                                         TextInput::make('mail_host')
                                             ->label('SMTP Host')
                                             ->placeholder('smtp.mailtrap.io'),
