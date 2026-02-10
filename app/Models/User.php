@@ -79,6 +79,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Overriding toArray to provide both snake_case and CamelCase for Flutter
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['emailVerifiedAt'] = $this->email_verified_at ? $this->email_verified_at->toIso8601String() : null;
+        $array['createdAt'] = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $array['updatedAt'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
+        return $array;
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
