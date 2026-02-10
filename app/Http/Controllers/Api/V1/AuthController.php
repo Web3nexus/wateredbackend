@@ -97,11 +97,16 @@ class AuthController extends Controller
         Log::info("[REGISTER] Success for email: " . $user->email);
 
         $token = $user->createToken($request->device_name)->plainTextToken;
+        $freshUser = $user->fresh();
 
-        // Return exactly what AuthResponse model expects
         return response()->json([
-            'user' => $user->fresh(),
+            'status' => true,
+            'message' => 'Success',
+            'user' => $freshUser,
             'token' => $token,
+            'is_verified' => $freshUser->hasVerifiedEmail(),
+            'verified' => $freshUser->hasVerifiedEmail(),
+            'email_verified' => $freshUser->hasVerifiedEmail(),
         ]);
     }
 
@@ -120,6 +125,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             Log::warning("[LOGIN] Failed for: {$email}");
             return response()->json([
+                'status' => false,
                 'message' => 'Invalid email or password.',
                 'errors' => ['email' => ['Invalid email or password.']]
             ], 401);
@@ -127,13 +133,18 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
+        $isVerified = $freshUser->hasVerifiedEmail();
 
-        Log::info("[LOGIN] SUCCESS User {$user->id}.");
+        Log::info("[LOGIN] SUCCESS User {$user->id}. Verified: " . ($isVerified ? 'YES' : 'NO'));
 
-        // Return exactly what AuthResponse model expects
         return response()->json([
+            'status' => true,
+            'message' => 'Success',
             'user' => $freshUser,
             'token' => $token,
+            'is_verified' => $isVerified,
+            'verified' => $isVerified,
+            'email_verified' => $isVerified,
         ]);
     }
 
@@ -141,7 +152,10 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out.'
+        ]);
     }
 
     public function socialLogin(Request $request)
@@ -180,13 +194,19 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
+        $freshUser = $user->fresh();
+        $isVerified = $freshUser->hasVerifiedEmail();
 
         Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
 
-        // Return exactly what AuthResponse model expects
         return response()->json([
-            'user' => $user->fresh(),
+            'status' => true,
+            'message' => 'Success',
+            'user' => $freshUser,
             'token' => $token,
+            'is_verified' => $isVerified,
+            'verified' => $isVerified,
+            'email_verified' => $isVerified,
         ]);
     }
 }
