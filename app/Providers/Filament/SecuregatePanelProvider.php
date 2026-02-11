@@ -42,6 +42,7 @@ class SecuregatePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 \App\Filament\Widgets\QuickActionsWidget::class,
+                \App\Filament\Widgets\ActivityStatsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
