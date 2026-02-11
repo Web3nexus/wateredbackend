@@ -6,6 +6,10 @@ use App\Filament\Resources\Audios\AudioResource;
 use App\Filament\Resources\Entries\EntryResource;
 use App\Filament\Resources\TextCollections\TextCollectionResource;
 use App\Filament\Resources\Videos\VideoResource;
+use App\Filament\Resources\Rituals\RitualResource;
+use App\Filament\Resources\Incantations\IncantationResource;
+use App\Filament\Resources\DailyWisdoms\DailyWisdomResource;
+use App\Filament\Resources\Events\EventResource;
 use Filament\Widgets\Widget;
 
 class QuickActionsWidget extends Widget
@@ -44,6 +48,34 @@ class QuickActionsWidget extends Widget
                 'description' => 'Create a new sacred text or scripture collection.',
                 'url' => TextCollectionResource::getUrl('create'),
                 'color' => 'danger',
+            ],
+            [
+                'label' => 'Add New Ritual',
+                'icon' => 'heroicon-o-sparkles',
+                'description' => 'Add a new spiritual ritual or practice.',
+                'url' => RitualResource::getUrl('create'),
+                'color' => 'success',
+            ],
+            [
+                'label' => 'Add Incantation',
+                'icon' => 'heroicon-o-musical-note',
+                'description' => 'Add a new sacred chant or incantation.',
+                'url' => IncantationResource::getUrl('create'),
+                'color' => 'primary',
+            ],
+            [
+                'label' => 'Daily Wisdom',
+                'icon' => 'heroicon-o-sun',
+                'description' => 'Post a new inspirational quote or daily teaching.',
+                'url' => DailyWisdomResource::getUrl('create'),
+                'color' => 'warning',
+            ],
+            [
+                'label' => 'Add New Event',
+                'icon' => 'heroicon-o-calendar',
+                'description' => 'Schedule a new community gathering or ceremony.',
+                'url' => EventResource::getUrl('create'),
+                'color' => 'info',
             ],
         ];
     }
