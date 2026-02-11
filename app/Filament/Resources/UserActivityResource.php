@@ -17,12 +17,13 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
+use BackedEnum;
 
 class UserActivityResource extends Resource
 {
     protected static ?string $model = UserActivity::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     protected static UnitEnum|string|null $navigationGroup = 'Analytics';
 
