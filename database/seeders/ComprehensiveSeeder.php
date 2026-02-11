@@ -91,20 +91,26 @@ class ComprehensiveSeeder extends Seeder
             [
                 'name' => 'Festival of Waters',
                 'theme' => 'Celebration of spiritual renewal',
-                'date' => Carbon::create(2025, 3, 21),
+                'date' => Carbon::create(2026, 3, 21),
                 'description' => 'A major festival celebrating the renewal of life and spirit through water.',
             ],
             [
                 'name' => 'Day of Illumination',
                 'theme' => 'Honoring the inner light',
-                'date' => Carbon::create(2025, 4, 15),
+                'date' => Carbon::create(2026, 6, 15),
                 'description' => 'A day dedicated to self-reflection and honoring the divine spark within.',
             ],
             [
                 'name' => 'Harvest of Souls',
                 'theme' => 'Gathering of the faithful',
-                'date' => Carbon::create(2025, 5, 10),
+                'date' => Carbon::create(2026, 10, 10),
                 'description' => 'A time for community gathering and spiritual harvest.',
+            ],
+            [
+                'name' => 'Winter Solstice Gathering',
+                'theme' => 'Ancient light celebration',
+                'date' => Carbon::create(2026, 12, 21),
+                'description' => 'Honoring the return of the sun and the cycles of life.',
             ],
         ];
 

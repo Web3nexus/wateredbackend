@@ -163,6 +163,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
         Route::get('/notifications/settings', [\App\Http\Controllers\Api\V1\NotificationController::class, 'getSettings']);
         Route::post('/notifications/settings', [\App\Http\Controllers\Api\V1\NotificationController::class, 'updateSettings']);
+
+        // User Activity Tracking
+        Route::post('/activity/track', [\App\Http\Controllers\Api\V1\ActivityController::class, 'store']);
+        Route::get('/activity/history', [\App\Http\Controllers\Api\V1\ActivityController::class, 'index']);
     });
 
     // Informational Content (Public)

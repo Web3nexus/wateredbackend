@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,9 @@ class ProductController extends Controller
             ->latest()
             ->get();
 
-        return response()->json(['data' => $products]);
+        return response()->json([
+            'data' => ProductResource::collection($products)
+        ]);
     }
 
     public function show(Product $product)
@@ -22,7 +25,9 @@ class ProductController extends Controller
         if (!$product->is_active) {
             abort(404);
         }
-        return response()->json(['data' => $product]);
+        return response()->json([
+            'data' => new ProductResource($product)
+        ]);
     }
 
     public function checkout(Request $request)

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             KemeticCalendarSeeder::class,
             DailyWisdomSeeder::class,
             EmailTemplateSeeder::class,
+            InformationalSeeder::class,
         ]);
     }
 }
