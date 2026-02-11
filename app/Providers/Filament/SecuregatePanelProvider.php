@@ -66,6 +66,8 @@ class SecuregatePanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('User Management'),
                 NavigationGroup::make()
+                    ->label('Analytics'),
+                NavigationGroup::make()
                     ->label('Settings')
                     ->collapsed(),
             ]);

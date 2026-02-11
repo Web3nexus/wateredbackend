@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class ActivityStatsWidget extends BaseWidget
 {
+    protected static ?int $sort = 10;
+
     protected function getStats(): array
     {
         $totalSeconds = UserActivity::sum('duration_seconds');
