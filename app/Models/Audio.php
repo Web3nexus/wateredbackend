@@ -26,7 +26,6 @@ class Audio extends Model
         'category_id',
         'is_active',
         'is_featured',
-        // 'category',
     ];
 
     protected $casts = [
@@ -39,7 +38,7 @@ class Audio extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ContentCategory::class, 'category_id');
+        return $this->belongsTo(\App\Models\ContentCategory::class, 'category_id');
     }
 
     protected function audioUrl(): Attribute

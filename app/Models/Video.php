@@ -26,7 +26,6 @@ class Video extends Model
         'category_id',
         'is_active',
         'is_featured',
-        // 'category', // Deprecated in favor of category_id? Or keep for sync?
     ];
 
     protected $casts = [
@@ -39,7 +38,7 @@ class Video extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ContentCategory::class, 'category_id');
+        return $this->belongsTo(\App\Models\ContentCategory::class, 'category_id');
     }
 
     protected function storageUrl(): Attribute
