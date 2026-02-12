@@ -7,6 +7,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
     Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
 
+    // Webhooks
+    Route::post('/webhooks/apple', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apple']);
+    Route::post('/webhooks/paystack', [\App\Http\Controllers\Api\V1\WebhookController::class, 'paystack']);
+
     // Traditions endpoints
     Route::get('/traditions', [\App\Http\Controllers\Api\V1\TraditionController::class, 'index']);
     Route::get('/traditions/{tradition}', [\App\Http\Controllers\Api\V1\TraditionController::class, 'show']);
