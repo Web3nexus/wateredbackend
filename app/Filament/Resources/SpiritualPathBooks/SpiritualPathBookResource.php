@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\TextCollections;
+namespace App\Filament\Resources\SpiritualPathBooks;
 
-use App\Filament\Resources\TextCollections\RelationManagers;
-
-use App\Filament\Resources\TextCollections\Pages\CreateTextCollection;
-use App\Filament\Resources\TextCollections\Pages\EditTextCollection;
-use App\Filament\Resources\TextCollections\Pages\ListTextCollections;
+use App\Filament\Resources\SpiritualPathBooks\Pages;
 use App\Filament\Resources\TextCollections\Schemas\TextCollectionForm;
 use App\Filament\Resources\TextCollections\Tables\TextCollectionsTable;
+use App\Filament\Resources\TextCollections\RelationManagers;
 use App\Models\TextCollection;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -16,19 +13,19 @@ use Filament\Schemas\Schema;
 use BackedEnum;
 use UnitEnum;
 
-class TextCollectionResource extends Resource
+class SpiritualPathBookResource extends Resource
 {
     protected static ?string $model = TextCollection::class;
 
-    protected static ?string $navigationLabel = 'Nima Sedani';
+    protected static ?string $navigationLabel = 'Spiritual Path Books';
 
-    protected static ?string $pluralLabel = 'Books';
+    protected static ?string $pluralLabel = 'Spiritual Path Books';
 
-    protected static ?string $modelLabel = 'Book';
+    protected static ?string $modelLabel = 'Spiritual Path Book';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Nima Sedani';
+    protected static UnitEnum|string|null $navigationGroup = 'Spiritual Paths';
 
     public static function form(Schema $schema): Schema
     {
@@ -51,16 +48,16 @@ class TextCollectionResource extends Resource
     {
         return parent::getEloquentQuery()
             ->whereHas('tradition', function ($query) {
-                $query->where('slug', 'nima-sedani');
+                $query->where('slug', '!=', 'nima-sedani');
             });
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListTextCollections::route('/'),
-            'create' => CreateTextCollection::route('/create'),
-            'edit' => EditTextCollection::route('/{record}/edit'),
+            'index' => Pages\ListSpiritualPathBooks::route('/'),
+            'create' => Pages\CreateSpiritualPathBook::route('/create'),
+            'edit' => Pages\EditSpiritualPathBook::route('/{record}/edit'),
         ];
     }
 }
