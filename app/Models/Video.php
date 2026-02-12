@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
 {
@@ -44,14 +45,14 @@ class Video extends Model
     protected function storageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : asset('storage/' . $value)) : null,
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value)) : null,
         );
     }
 
     protected function thumbnailUrl(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : asset('storage/' . $value)) : null,
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value)) : null,
         );
     }
 

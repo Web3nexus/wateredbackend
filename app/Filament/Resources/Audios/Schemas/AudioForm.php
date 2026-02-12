@@ -9,6 +9,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\FileUpload;
 
 class AudioForm
 {
@@ -24,15 +25,21 @@ class AudioForm
                         Textarea::make('description')
                             ->rows(3)
                             ->maxLength(1000),
-                        TextInput::make('audio_url')
-                            ->label('Audio URL')
+                        FileUpload::make('audio_url')
+                            ->label('Audio File')
                             ->required()
-                            ->url()
-                            ->helperText('Paste the URL to the mp3/audio file.'),
-                        TextInput::make('thumbnail_url')
-                            ->label('Artwork URL')
-                            ->url()
-                            ->helperText('Optional image URL for the player.'),
+                            ->disk('public')
+                            ->directory('audios')
+                            ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac'])
+                            ->maxSize(51200) // 50MB
+                            ->helperText('Upload the mp3/audio file.'),
+                        FileUpload::make('thumbnail_url')
+                            ->label('Artwork Image')
+                            ->disk('public')
+                            ->directory('thumbnails/audios')
+                            ->image()
+                            ->imageEditor()
+                            ->helperText('Optional image for the player.'),
                         TextInput::make('author')
                             ->placeholder('e.g. Recitor Name, Speaker Name')
                             ->maxLength(255),

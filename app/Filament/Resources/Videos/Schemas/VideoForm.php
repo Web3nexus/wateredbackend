@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Videos\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
@@ -41,12 +42,14 @@ class VideoForm
                             ->required(fn($get) => $get('video_type') === 'youtube')
                             ->visible(fn($get) => $get('video_type') === 'youtube')
                             ->helperText('Paste the full YouTube video URL.'),
-                        TextInput::make('storage_url')
-                            ->label('File URL')
-                            ->url()
-                            ->required(fn($get) => $get('video_type') === 'file')
+                        FileUpload::make('storage_url')
+                            ->label('Video File')
+                            ->disk('public')
+                            ->directory('videos')
+                            ->visibility('public')
                             ->visible(fn($get) => $get('video_type') === 'file')
-                            ->helperText('Direct link to MP4 or HLS stream (e.g. from Bunny.net or R2).'),
+                            ->required(fn($get) => $get('video_type') === 'file')
+                            ->helperText('Upload the video file.'),
                         TextInput::make('duration')
                             ->placeholder('e.g. 15:30')
                             ->maxLength(50),
