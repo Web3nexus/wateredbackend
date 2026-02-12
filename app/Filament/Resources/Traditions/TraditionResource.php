@@ -4,11 +4,20 @@ namespace App\Filament\Resources\Traditions;
 
 use App\Filament\Resources\Traditions\Pages;
 use App\Models\Tradition;
-use Filament\Forms;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
 use BackedEnum;
 use UnitEnum;
@@ -27,48 +36,48 @@ class TraditionResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Basic Information')
+                Section::make('Basic Information')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                            ->afterStateUpdated(fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
 
-                        Forms\Components\TextInput::make('slug')
+                        TextInput::make('slug')
                             ->disabled()
                             ->dehydrated()
                             ->required()
                             ->maxLength(255)
                             ->unique(Tradition::class, 'slug', ignoreRecord: true),
 
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->maxLength(65535)
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Attributes')
+                Section::make('Attributes')
                     ->schema([
-                        Forms\Components\Select::make('language_id')
+                        Select::make('language_id')
                             ->relationship('language', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
 
-                        Forms\Components\TextInput::make('tradition_type')
+                        TextInput::make('tradition_type')
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('african_origin')
+                        TextInput::make('african_origin')
                             ->maxLength(255),
 
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->default(true)
                             ->required(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Visuals')
+                Section::make('Visuals')
                     ->schema([
-                        Forms\Components\FileUpload::make('deity_image_url')
+                        FileUpload::make('deity_image_url')
                             ->label('Banner/Deity Image')
                             ->image()
                             ->directory('traditions'),
@@ -104,12 +113,12 @@ class TraditionResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
