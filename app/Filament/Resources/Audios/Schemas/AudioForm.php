@@ -44,7 +44,7 @@ class AudioForm
                 Section::make('Publishing')
                     ->schema([
                         Select::make('category_id')
-                            ->relationship('category', 'name', fn($query) => $query->whereIn('type', ['audio', 'both']))
+                            ->relationship('contentCategory', 'name', fn($query) => $query->whereIn('type', ['audio', 'both']))
                             ->label('Category')
                             ->required()
                             ->searchable()

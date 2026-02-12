@@ -62,7 +62,7 @@ class VideoForm
                 Section::make('Publishing')
                     ->schema([
                         Select::make('category_id')
-                            ->relationship('category', 'name', fn($query) => $query->whereIn('type', ['video', 'both']))
+                            ->relationship('contentCategory', 'name', fn($query) => $query->whereIn('type', ['video', 'both']))
                             ->label('Category')
                             ->required()
                             ->searchable()

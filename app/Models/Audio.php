@@ -36,7 +36,7 @@ class Audio extends Model
 
     // protected $with = ['category'];
 
-    public function category(): BelongsTo
+    public function contentCategory(): BelongsTo
     {
         return $this->belongsTo(\App\Models\ContentCategory::class, 'category_id');
     }
