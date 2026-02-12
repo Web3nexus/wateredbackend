@@ -33,17 +33,15 @@ class TextCollectionForm
                             ->maxLength(1000),
                     ]),
 
-                Section::make('Classification')
-                    ->description('Link this book to a spiritual path or topic.')
+                Section::make('Classification (Optional)')
+                    ->description('Optionally link this book to a spiritual path or topic. Leave blank for standalone texts like Nima Sedani.')
+                    ->visible(fn($record) => $record === null || !str_contains(strtolower($record->name ?? ''), 'nima sedani'))
                     ->schema([
                         Select::make('tradition_id')
                             ->label('Spiritual Path')
                             ->relationship('tradition', 'name')
                             ->searchable()
-                            ->preload()
-                            ->required()
-                            ->disabled(fn($record) => $record !== null && str_contains(strtolower($record->tradition?->slug ?? ''), 'nima-sedani'))
-                            ->dehydrated(),
+                            ->preload(),
                         Select::make('category_id')
                             ->label('Topic')
                             ->relationship('category', 'name')

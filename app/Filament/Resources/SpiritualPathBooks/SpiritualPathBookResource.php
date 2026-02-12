@@ -46,10 +46,7 @@ class SpiritualPathBookResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()
-            ->whereHas('tradition', function ($query) {
-                $query->where('slug', '!=', 'nima-sedani');
-            });
+        return parent::getEloquentQuery()->whereNotNull('tradition_id');
     }
 
     public static function getPages(): array
