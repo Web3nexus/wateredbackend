@@ -46,7 +46,7 @@ class TextCollectionForm
                             ->dehydrated(),
                         Select::make('category_id')
                             ->label('Topic')
-                            ->relationship('category', 'name', fn($query) => $query->where('type', 'audio')) // Or appropriate type
+                            ->relationship('category', 'name')
                             ->searchable()
                             ->preload(),
                         TextInput::make('order')
