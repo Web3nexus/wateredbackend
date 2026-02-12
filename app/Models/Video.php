@@ -35,11 +35,11 @@ class Video extends Model
         'is_featured' => 'boolean',
     ];
 
-    protected $with = ['category'];
+    // protected $with = ['category'];
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ContentCategory::class);
+        return $this->belongsTo(ContentCategory::class, 'category_id');
     }
 
     protected function storageUrl(): Attribute
