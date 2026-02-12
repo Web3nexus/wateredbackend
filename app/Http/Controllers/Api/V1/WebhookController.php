@@ -48,6 +48,7 @@ class WebhookController extends Controller
             case 'SUBSCRIBED':
                 $subscription->update([
                     'status' => 'active',
+                    'platform' => 'ios',
                     'expires_at' => \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']),
                 ]);
                 $user->update(['is_premium' => true]);

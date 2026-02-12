@@ -14,6 +14,7 @@ class Subscription extends Model
         'user_id',
         'plan_id',
         'provider',
+        'platform',
         'provider_subscription_id',
         'amount',
         'status',

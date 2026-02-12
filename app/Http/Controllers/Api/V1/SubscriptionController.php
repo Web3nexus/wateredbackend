@@ -96,6 +96,7 @@ class SubscriptionController extends Controller
                 [
                     'plan_id' => $request->plan_id,
                     'provider' => 'apple',
+                    'platform' => 'ios',
                     'status' => 'active',
                     'starts_at' => now(),
                     'expires_at' => isset($latestReceipt['expires_date_ms'])
@@ -131,6 +132,7 @@ class SubscriptionController extends Controller
             $user->subscriptions()->create([
                 'plan_id' => $request->plan_id,
                 'provider' => 'paystack',
+                'platform' => 'android',
                 'provider_subscription_id' => $reference,
                 'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents
                 'status' => 'active',
