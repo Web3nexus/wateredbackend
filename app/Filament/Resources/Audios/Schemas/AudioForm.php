@@ -50,10 +50,9 @@ class AudioForm
                     ->schema([
                         Select::make('tradition_id')
                             ->relationship('tradition', 'name')
-                            ->label('Tradition')
+                            ->label('Tradition (Optional)')
                             ->searchable()
-                            ->preload()
-                            ->required(),
+                            ->preload(),
                         Select::make('category_id')
                             ->relationship('contentCategory', 'name', fn($query) => $query->whereIn('type', ['audio', 'both']))
                             ->label('Category')
