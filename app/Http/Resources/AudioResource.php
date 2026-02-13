@@ -26,6 +26,7 @@ class AudioResource extends JsonResource
             'tradition_id' => $this->tradition_id,
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
+            'category' => $this->contentCategory?->name,
             'is_liked' => $this->isLikedBy($request->user()),
             'likes_count' => (int) $this->likes_count,
             'comments_count' => (int) $this->comments_count,

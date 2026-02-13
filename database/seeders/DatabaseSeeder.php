@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             DailyWisdomSeeder::class,
             EmailTemplateSeeder::class,
             InformationalSeeder::class,
+            TempleSeeder::class,
         ]);
     }
 }

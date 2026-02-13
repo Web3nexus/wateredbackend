@@ -27,6 +27,16 @@ class AudioController extends Controller
             $query->search($request->search);
         }
 
+        // Ensure audio_url is not null to prevent app crashes
+        $query->whereNotNull('audio_url');
+
+        // Filter by category
+        if ($request->has('category') && $request->category !== 'All') {
+            $query->whereHas('contentCategory', function ($q) use ($request) {
+                $q->where('name', $request->category);
+            });
+        }
+
         // Filter by featured
         if ($request->has('featured')) {
             $query->where('is_featured', true);
