@@ -19,7 +19,7 @@ class LandingPageFeaturesTable
                 TextColumn::make('title')
                     ->searchable(),
                 ImageColumn::make('image'),
-                ImageColumn::make('image_position')
+                TextColumn::make('image_position')
                     ->badge(),
                 TextColumn::make('order')
                     ->numeric()
