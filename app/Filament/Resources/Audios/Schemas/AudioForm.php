@@ -30,16 +30,14 @@ class AudioForm
                             ->required()
                             ->disk('public')
                             ->directory('audios')
-                            ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac'])
-                            ->maxSize(51200) // 50MB
-                            ->helperText('Upload the mp3/audio file.'),
-                        FileUpload::make('thumbnail_url')
-                            ->label('Artwork Image')
-                            ->disk('public')
-                            ->directory('thumbnails/audios')
-                            ->image()
-                            ->imageEditor()
-                            ->helperText('Optional image for the player.'),
+                            ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'video/mp4', 'audio/mp4', 'audio/x-m4a'])
+                            ->maxSize(102400) // 100MB
+                            ->helperText('Upload the mp3/mp4/m4a audio file.'),
+                        TextInput::make('thumbnail_url')
+                            ->label('Artwork Image URL')
+                            ->url()
+                            ->placeholder('https://assets.audiomack.com/...')
+                            ->helperText('Paste an image link from Audiomack or other sources.'),
                         TextInput::make('author')
                             ->placeholder('e.g. Recitor Name, Speaker Name')
                             ->maxLength(255),
