@@ -30,9 +30,9 @@ class AudioForm
                             ->required()
                             ->disk('public')
                             ->directory('audios')
-                            ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'video/mp4', 'audio/mp4', 'audio/x-m4a'])
+                            // ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'video/mp4', 'audio/mp4', 'audio/x-m4a'])
                             ->maxSize(102400) // 100MB
-                            ->helperText('Upload the mp3/mp4/m4a audio file.'),
+                            ->helperText('Upload any audio/video file.'),
                         TextInput::make('thumbnail_url')
                             ->label('Artwork Image URL')
                             ->url()
