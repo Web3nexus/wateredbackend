@@ -55,8 +55,7 @@ class AudioForm
                             ->preload(),
                         Select::make('category_id')
                             ->relationship('contentCategory', 'name', fn($query) => $query->whereIn('type', ['audio', 'both']))
-                            ->label('Category')
-                            ->required()
+                            ->label('Category (Optional)')
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
