@@ -12,9 +12,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+// use Filament\Tables\Actions\DeleteAction;
+// use Filament\Tables\Actions\BulkActionGroup;
+// use Filament\Tables\Actions\DeleteBulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 use BackedEnum;
@@ -91,11 +91,11 @@ class UserActivityResource extends Resource
                     })
             ])
             ->actions([
-                DeleteAction::make(),
+                \Filament\Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('visited_at', 'desc');
