@@ -102,7 +102,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function profilePhotoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : asset('storage/' . $value)) : null,
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::disk('public')->url($value)) : null,
         );
     }
 

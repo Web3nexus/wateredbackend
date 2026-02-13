@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Rituals\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class RitualForm
@@ -30,9 +31,12 @@ class RitualForm
                 Textarea::make('content')
                     ->placeholder('The full ritual text or instructions...')
                     ->columnSpanFull(),
-                TextInput::make('media_urls')
-                    ->placeholder('URL to related video/audio')
-                    ->helperText('Link to media content for this ritual.'),
+                FileUpload::make('media_urls')
+                    ->label('Ritual Media (Audio/Video)')
+                    ->multiple()
+                    ->disk('public')
+                    ->directory('rituals')
+                    ->maxSize(102400), // 100MB
                 TextInput::make('steps')
                     ->placeholder('["Step 1", "Step 2", ...]')
                     ->helperText('Enter steps as a JSON array string.'),

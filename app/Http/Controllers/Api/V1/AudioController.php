@@ -67,4 +67,20 @@ class AudioController extends Controller
 
         return response()->json(new AudioResource($audio));
     }
+
+    /**
+     * Get all audio categories.
+     */
+    public function categories(): JsonResponse
+    {
+        $categories = \App\Models\ContentCategory::where(function ($q) {
+            $q->where('type', 'audio')->orWhere('type', 'both');
+        })
+            ->where('is_active', true)
+            ->get(['id', 'name', 'slug']);
+
+        return response()->json([
+            'data' => $categories
+        ]);
+    }
 }

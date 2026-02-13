@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Incantations\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class IncantationForm
@@ -19,8 +20,11 @@ class IncantationForm
                     ->columnSpanFull(),
                 Textarea::make('content')
                     ->columnSpanFull(),
-                TextInput::make('audio_url')
-                    ->url(),
+                FileUpload::make('audio_url')
+                    ->label('Audio Recitation')
+                    ->disk('public')
+                    ->directory('incantations')
+                    ->maxSize(51200), // 50MB
                 Toggle::make('is_paid')
                     ->required(),
                 TextInput::make('category'),

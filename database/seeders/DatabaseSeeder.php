@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             EmailTemplateSeeder::class,
             InformationalSeeder::class,
             TempleSeeder::class,
+            FeatureTwoSeeder::class,
+            NimaSedaniContentSeeder::class,
         ]);
     }
 }

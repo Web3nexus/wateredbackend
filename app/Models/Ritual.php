@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 class Ritual extends Model
 {
@@ -24,4 +26,24 @@ class Ritual extends Model
         'media_urls' => 'array',
         'steps' => 'array',
     ];
+
+    /**
+     * Get the media URLs.
+     */
+    protected function mediaUrls(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value)
+                    return [];
+                $urls = is_array($value) ? $value : json_decode($value, true);
+
+                return array_map(function ($url) {
+                    if (str_starts_with($url, 'http'))
+                        return $url;
+                    return Storage::disk('public')->url($url);
+                }, $urls);
+            },
+        );
+    }
 }

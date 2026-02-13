@@ -10,13 +10,19 @@ class DailyWisdomController extends Controller
 {
     public function index()
     {
-        // Get Nimasedani tradition
-        $nimasedani = \App\Models\Tradition::where('slug', 'nima-sedani')->first();
+        // Get Nima Sedani tradition with more robust search
+        $nimasedani = \App\Models\Tradition::whereIn('slug', ['nima-sedani', 'nimasedani', 'ni-maseani'])
+            ->orWhere('name', 'LIKE', '%Nima Sedani%')
+            ->orWhere('name', 'LIKE', '%ni maseani%')
+            ->first();
 
         if ($nimasedani) {
             // Get all active entries for Nima Sedani
             // Joining through collections and chapters
             $query = \App\Models\Entry::where('is_active', true)
+                ->whereHas('chapter', function ($q) {
+                    $q->where('is_active', true);
+                })
                 ->whereHas('chapter.collection', function ($q) use ($nimasedani) {
                     $q->where('tradition_id', $nimasedani->id)
                         ->where('is_active', true);
@@ -34,13 +40,21 @@ class DailyWisdomController extends Controller
                     ->first();
 
                 if ($entry) {
+                    // Get fallback background image
+                    $backgroundImage = $nimasedani->deity_image_url;
+
+                    if (!$backgroundImage) {
+                        $fallbackWisdom = \App\Models\DailyWisdom::whereNotNull('background_image_url')->inRandomOrder()->first();
+                        $backgroundImage = $fallbackWisdom?->background_image_url;
+                    }
+
                     // Format the entry as daily wisdom
                     return response()->json([
                         'data' => [
                             'id' => $entry->id,
                             'quote' => $entry->text,
-                            'author' => 'Nima Sedani', // User spelled it "ni maseani" but tradition is "Nima Sedani"
-                            'background_image_url' => null, // We can add logic for backgrounds later
+                            'author' => 'Nima Sedani',
+                            'background_image_url' => $backgroundImage,
                             'active_date' => now()->toDateString(),
                             'is_active' => true,
                             'publish_date' => now()->toDateString(),

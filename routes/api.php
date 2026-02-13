@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
 
     // Audio Feed endpoints
     Route::get('/audios', [\App\Http\Controllers\Api\V1\AudioController::class, 'index']);
+    Route::get('/audio-categories', [\App\Http\Controllers\Api\V1\AudioController::class, 'categories']);
     Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
     // Public Community
@@ -87,6 +88,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login'])->name('login');
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
+    Route::post('/forgot-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'resetPassword']);
 
     // Verification Logic (Signed Routes)
     Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
