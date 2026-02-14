@@ -24,6 +24,10 @@ class DeityForm
                     ->relationship('tradition', 'name')
                     ->required(),
                 TextInput::make('origin'),
+                TextInput::make('sort_order')
+                    ->numeric()
+                    ->default(999)
+                    ->required(),
                 Textarea::make('mythology_story')
                     ->columnSpanFull(),
                 Textarea::make('symbols')

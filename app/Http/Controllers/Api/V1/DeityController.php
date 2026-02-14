@@ -23,7 +23,7 @@ class DeityController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $deities = $query->latest()->paginate(20);
+        $deities = $query->orderBy('sort_order')->latest()->paginate(20);
 
         return response()->json($deities);
     }

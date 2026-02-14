@@ -20,6 +20,7 @@ class Deity extends Model
         'symbols',
         'domains',
         'sacred_elements',
+        'sort_order',
     ];
     protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {

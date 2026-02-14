@@ -14,6 +14,7 @@ class DeitiesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -28,6 +29,9 @@ class DeitiesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('sort_order')
+                    ->sortable()
+                    ->label('#'),
                 TextColumn::make('origin')
                     ->searchable(),
             ])

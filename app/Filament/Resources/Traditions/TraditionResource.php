@@ -52,6 +52,11 @@ class TraditionResource extends Resource
                             ->maxLength(255)
                             ->unique(Tradition::class, 'slug', ignoreRecord: true),
 
+                        TextInput::make('sort_order')
+                            ->numeric()
+                            ->default(999)
+                            ->required(),
+
                         Textarea::make('description.en')
                             ->label('Description (English)')
                             ->maxLength(65535)
@@ -90,7 +95,11 @@ class TraditionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
             ->columns([
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->sortable()
+                    ->label('#'),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

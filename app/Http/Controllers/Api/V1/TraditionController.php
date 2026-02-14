@@ -19,6 +19,7 @@ class TraditionController extends Controller
         $perPage = $request->query('per_page', 20);
 
         $traditions = Tradition::where('is_active', true)
+            ->orderBy('sort_order')
             ->orderBy('id')
             ->paginate($perPage);
 

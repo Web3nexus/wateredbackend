@@ -20,6 +20,7 @@ class Tradition extends Model
         'tradition_type',
         'african_origin',
         'deity_image_url',
+        'sort_order',
     ];
 
     public array $translatable = ['name', 'description'];
