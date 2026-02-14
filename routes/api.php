@@ -55,9 +55,7 @@ Route::prefix('v1')->group(function () {
     // Entries endpoints
     Route::get('/entries/{entry}', [\App\Http\Controllers\Api\V1\EntryController::class, 'show']);
 
-    // Video Feed endpoints
-    Route::get('/videos', [\App\Http\Controllers\Api\V1\VideoController::class, 'index']);
-    Route::get('/videos/{video}', [\App\Http\Controllers\Api\V1\VideoController::class, 'show']);
+    // Video Feed endpoints (Removed)
 
     // Audio Feed endpoints
     Route::get('/audios', [\App\Http\Controllers\Api\V1\AudioController::class, 'index']);
