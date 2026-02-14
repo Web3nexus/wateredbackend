@@ -55,10 +55,10 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Delete old photo if exists
-        if ($user->profile_photo_url) {
+        if ($user->profile_image) {
             /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
             $disk = Storage::disk('public');
-            $oldPath = str_replace($disk->url(''), '', $user->profile_photo_url);
+            $oldPath = str_replace($disk->url(''), '', $user->profile_image);
             $disk->delete($oldPath);
         }
 
@@ -68,11 +68,11 @@ class ProfileController extends Controller
         $path = $request->file('photo')->store('profile-photos', 'public');
         $url = $disk->url($path);
 
-        $user->update(['profile_photo_url' => $url]);
+        $user->update(['profile_image' => $url]);
 
         return response()->json([
             'message' => 'Profile photo uploaded successfully.',
-            'profile_photo_url' => $url,
+            'profile_image' => $url,
             'user' => $user->fresh(),
         ]);
     }

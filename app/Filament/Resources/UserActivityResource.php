@@ -45,7 +45,7 @@ class UserActivityResource extends Resource
                     ->color(fn(string $state): string => match ($state) {
                         'ritual' => 'success',
                         'incantation' => 'warning',
-                        'sacred_book' => 'primary',
+                        'sacred_book' => 'primary', // Nima Sedani
                         'deity' => 'info',
                         'audio' => 'danger',
                         default => 'gray',
@@ -69,7 +69,7 @@ class UserActivityResource extends Resource
                     ->options([
                         'ritual' => 'Rituals',
                         'incantation' => 'Incantations',
-                        'sacred_book' => 'Sacred Book',
+                        'sacred_book' => 'Nima Sedani',
                         'deity' => 'Deities',
                         'audio' => 'Audio',
                     ]),

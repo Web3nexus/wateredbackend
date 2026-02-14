@@ -44,15 +44,29 @@ class Tradition extends Model
         return $this->textCollections();
     }
 
-    protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function deityImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn(?string $value, array $attributes) =>
-            ($attributes['deity_image_url'] ?? null)
-            ? (str_starts_with($attributes['deity_image_url'], 'http')
-                ? $attributes['deity_image_url']
-                : \Illuminate\Support\Facades\Storage::disk('public')->url($attributes['deity_image_url']))
+            get: fn(?string $value) => $value
+            ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::url($value))
             : null,
         );
+    }
+
+    protected function backgroundImage(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn() => $this->deity_image_url,
+        );
+    }
+
+    /**
+     * Overriding toArray to provide background_image for Flutter
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['background_image'] = $this->background_image;
+        return $array;
     }
 }

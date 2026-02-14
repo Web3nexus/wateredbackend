@@ -19,15 +19,15 @@ class DeityResource extends Resource
 {
     protected static ?string $model = Deity::class;
 
-    protected static ?string $navigationLabel = 'The Gods';
+    protected static ?string $navigationLabel = 'Deities';
 
-    protected static ?string $pluralLabel = 'The Gods';
+    protected static ?string $pluralLabel = 'Deities';
 
     protected static ?string $modelLabel = 'Deity';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static UnitEnum|string|null $navigationGroup = 'The Gods';
+    protected static UnitEnum|string|null $navigationGroup = 'Deities';
 
     public static function form(Schema $schema): Schema
     {

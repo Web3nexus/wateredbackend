@@ -91,7 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'provider',
         'provider_id',
-        'profile_photo_url',
+        'profile_image',
         'is_premium',
         'push_notifications',
         'ritual_reminders',
@@ -99,10 +99,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'community_activity',
     ];
 
-    protected function profilePhotoUrl(): Attribute
+    protected function profileImage(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::disk('public')->url($value)) : null,
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::url($value)) : null,
         );
     }
 

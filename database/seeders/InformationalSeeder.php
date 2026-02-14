@@ -31,7 +31,7 @@ class InformationalSeeder extends Seeder
             [
                 'category' => 'Account & Billing',
                 'question' => 'What is Watered Plus+?',
-                'answer' => 'Watered Plus+ is our premium subscription that unlocks full access to the Sacred Book, advanced rituals, exclusive spiritual events, and the complete library of ancient traditions.',
+                'answer' => 'Watered Plus+ is our premium subscription that unlocks full access to Nima Sedani, advanced rituals, exclusive spiritual events, and the complete library of ancient traditions.',
                 'sort_order' => 3,
             ],
             [

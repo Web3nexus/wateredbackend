@@ -36,8 +36,8 @@ class FeatureTwoSeeder extends Seeder
                 'language_id' => $english->id,
             ],
             [
-                'name' => ['en' => 'The Four Witnesses'],
-                'slug' => 'the-four-witnesses',
+                'name' => ['en' => 'Watered'],
+                'slug' => 'watered',
                 'description' => ['en' => 'The foundational proofs behind the existence and power of The Gods in secular and spiritual realms.'],
                 'language_id' => $english->id,
             ],

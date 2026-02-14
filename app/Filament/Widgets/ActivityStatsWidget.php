@@ -25,7 +25,7 @@ class ActivityStatsWidget extends BaseWidget
         $pageLabels = [
             'ritual' => 'Rituals',
             'incantation' => 'Incantations',
-            'sacred_book' => 'Sacred Book',
+            'sacred_book' => 'Nima Sedani',
             'deity' => 'Deities',
             'audio' => 'Audio',
         ];

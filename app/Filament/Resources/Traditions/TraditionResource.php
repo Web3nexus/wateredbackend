@@ -38,7 +38,8 @@ class TraditionResource extends Resource
             ->schema([
                 Section::make('Basic Information')
                     ->schema([
-                        TextInput::make('name')
+                        TextInput::make('name.en')
+                            ->label('Name (English)')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
@@ -51,7 +52,8 @@ class TraditionResource extends Resource
                             ->maxLength(255)
                             ->unique(Tradition::class, 'slug', ignoreRecord: true),
 
-                        Textarea::make('description')
+                        Textarea::make('description.en')
+                            ->label('Description (English)')
                             ->maxLength(65535)
                             ->columnSpanFull(),
                     ])->columns(2),
