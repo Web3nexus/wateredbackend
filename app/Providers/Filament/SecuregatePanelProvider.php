@@ -28,6 +28,7 @@ class SecuregatePanelProvider extends PanelProvider
             ->default()
             ->id('securegate')
             ->path('securegate')
+            ->brandName('Watered')
             ->login()
             ->authGuard('admin')
             ->colors([
