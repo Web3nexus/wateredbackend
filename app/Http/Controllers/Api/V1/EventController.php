@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -30,8 +31,187 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
+        $user = auth()->user();
+        $eventData = $event->toArray();
+
+        // Add registration and reminder status for authenticated users
+        if ($user) {
+            $eventData['is_registered'] = $event->isRegistered($user);
+            $eventData['has_reminder'] = $event->hasReminder($user);
+        }
+
         return response()->json([
-            'data' => $event
+            'data' => $eventData
         ]);
+    }
+
+    /**
+     * Register user for an event
+     */
+    public function register(Request $request, Event $event)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Check if already registered
+        if ($event->isRegistered($user)) {
+            return response()->json(['message' => 'Already registered for this event'], 400);
+        }
+
+        // For paid events, require payment first
+        if ($event->is_paid) {
+            return response()->json([
+                'message' => 'Payment required for this event',
+                'requires_payment' => true,
+                'amount' => $event->price
+            ], 402);
+        }
+
+        // Register for free event
+        $registration = $event->registrations()->create([
+            'user_id' => $user->id,
+            'status' => 'registered',
+        ]);
+
+        return response()->json([
+            'message' => 'Successfully registered for event',
+            'data' => $registration
+        ], 201);
+    }
+
+    /**
+     * Cancel event registration
+     */
+    public function cancelRegistration(Event $event)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $registration = $event->registrations()
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['message' => 'Not registered for this event'], 404);
+        }
+
+        $registration->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'message' => 'Registration cancelled successfully'
+        ]);
+    }
+
+    /**
+     * Initiate Paystack payment for paid event
+     */
+    public function initiatePayment(Request $request, Event $event)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        if (!$event->is_paid) {
+            return response()->json(['message' => 'This event is free'], 400);
+        }
+
+        if ($event->isRegistered($user)) {
+            return response()->json(['message' => 'Already registered for this event'], 400);
+        }
+
+        // Initialize Paystack payment
+        $paystackSecretKey = config('services.paystack.secret_key');
+
+        $url = "https://api.paystack.co/transaction/initialize";
+
+        $fields = [
+            'email' => $user->email,
+            'amount' => $event->price * 100, // Convert to kobo
+            'metadata' => [
+                'event_id' => $event->id,
+                'user_id' => $user->id,
+                'event_title' => $event->title,
+            ],
+            'callback_url' => config('app.url') . '/api/v1/events/payment/callback',
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bearer " . $paystackSecretKey,
+            "Content-Type: application/json",
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+
+        if ($result && $result['status']) {
+            return response()->json([
+                'message' => 'Payment initialized',
+                'data' => $result['data']
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Failed to initialize payment',
+            'error' => $result['message'] ?? 'Unknown error'
+        ], 500);
+    }
+
+    /**
+     * Verify Paystack payment webhook
+     */
+    public function verifyPayment(Request $request)
+    {
+        $paystackSecretKey = config('services.paystack.secret_key');
+
+        // Verify webhook signature
+        $signature = $request->header('x-paystack-signature');
+        $body = $request->getContent();
+
+        if ($signature !== hash_hmac('sha512', $body, $paystackSecretKey)) {
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
+
+        $event = $request->input('event');
+        $data = $request->input('data');
+
+        if ($event === 'charge.success') {
+            $metadata = $data['metadata'];
+            $eventId = $metadata['event_id'];
+            $userId = $metadata['user_id'];
+            $reference = $data['reference'];
+
+            $eventModel = Event::find($eventId);
+
+            if ($eventModel) {
+                // Create registration with payment info
+                $eventModel->registrations()->create([
+                    'user_id' => $userId,
+                    'status' => 'registered',
+                    'payment_reference' => $reference,
+                    'amount' => $data['amount'] / 100, // Convert from kobo
+                    'payment_status' => 'completed',
+                    'payment_method' => $data['channel'],
+                ]);
+
+                // TODO: Send confirmation email
+            }
+        }
+
+        return response()->json(['message' => 'Webhook processed'], 200);
     }
 }

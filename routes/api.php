@@ -30,6 +30,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
     Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
 
+    // Event payment webhook (public)
+    Route::post('/events/payment/webhook', [\App\Http\Controllers\Api\V1\EventController::class, 'verifyPayment']);
+
     // Consultation Types (Public)
     Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\BookingController::class, 'indexTypes']);
 
@@ -174,6 +177,15 @@ Route::prefix('v1')->group(function () {
         // User Activity Tracking
         Route::post('/activity/track', [\App\Http\Controllers\Api\V1\ActivityController::class, 'store']);
         Route::get('/activity/history', [\App\Http\Controllers\Api\V1\ActivityController::class, 'index']);
+
+        // Event Registration and Reminders
+        Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);
+        Route::delete('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'cancelRegistration']);
+        Route::post('/events/{event}/payment', [\App\Http\Controllers\Api\V1\EventController::class, 'initiatePayment']);
+
+        Route::get('/event-reminders', [\App\Http\Controllers\Api\V1\EventReminderController::class, 'index']);
+        Route::post('/events/{event}/reminder', [\App\Http\Controllers\Api\V1\EventReminderController::class, 'store']);
+        Route::delete('/events/{event}/reminder', [\App\Http\Controllers\Api\V1\EventReminderController::class, 'destroy']);
     });
 
     // Informational Content (Public)
