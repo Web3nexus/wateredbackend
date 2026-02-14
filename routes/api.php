@@ -57,9 +57,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/audio-categories', [\App\Http\Controllers\Api\V1\AudioController::class, 'categories']);
         Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
-        // Community 
-        Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
-        Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
+        // Community (Disabled)
+        // Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
+        // Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 
         // Rituals & Deities & Holidays
         Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);
@@ -100,7 +100,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
         Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
 
-        // Community Actions
+        // Community Actions (Disabled)
+        /*
         Route::prefix('community')->group(function () {
             Route::post('/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'store']);
             Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
@@ -108,6 +109,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\PostController::class, 'toggleLike']);
             Route::post('/posts/{post}/share', [\App\Http\Controllers\Api\V1\PostController::class, 'share']);
         });
+        */
 
         // Interactions
         Route::post('/interact/like', [\App\Http\Controllers\Api\V1\InteractionController::class, 'toggleLike']);

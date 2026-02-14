@@ -83,4 +83,17 @@ class GlobalSetting extends Model
         'is_ads_enabled' => 'boolean',
         'ads_screens' => 'json',
     ];
+    protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn() => $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : null,
+        );
+    }
+
+    protected function faviconUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn() => $this->favicon_path ? \Illuminate\Support\Facades\Storage::url($this->favicon_path) : null,
+        );
+    }
 }

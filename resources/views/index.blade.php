@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $settings?->site_name ?? 'Watered' }} - {{ $settings?->tagline ?? 'The Ancient Spirits' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @if($settings?->favicon_path)
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $settings?->favicon_path) }}">
+    @if($settings?->favicon_url)
+        <link rel="icon" type="image/x-icon" href="{{ $settings->favicon_url }}">
     @else
         <link rel="icon" type="image/x-icon" href="{{ asset('images/watered-logo.png') }}">
     @endif
@@ -27,13 +27,13 @@
     <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                @if($settings?->logo_path)
-                    <img src="{{ asset('storage/' . $settings?->logo_path) }}" alt="Logo" class="h-10 w-10 object-contain">
+                @if($settings?->logo_url)
+                    <img src="{{ $settings->logo_url }}" alt="Logo" class="h-10 w-10 object-contain">
                 @else
                     <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
+                    <span
+                        class="font-heading text-xl text-gold-antique tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
                 @endif
-                <span
-                    class="font-heading text-xl text-gold-antique tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
             </div>
             <div class="flex items-center gap-8">
                 <a href="#features"
@@ -79,7 +79,7 @@
                         <div
                             class="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
                             @if($settings?->hero_image)
-                                <img src="{{ asset('storage/' . $settings?->hero_image) }}" alt="Watered App"
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($settings->hero_image) }}" alt="Watered App"
                                     class="w-full h-full object-cover">
                             @else
                                 <div
@@ -341,7 +341,7 @@
                     <div class="relative">
                         <div class="aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl border border-parchment/10">
                             @if($settings?->rituals_image)
-                                <img src="{{ asset('storage/' . $settings?->rituals_image) }}" alt="Sacred Rituals"
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($settings->rituals_image) }}" alt="Sacred Rituals"
                                     class="w-full h-full object-cover">
                             @else
                                 <img src="{{ asset('images/acceptance-ritual.png') }}" alt="Acceptance Ritual"
@@ -380,10 +380,14 @@
             <div class="grid md:grid-cols-4 gap-16 mb-20 text-center md:text-left">
                 <div class="md:col-span-2 space-y-6">
                     <div class="flex items-center gap-4 justify-center md:justify-start">
-                        <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
-                            class="h-12 w-12 object-contain">
-                        <span
-                            class="font-heading text-2xl text-gold-antique tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
+                        @if($settings?->logo_url)
+                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-12 w-12 object-contain">
+                        @else
+                            <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
+                                class="h-12 w-12 object-contain">
+                            <span
+                                class="font-heading text-2xl text-gold-antique tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
+                        @endif
                     </div>
                     <p class="text-parchment/50 max-w-sm">Elevating humanity through ancient wisdom, community, and
                         divine connection. Your journey to clarity starts here.</p>

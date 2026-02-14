@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\Audios\AudioResource;
 use App\Filament\Resources\Entries\EntryResource;
 use App\Filament\Resources\TextCollections\TextCollectionResource;
-use App\Filament\Resources\Videos\VideoResource;
 use App\Filament\Resources\Rituals\RitualResource;
 use App\Filament\Resources\Incantations\IncantationResource;
 use App\Filament\Resources\DailyWisdoms\DailyWisdomResource;
@@ -28,13 +27,7 @@ class QuickActionsWidget extends Widget
                 'url' => EntryResource::getUrl('create'),
                 'color' => 'primary',
             ],
-            [
-                'label' => 'Add New Short Reel',
-                'icon' => 'heroicon-o-video-camera',
-                'description' => 'Upload a TikTok-style wisdom video.',
-                'url' => VideoResource::getUrl('create'),
-                'color' => 'success',
-            ],
+
             [
                 'label' => 'Add Audio Teaching',
                 'icon' => 'heroicon-o-microphone',
