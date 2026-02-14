@@ -35,6 +35,22 @@ class Event extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(EventReminder::class);
+    }
+
+    public function hasReminder(?User $user): bool
+    {
+        if (!$user)
+            return false;
+
+        return $this->reminders()
+            ->where('user_id', $user->id)
+            ->where('reminder_status', 'active')
+            ->exists();
+    }
+
     public function isRegistered(?User $user): bool
     {
         if (!$user)
