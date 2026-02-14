@@ -14,7 +14,7 @@ class TraditionResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'imageUrl' => $this->imageUrl,
+            'imageUrl' => $this->deity_image_url,
             'isActive' => $this->is_active,
             'languageId' => $this->language_id,
             'createdAt' => $this->created_at?->toISOString(),

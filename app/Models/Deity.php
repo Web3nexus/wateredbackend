@@ -24,7 +24,7 @@ class Deity extends Model
     protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::url($value)) : null,
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::disk('public')->url($value)) : null,
         );
     }
 

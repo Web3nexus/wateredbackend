@@ -146,6 +146,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/events/{event}/reminder', [\App\Http\Controllers\Api\V1\EventReminderController::class, 'store']);
         Route::delete('/events/{event}/reminder', [\App\Http\Controllers\Api\V1\EventReminderController::class, 'destroy']);
 
+        // Holiday Reminders
+        Route::get('/holiday-reminders', [\App\Http\Controllers\Api\V1\HolidayReminderController::class, 'index']);
+        Route::post('/holiday-reminders', [\App\Http\Controllers\Api\V1\HolidayReminderController::class, 'store']);
+        Route::delete('/holiday-reminders/{holiday_reminder}', [\App\Http\Controllers\Api\V1\HolidayReminderController::class, 'destroy']);
+
         // Informational Content (Now Protected)
         Route::get('/faqs', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexFaqs']);
         Route::get('/user-guides', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexUserGuides']);

@@ -19,7 +19,7 @@ class ContentCategorySeeder extends Seeder
             ['name' => 'Documentary', 'type' => 'video', 'slug' => 'documentary'],
 
             ['name' => 'Incantation', 'type' => 'audio', 'slug' => 'incantation'],
-            ['name' => 'Music', 'type' => 'audio', 'slug' => 'music'],
+            ['name' => 'Teachings', 'type' => 'audio', 'slug' => 'teachings'],
             ['name' => 'Sermons', 'type' => 'audio', 'slug' => 'sermons'],
             ['name' => 'Meditation', 'type' => 'audio', 'slug' => 'meditation'],
         ];

@@ -48,7 +48,7 @@ class Tradition extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn(?string $value) => $value
-            ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::url($value))
+            ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::disk('public')->url($value))
             : null,
         );
     }
