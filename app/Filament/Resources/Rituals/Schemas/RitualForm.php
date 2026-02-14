@@ -32,7 +32,7 @@ class RitualForm
                     ->placeholder('The full ritual text or instructions...')
                     ->columnSpanFull(),
                 FileUpload::make('media_urls')
-                    ->label('Ritual Media (Audio/Video)')
+                    ->label('Ritual Media (Audio)')
                     ->multiple()
                     ->disk('public')
                     ->directory('rituals')

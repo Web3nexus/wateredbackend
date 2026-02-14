@@ -242,10 +242,7 @@ class ComprehensiveSeeder extends Seeder
             ConsultationType::updateOrCreate(['name' => $ctype['name']], $ctype);
         }
 
-        // 8. Update Video/Audio categories for existing items? or just seed a few
-        Video::where('title', 'LIKE', '%Teaching%')->update(['category' => 'Teaching']);
-        Video::where('title', 'LIKE', '%Music%')->update(['category' => 'Music Video']);
-
+        // 8. Update Audio categories for existing items? or just seed a few
         Audio::where('title', 'LIKE', '%Incantation%')->update(['category' => 'Incantation']);
         Audio::where('title', 'LIKE', '%Sermon%')->update(['category' => 'Sermons']);
     }

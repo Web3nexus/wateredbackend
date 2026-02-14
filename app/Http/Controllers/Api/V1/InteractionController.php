@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Audio;
 use App\Models\Comment;
 use App\Models\Post;
-use App\Models\Video;
 use Illuminate\Http\Request;
 
 class InteractionController extends Controller
@@ -17,7 +16,7 @@ class InteractionController extends Controller
     public function toggleLike(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,video,audio',
+            'type' => 'required|string|in:post,audio',
             'id' => 'required|integer',
         ]);
 
@@ -48,7 +47,7 @@ class InteractionController extends Controller
     public function storeComment(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,video,audio',
+            'type' => 'required|string|in:post,audio',
             'id' => 'required|integer',
             'content' => 'required|string|max:1000',
         ]);
@@ -78,7 +77,7 @@ class InteractionController extends Controller
     public function indexComments(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,video,audio',
+            'type' => 'required|string|in:post,audio',
             'id' => 'required|integer',
         ]);
 
@@ -99,8 +98,6 @@ class InteractionController extends Controller
         switch ($type) {
             case 'post':
                 return Post::find($id);
-            case 'video':
-                return Video::find($id);
             case 'audio':
                 return Audio::find($id);
         }

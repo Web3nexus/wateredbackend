@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Audio;
 use App\Models\Product;
 use App\Models\Temple;
-use App\Models\Video;
 use App\Models\Tradition;
 use Illuminate\Http\Request;
 
@@ -18,7 +17,6 @@ class SearchController extends Controller
 
         if (!$query) {
             return response()->json([
-                'videos' => [],
                 'audio' => [],
                 'products' => [],
                 'temples' => [],
@@ -28,11 +26,6 @@ class SearchController extends Controller
 
         // Limit results per category to avoid huge payload
         $limit = 5;
-
-        $videos = Video::where('is_active', true)
-            ->where('title', 'like', "%{$query}%")
-            ->take($limit)
-            ->get();
 
         $audio = Audio::where('is_active', true)
             ->where('title', 'like', "%{$query}%")
@@ -55,7 +48,6 @@ class SearchController extends Controller
             ->get();
 
         return response()->json([
-            'videos' => $videos,
             'audio' => $audio,
             'products' => $products,
             'temples' => $temples,

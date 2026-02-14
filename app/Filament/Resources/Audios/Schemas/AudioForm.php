@@ -67,9 +67,7 @@ class AudioForm
                                     ->maxLength(255),
                                 Select::make('type')
                                     ->options([
-                                        'video' => 'Video',
                                         'audio' => 'Audio',
-                                        'both' => 'Both',
                                     ])
                                     ->default('audio')
                                     ->required(),
