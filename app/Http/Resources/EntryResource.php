@@ -13,12 +13,12 @@ class EntryResource extends JsonResource
             'id' => $this->id,
             'number' => $this->number,
             'text' => $this->text,
-            'chapterId' => $this->chapter_id,
+            'chapter_id' => $this->chapter_id,
             'order' => $this->order,
             'metadata' => $this->metadata,
-            'isActive' => $this->is_active,
-            'createdAt' => $this->created_at?->toISOString(),
-            'updatedAt' => $this->updated_at?->toISOString(),
+            'is_active' => (bool) $this->is_active,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
 
         // Include translations if loaded
