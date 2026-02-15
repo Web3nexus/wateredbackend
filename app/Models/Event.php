@@ -65,6 +65,11 @@ class Event extends Model
         return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
     }
 
+    public function tradition(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Tradition::class);
+    }
+
     public function registrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
