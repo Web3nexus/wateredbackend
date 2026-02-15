@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Ritual;
 use Illuminate\Http\Request;
 
+use App\Http\Resources\RitualResource;
+
 class RitualController extends Controller
 {
     /**
@@ -17,7 +19,7 @@ class RitualController extends Controller
             return $query->where('category', $category);
         })->latest()->paginate(20);
 
-        return response()->json($rituals);
+        return RitualResource::collection($rituals);
     }
 
     /**
@@ -25,6 +27,6 @@ class RitualController extends Controller
      */
     public function show(Ritual $ritual)
     {
-        return response()->json($ritual);
+        return new RitualResource($ritual);
     }
 }
