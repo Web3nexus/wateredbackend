@@ -4,15 +4,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
-    Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
-
-    // Webhooks
+    // Webhooks (Public - Required for payment processing)
     Route::post('/webhooks/apple', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apple']);
     Route::post('/webhooks/paystack', [\App\Http\Controllers\Api\V1\WebhookController::class, 'paystack']);
 
-    // Protected Routes (Sanctum)
+    // Protected Routes (Sanctum) - ALL app content requires authentication
     Route::middleware('auth:sanctum')->group(function () {
+        // App Settings & Legal Documents (Now Protected)
+        Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
+        Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
+
         // Traditions endpoints
         Route::get('/traditions', [\App\Http\Controllers\Api\V1\TraditionController::class, 'index']);
         Route::get('/traditions/{tradition}', [\App\Http\Controllers\Api\V1\TraditionController::class, 'show']);
