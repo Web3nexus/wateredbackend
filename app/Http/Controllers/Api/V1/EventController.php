@@ -71,8 +71,18 @@ class EventController extends Controller
         ]);
     }
 
-    public function show(Event $event)
+    public function show($identifier)
     {
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
+            ->firstOrFail();
+
         $user = auth()->user();
         $eventData = $event->toArray();
 
@@ -90,8 +100,18 @@ class EventController extends Controller
     /**
      * Register user for an event
      */
-    public function register(Request $request, Event $event)
+    public function register(Request $request, $identifier)
     {
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
+            ->firstOrFail();
+
         $user = auth()->user();
 
         $validated = $request->validate([
@@ -143,8 +163,18 @@ class EventController extends Controller
     /**
      * Cancel event registration
      */
-    public function cancelRegistration(Event $event)
+    public function cancelRegistration($identifier)
     {
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
+            ->firstOrFail();
+
         $user = auth()->user();
 
         if (!$user) {
@@ -169,8 +199,18 @@ class EventController extends Controller
     /**
      * Initiate Paystack payment for paid event
      */
-    public function initiatePayment(Request $request, Event $event)
+    public function initiatePayment(Request $request, $identifier)
     {
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
+            ->firstOrFail();
+
         $user = auth()->user();
 
         $validated = $request->validate([
