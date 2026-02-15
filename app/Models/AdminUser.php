@@ -34,6 +34,29 @@ class AdminUser extends Authenticatable implements FilamentUser
         ];
     }
 
+    /**
+     * Check if this admin user has the Developer role
+     */
+    public function isDeveloper(): bool
+    {
+        return $this->hasRole('Developer', 'admin');
+    }
+
+    /**
+     * Boot method to add model event listeners
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Prevent deletion of users with Developer role
+        static::deleting(function ($admin) {
+            if ($admin->isDeveloper()) {
+                throw new \Exception('Cannot delete admin users with Developer role. This role is protected.');
+            }
+        });
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return true; // Further restricted by roles/permissions if needed
