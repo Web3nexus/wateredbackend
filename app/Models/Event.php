@@ -50,21 +50,16 @@ class Event extends Model
 
     public function getBannerImageUrlAttribute(): ?string
     {
-        if ($this->banner_image) {
-            if (filter_var($this->banner_image, FILTER_VALIDATE_URL)) {
-                return $this->banner_image;
-            }
-            return asset(\Illuminate\Support\Facades\Storage::url($this->banner_image));
+        $path = $this->banner_image ?? $this->image_url;
+
+        if (!$path)
+            return null;
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
         }
 
-        if ($this->image_url) {
-            if (filter_var($this->image_url, FILTER_VALIDATE_URL)) {
-                return $this->image_url;
-            }
-            return asset(\Illuminate\Support\Facades\Storage::url($this->image_url));
-        }
-
-        return null;
+        return asset(\Illuminate\Support\Facades\Storage::url($path));
     }
 
     public function registrations(): HasMany

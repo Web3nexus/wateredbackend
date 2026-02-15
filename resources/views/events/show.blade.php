@@ -16,7 +16,7 @@
 <body class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white min-h-screen flex flex-col">
     <style>
         :root {
-            --color-app-blue: {{ $settings->primary_color ?? '#0077BE' }};
+            --color-app-blue: #0077BE;
         }
     </style>
     {{-- Background --}}
@@ -52,14 +52,14 @@
                 <a href="{{ route('home') }}#blog"
                     class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
                 <a href="{{ route('home') }}#download"
-                    class="px-5 py-2.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
+                    class="px-8 py-3.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
                     Watered App</a>
             </div>
         </div>
     </nav>
 
     {{-- Content --}}
-    <main class="pt-24 pb-48 flex-grow">
+    <main class="pt-32 pb-64 flex-grow">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                 <!-- Left: Event Info -->
@@ -144,7 +144,7 @@
                                        placeholder="+1 (555) 000-0000">
                             </div>
 
-                            <button type="submit" class="w-full py-6 bg-app-blue text-white font-bold rounded-2xl hover:bg-white hover:text-sea-deep transition-all transform hover:-translate-y-1 shadow-2xl shadow-app-blue/20 uppercase tracking-[0.2em] mt-10">
+                            <button type="submit" class="w-full py-4 px-8 bg-app-blue text-white font-bold rounded-full hover:bg-white hover:text-sea-deep transition-all transform hover:-translate-y-1 shadow-2xl shadow-app-blue/20 uppercase tracking-[0.2em] mt-10">
                                 {{ $event->is_paid ? 'Pay & Register' : 'Join Now' }}
                             </button>
                             

@@ -61,7 +61,7 @@ class EventsListingController extends Controller
         // Handled via proxy to Api V1 EventController or duplicate logic here
         // For simplicity, let's call the API logic
         $apiController = new \App\Http\Controllers\Api\V1\EventController();
-        $response = $apiController->register($request, $event);
+        $response = $apiController->register($request, $event->id);
 
         $data = json_decode($response->getContent(), true);
 

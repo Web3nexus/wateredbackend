@@ -17,9 +17,7 @@
     class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white min-h-screen flex flex-col">
     <style>
         :root {
-            --color-app-blue:
-                {{ $settings->primary_color ?? '#0077BE' }}
-            ;
+            --color-app-blue: #0077BE;
         }
     </style>
     {{-- Background --}}
@@ -57,14 +55,14 @@
                 <a href="{{ route('home') }}#blog"
                     class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
                 <a href="{{ route('home') }}#download"
-                    class="px-5 py-2.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
+                    class="px-8 py-3.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
                     Watered App</a>
             </div>
         </div>
     </nav>
 
     {{-- Content --}}
-    <main class="pt-24 pb-48 flex-grow">
+    <main class="pt-32 pb-64 flex-grow">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-20">
                 <p class="text-app-blue/90 mb-4 text-sm uppercase tracking-[0.3em] font-bold">Community Gatherings</p>
