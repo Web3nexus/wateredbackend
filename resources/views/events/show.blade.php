@@ -13,7 +13,12 @@
     @endif
 </head>
 
-<body class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white">
+<body class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white min-h-screen flex flex-col">
+    <style>
+        :root {
+            --color-app-blue: {{ $settings->primary_color ?? '#0077BE' }};
+        }
+    </style>
     {{-- Background --}}
     <div class="fixed inset-0 -z-10 bg-sea-deep">
         <div class="absolute inset-0 opacity-5"
@@ -54,7 +59,7 @@
     </nav>
 
     {{-- Content --}}
-    <main class="pt-24 pb-32">
+    <main class="pt-24 pb-48 flex-grow">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                 <!-- Left: Event Info -->
@@ -83,7 +88,17 @@
                             </div>
                             <div class="space-y-2">
                                 <span class="block text-parchment/30 text-[10px] font-bold uppercase tracking-widest">Access</span>
-                                <p class="text-app-blue font-heading text-2xl uppercase tracking-wider">{{ $event->is_paid ? '$' . number_format($event->price, 2) : 'FREE' }}</p>
+                                <p class="text-app-blue font-heading text-2xl uppercase tracking-wider">
+                                    @if($event->is_paid)
+                                        @if(($settings->currency_position ?? 'before') === 'before')
+                                            {{ $settings->currency_symbol ?? '$' }}{{ number_format($event->price, 2) }}
+                                        @else
+                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '$' }}
+                                        @endif
+                                    @else
+                                        FREE
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -51,14 +51,17 @@ class Event extends Model
     public function getBannerImageUrlAttribute(): ?string
     {
         if ($this->banner_image) {
-            return url(\Illuminate\Support\Facades\Storage::url($this->banner_image));
+            if (filter_var($this->banner_image, FILTER_VALIDATE_URL)) {
+                return $this->banner_image;
+            }
+            return asset(\Illuminate\Support\Facades\Storage::url($this->banner_image));
         }
 
         if ($this->image_url) {
             if (filter_var($this->image_url, FILTER_VALIDATE_URL)) {
                 return $this->image_url;
             }
-            return url(\Illuminate\Support\Facades\Storage::url($this->image_url));
+            return asset(\Illuminate\Support\Facades\Storage::url($this->image_url));
         }
 
         return null;

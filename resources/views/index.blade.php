@@ -13,7 +13,14 @@
     @endif
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col">
+    <style>
+        :root {
+            --color-app-blue:
+                {{ $settings->primary_color ?? '#0077BE' }}
+            ;
+        }
+    </style>
     {{-- Background --}}
     <div class="fixed inset-0 -z-10 bg-sea-deep">
         <div class="absolute inset-0 opacity-5"
@@ -585,7 +592,7 @@
                 if (response.ok) {
                     msg.innerText = 'Success! Redirecting to payment...';
                     msg.classList.remove('hidden', 'bg-red-100', 'text-red-700');
-                    msg.classList.add('bg-green-100', 'text-green-700');
+         msg.classList.add('bg-green-100', 'text-green-700');
 
                     if (result.payment_url) {
                         window.location.href = result.payment_url;

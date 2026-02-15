@@ -192,8 +192,21 @@ class GlobalSettingForm
                                             ->options([
                                                 'USD' => 'USD ($)',
                                                 'NGN' => 'NGN (₦)',
+                                                'GBP' => 'GBP (£)',
+                                                'EUR' => 'EUR (€)',
                                             ])
                                             ->default('USD'),
+                                        TextInput::make('currency_symbol')
+                                            ->label('Currency Symbol')
+                                            ->default('$')
+                                            ->maxLength(10),
+                                        Select::make('currency_position')
+                                            ->label('Currency Position')
+                                            ->options([
+                                                'before' => 'Before Amount ($100)',
+                                                'after' => 'After Amount (100$)',
+                                            ])
+                                            ->default('before'),
                                     ]),
 
                                 Section::make('Google AdMob')

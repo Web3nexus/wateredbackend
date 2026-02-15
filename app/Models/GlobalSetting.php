@@ -64,6 +64,9 @@ class GlobalSetting extends Model
         'mail_encryption',
         'mail_from_address',
         'mail_from_name',
+        'system_currency',
+        'currency_symbol',
+        'currency_position',
     ];
 
     protected $hidden = [
@@ -86,14 +89,26 @@ class GlobalSetting extends Model
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn() => $this->logo_path ? url(\Illuminate\Support\Facades\Storage::url($this->logo_path)) : null,
+            get: function () {
+                if (!$this->logo_path)
+                    return null;
+                if (filter_var($this->logo_path, FILTER_VALIDATE_URL))
+                    return $this->logo_path;
+                return asset(\Illuminate\Support\Facades\Storage::url($this->logo_path));
+            }
         );
     }
 
     protected function faviconUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn() => $this->favicon_path ? url(\Illuminate\Support\Facades\Storage::url($this->favicon_path)) : null,
+            get: function () {
+                if (!$this->favicon_path)
+                    return null;
+                if (filter_var($this->favicon_path, FILTER_VALIDATE_URL))
+                    return $this->favicon_path;
+                return asset(\Illuminate\Support\Facades\Storage::url($this->favicon_path));
+            }
         );
     }
 }

@@ -13,7 +13,15 @@
     @endif
 </head>
 
-<body class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white">
+<body
+    class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white min-h-screen flex flex-col">
+    <style>
+        :root {
+            --color-app-blue:
+                {{ $settings->primary_color ?? '#0077BE' }}
+            ;
+        }
+    </style>
     {{-- Background --}}
     <div class="fixed inset-0 -z-10 bg-sea-deep">
         <div class="absolute inset-0 opacity-5"
@@ -56,7 +64,7 @@
     </nav>
 
     {{-- Content --}}
-    <main class="pt-24 pb-32">
+    <main class="pt-24 pb-48 flex-grow">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-20">
                 <p class="text-app-blue/90 mb-4 text-sm uppercase tracking-[0.3em] font-bold">Community Gatherings</p>
@@ -90,7 +98,15 @@
 
                             <div class="flex items-center justify-between pt-6 border-t border-parchment/5">
                                 <span class="text-sm font-bold {{ $event->is_paid ? 'text-parchment' : 'text-green-400' }}">
-                                    {{ $event->is_paid ? '$' . number_format($event->price, 2) : 'FREE' }}
+                                    @if($event->is_paid)
+                                        @if(($settings->currency_position ?? 'before') === 'before')
+                                            {{ $settings->currency_symbol ?? '$' }}{{ number_format($event->price, 2) }}
+                                        @else
+                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '$' }}
+                                        @endif
+                                    @else
+                                        FREE
+                                    @endif
                                 </span>
                                 <a href="{{ route('events.show', $event) }}"
                                     class="text-app-blue text-xs font-bold uppercase tracking-widest hover:text-parchment transition-colors flex items-center gap-2">
