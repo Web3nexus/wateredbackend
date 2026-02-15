@@ -9,13 +9,17 @@ class EventsListingController extends Controller
 {
     public function index(Request $request)
     {
-        $events = Event::where(function ($q) {
-            $q->where('event_date', '>=', now()->toDateString())
-                ->orWhere(function ($sq) {
-                    $sq->whereNull('event_date')->where('start_time', '>=', now());
-                });
-        })
-            ->orderBy('event_date', 'asc')
+        $events = Event::query()
+            ->when(\Illuminate\Support\Facades\Schema::hasColumn('events', 'event_date'), function ($q) {
+                $q->where(function ($sq) {
+                    $sq->where('event_date', '>=', now()->toDateString())
+                        ->orWhere(function ($ssq) {
+                            $ssq->whereNull('event_date')->where('start_time', '>=', now());
+                        });
+                })->orderBy('event_date', 'asc');
+            }, function ($q) {
+                $q->where('start_time', '>=', now())->orderBy('start_time', 'asc');
+            })
             ->get();
 
         return view('events.index', compact('events'));

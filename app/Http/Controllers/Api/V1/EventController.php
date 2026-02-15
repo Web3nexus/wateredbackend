@@ -21,27 +21,46 @@ class EventController extends Controller
                 return $q->where('tradition_id', $traditionId);
             });
 
+        $hasEventDate = \Illuminate\Support\Facades\Schema::hasColumn('events', 'event_date');
+
         switch ($filter) {
             case 'new':
-                // Recently created events (e.g., last 30 days or just ordered by created_at)
                 $query->orderBy('created_at', 'desc');
                 break;
             case 'past':
-                $query->where(function ($q) {
-                    $q->where('event_date', '<', now()->toDateString())
-                        ->orWhere(function ($sq) {
-                            $sq->whereNull('event_date')->where('start_time', '<', now());
-                        });
-                })->orderBy('event_date', 'desc');
+                $query->where(function ($q) use ($hasEventDate) {
+                    if ($hasEventDate) {
+                        $q->where('event_date', '<', now()->toDateString())
+                            ->orWhere(function ($sq) {
+                                $sq->whereNull('event_date')->where('start_time', '<', now());
+                            });
+                    } else {
+                        $q->where('start_time', '<', now());
+                    }
+                });
+                if ($hasEventDate) {
+                    $query->orderBy('event_date', 'desc');
+                } else {
+                    $query->orderBy('start_time', 'desc');
+                }
                 break;
             case 'upcoming':
             default:
-                $query->where(function ($q) {
-                    $q->where('event_date', '>=', now()->toDateString())
-                        ->orWhere(function ($sq) {
-                            $sq->whereNull('event_date')->where('start_time', '>=', now());
-                        });
-                })->orderBy('event_date', 'asc');
+                $query->where(function ($q) use ($hasEventDate) {
+                    if ($hasEventDate) {
+                        $q->where('event_date', '>=', now()->toDateString())
+                            ->orWhere(function ($sq) {
+                                $sq->whereNull('event_date')->where('start_time', '>=', now());
+                            });
+                    } else {
+                        $q->where('start_time', '>=', now());
+                    }
+                });
+                if ($hasEventDate) {
+                    $query->orderBy('event_date', 'asc');
+                } else {
+                    $query->orderBy('start_time', 'asc');
+                }
                 break;
         }
 
