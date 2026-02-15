@@ -45,14 +45,38 @@ class Audio extends Model
     protected function audioUrl(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value)) : null,
+            get: function (?string $value) {
+                if (!$value)
+                    return null;
+
+                // Defensive: Ensure localhost is replaced with the correct APP_URL host
+                $appUrl = config('app.url');
+                $appHost = parse_url($appUrl, PHP_URL_HOST);
+                if ($appHost && str_contains($value, 'localhost')) {
+                    $value = str_replace('localhost', $appHost, $value);
+                }
+
+                return str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value);
+            },
         );
     }
 
     protected function thumbnailUrl(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value)) : null,
+            get: function (?string $value) {
+                if (!$value)
+                    return null;
+
+                // Defensive: Ensure localhost is replaced with the correct APP_URL host
+                $appUrl = config('app.url');
+                $appHost = parse_url($appUrl, PHP_URL_HOST);
+                if ($appHost && str_contains($value, 'localhost')) {
+                    $value = str_replace('localhost', $appHost, $value);
+                }
+
+                return str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value);
+            },
         );
     }
 
