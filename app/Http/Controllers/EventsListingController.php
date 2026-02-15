@@ -24,7 +24,9 @@ class EventsListingController extends Controller
             })
             ->get();
 
-        return view('events.index', compact('events'));
+        $settings = \App\Models\GlobalSetting::first();
+
+        return view('events.index', compact('events', 'settings'));
     }
 
     public function show($identifier)
@@ -39,7 +41,9 @@ class EventsListingController extends Controller
             })
             ->firstOrFail();
 
-        return view('events.show', compact('event'));
+        $settings = \App\Models\GlobalSetting::first();
+
+        return view('events.show', compact('event', 'settings'));
     }
 
     public function register(Request $request, $identifier)

@@ -1,0 +1,79 @@
+{{-- Consolidated Layout Elements from index.blade.php --}}
+
+{{-- HEAD --}}
+<title>{{ $settings?->site_name ?? 'Watered' }} - {{ $settings?->tagline ?? 'The Ancient Spirits' }}</title>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+@if($settings?->favicon_url)
+    <link rel="icon" type="image/x-icon" href="{{ $settings->favicon_url }}?v={{ time() }}">
+@else
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/watered-logo.png') }}">
+@endif
+
+{{-- BACKGROUND DIV --}}
+<div class="fixed inset-0 -z-10 bg-sea-deep">
+    <div class="absolute inset-0 opacity-5"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(0,119,190,0.1) 1px, transparent 0); background-size: 40px 40px;">
+    </div>
+    <div class="absolute top-1/4 right-0 w-[800px] h-[800px] bg-app-blue/10 blur-[200px] rounded-full"></div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-app-blue/5 blur-[180px] rounded-full"></div>
+</div>
+
+{{-- NAVBAR --}}
+<nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            @if($settings?->logo_url)
+                <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-10 w-10 object-contain">
+            @else
+                <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
+                <span class="font-heading text-xl text-app-blue tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
+            @endif
+        </div>
+        <div class="flex items-center gap-8">
+            <a href="{{ route('home') }}#features" class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Features</a>
+            <a href="{{ route('home') }}#appointments" class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Book Appointment</a>
+            <a href="{{ route('events.index') }}" class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Events</a>
+            <a href="{{ route('home') }}#blog" class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
+            <a href="{{ route('home') }}#download" class="px-5 py-2.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get Watered App</a>
+        </div>
+    </div>
+</nav>
+
+{{-- FOOTER --}}
+<footer class="bg-sea-deep pt-24 pb-12 border-t border-parchment/5">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-4 gap-16 mb-20">
+            <div class="col-span-2 space-y-8">
+                <div class="flex items-center gap-4">
+                    @if($settings?->logo_url)
+                        <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-12 w-12 object-contain">
+                    @else
+                        <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-12 w-12 object-contain">
+                        <span class="font-heading text-2xl text-app-blue tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
+                    @endif
+                </div>
+                <p class="text-parchment/50 max-w-sm">Elevating humanity through ancient wisdom, community, and divine connection. Your journey to clarity starts here.</p>
+            </div>
+            <div class="space-y-6">
+                <h4 class="text-parchment font-bold uppercase tracking-widest text-sm">Navigation</h4>
+                <ul class="space-y-4 text-parchment/50 text-sm">
+                    <li><a href="{{ route('home') }}" class="hover:text-app-blue transition">Home</a></li>
+                    <li><a href="{{ route('home') }}#features" class="hover:text-app-blue transition">Features</a></li>
+                    <li><a href="{{ route('home') }}#blog" class="hover:text-app-blue transition">Insights</a></li>
+                    <li><a href="{{ route('home') }}#download" class="hover:text-app-blue transition">Get the App</a></li>
+                </ul>
+            </div>
+            <div class="space-y-6">
+                <h4 class="text-parchment font-bold uppercase tracking-widest text-sm">Support</h4>
+                <ul class="space-y-4 text-parchment/50 text-sm">
+                    <li><a href="#" class="hover:text-app-blue transition">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-app-blue transition">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-app-blue transition">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="pt-10 border-t border-parchment/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }} {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.</p>
+        </div>
+    </div>
+</footer>
