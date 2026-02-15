@@ -24,7 +24,7 @@
     <!-- Content -->
     <main class="pt-32 pb-20">
         <div class="max-w-7xl mx-auto px-6">
-            <h1 class="font-heading text-5xl text-app-blue mb-4 tracking-tighter">UPCOMING EVENTS</h1>
+            <h1 class="font-heading text-5xl text-app-blue mb-4 tracking-tighter">EVENTS</h1>
             <p class="text-white/60 text-lg max-w-2xl mb-12">Discover spiritual gatherings, rituals, and educational events hosted by the Watered community.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -52,7 +52,7 @@
                     </div>
                 @empty
                     <div class="col-span-full py-20 text-center">
-                        <p class="text-white/40">No upcoming events scheduled at the moment.</p>
+                        <p class="text-white/40">No events scheduled at the moment.</p>
                     </div>
                 @endforelse
             </div>
