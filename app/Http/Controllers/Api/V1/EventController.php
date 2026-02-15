@@ -11,18 +11,41 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $events = Event::where('start_time', '>=', now())
-            ->when($request->category, function ($query, $category) {
-                return $query->where('category', $category);
+        $filter = $request->query('filter', 'upcoming'); // default to upcoming
+
+        $query = Event::query()
+            ->when($request->category, function ($q, $category) {
+                return $q->where('category', $category);
             })
-            ->when($request->recurrence, function ($query, $recurrence) {
-                return $query->where('recurrence', $recurrence);
-            })
-            ->when($request->tradition_id, function ($query, $traditionId) {
-                return $query->where('tradition_id', $traditionId);
-            })
-            ->orderBy('start_time', 'asc')
-            ->get();
+            ->when($request->tradition_id, function ($q, $traditionId) {
+                return $q->where('tradition_id', $traditionId);
+            });
+
+        switch ($filter) {
+            case 'new':
+                // Recently created events (e.g., last 30 days or just ordered by created_at)
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'past':
+                $query->where(function ($q) {
+                    $q->where('event_date', '<', now()->toDateString())
+                        ->orWhere(function ($sq) {
+                            $sq->whereNull('event_date')->where('start_time', '<', now());
+                        });
+                })->orderBy('event_date', 'desc');
+                break;
+            case 'upcoming':
+            default:
+                $query->where(function ($q) {
+                    $q->where('event_date', '>=', now()->toDateString())
+                        ->orWhere(function ($sq) {
+                            $sq->whereNull('event_date')->where('start_time', '>=', now());
+                        });
+                })->orderBy('event_date', 'asc');
+                break;
+        }
+
+        $events = $query->get();
 
         return response()->json([
             'data' => $events
@@ -52,16 +75,28 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
+        $validated = $request->validate([
+            'full_name' => $user ? 'nullable|string' : 'required|string',
+            'email' => $user ? 'nullable|email' : 'required|email',
+            'phone' => $user ? 'nullable|string' : 'required|string',
+        ]);
 
         // Check if already registered
-        if ($event->isRegistered($user)) {
-            return response()->json(['message' => 'Already registered for this event'], 400);
+        if ($user) {
+            if ($event->isRegistered($user)) {
+                return response()->json(['message' => 'Already registered for this event'], 400);
+            }
+        } else {
+            $existing = $event->registrations()
+                ->where('email', $validated['email'])
+                ->first();
+            if ($existing) {
+                return response()->json(['message' => 'This email is already registered for this event'], 400);
+            }
         }
 
-        // For paid events, require payment first
+        // For paid events via API, we usually return requires_payment 
+        // and let them initiate payment separately
         if ($event->is_paid) {
             return response()->json([
                 'message' => 'Payment required for this event',
@@ -72,8 +107,12 @@ class EventController extends Controller
 
         // Register for free event
         $registration = $event->registrations()->create([
-            'user_id' => $user->id,
+            'user_id' => $user?->id,
+            'full_name' => $validated['full_name'] ?? $user?->name,
+            'email' => $validated['email'] ?? $user?->email,
+            'phone' => $validated['phone'] ?? $user?->phone,
             'status' => 'registered',
+            'payment_status' => 'completed', // Free event
         ]);
 
         return response()->json([
@@ -115,32 +154,35 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
+        $validated = $request->validate([
+            'full_name' => $user ? 'nullable|string' : 'required|string',
+            'email' => $user ? 'nullable|email' : 'required|email',
+            'phone' => $user ? 'nullable|string' : 'required|string',
+        ]);
 
         if (!$event->is_paid) {
             return response()->json(['message' => 'This event is free'], 400);
         }
 
-        if ($event->isRegistered($user)) {
-            return response()->json(['message' => 'Already registered for this event'], 400);
-        }
-
         // Initialize Paystack payment
-        $paystackSecretKey = config('services.paystack.secret_key');
+        $settings = \App\Models\GlobalSetting::first();
+        $paystackSecretKey = $settings->paystack_secret_key;
 
         $url = "https://api.paystack.co/transaction/initialize";
 
         $fields = [
-            'email' => $user->email,
+            'email' => $validated['email'] ?? $user?->email,
             'amount' => $event->price * 100, // Convert to kobo
             'metadata' => [
+                'type' => 'event',
                 'event_id' => $event->id,
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
+                'full_name' => $validated['full_name'] ?? $user?->name,
+                'email' => $validated['email'] ?? $user?->email,
+                'phone' => $validated['phone'] ?? $user?->phone,
                 'event_title' => $event->title,
             ],
-            'callback_url' => config('app.url') . '/api/v1/events/payment/callback',
+            // Use external callback if needed or handle via webhook
         ];
 
         $ch = curl_init();

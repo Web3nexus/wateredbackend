@@ -93,7 +93,7 @@ class GlobalSetting extends Model
     protected function faviconUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn() => $this->favicon_path ? \Illuminate\Support\Facades\Storage::url($this->favicon_path) : null,
+            get: fn() => $this->favicon_path ? url(\Illuminate\Support\Facades\Storage::url($this->favicon_path)) : null,
         );
     }
 }

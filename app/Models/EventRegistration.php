@@ -13,7 +13,14 @@ class EventRegistration extends Model
     protected $fillable = [
         'event_id',
         'user_id',
+        'full_name',
+        'email',
+        'phone',
         'status',
+        'payment_reference',
+        'amount',
+        'payment_status',
+        'payment_method',
     ];
 
     public function event(): BelongsTo

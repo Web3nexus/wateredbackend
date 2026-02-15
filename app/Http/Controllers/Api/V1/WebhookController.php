@@ -135,7 +135,50 @@ class WebhookController extends Controller
             }
         }
 
-        // 2. Handle Subscription Payment (Default behavior)
+        // 2. Handle Event Payment
+        if (isset($metadata['type']) && $metadata['type'] === 'event') {
+            $eventId = $metadata['event_id'] ?? null;
+            $event = \App\Models\Event::find($eventId);
+
+            if ($event) {
+                // Check if registration already exists (e.g. from a failed attempt or double webhook)
+                $registration = $event->registrations()
+                    ->where(function ($q) use ($metadata) {
+                        if (isset($metadata['user_id'])) {
+                            $q->where('user_id', $metadata['user_id']);
+                        } else {
+                            $q->where('email', $metadata['email']);
+                        }
+                    })->first();
+
+                if ($registration) {
+                    $registration->update([
+                        'payment_status' => 'completed',
+                        'payment_reference' => $reference,
+                        'amount' => $data['amount'] / 100,
+                        'payment_method' => $data['channel'],
+                        'status' => 'registered',
+                    ]);
+                } else {
+                    $event->registrations()->create([
+                        'user_id' => $metadata['user_id'] ?? null,
+                        'full_name' => $metadata['full_name'] ?? null,
+                        'email' => $metadata['email'] ?? null,
+                        'phone' => $metadata['phone'] ?? null,
+                        'status' => 'registered',
+                        'payment_reference' => $reference,
+                        'amount' => $data['amount'] / 100,
+                        'payment_status' => 'completed',
+                        'payment_method' => $data['channel'],
+                    ]);
+                }
+
+                // TODO: Send Confirmation Email to User/Guest
+                return;
+            }
+        }
+
+        // 3. Handle Subscription Payment (Default behavior)
         $subscription = Subscription::where('provider_subscription_id', $reference)->first();
 
         if ($subscription) {

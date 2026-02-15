@@ -41,6 +41,9 @@
                 <a href="#appointments"
                     class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Book
                     Appointment</a>
+                <a href="{{ route('events.index') }}"
+                    class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Upcoming
+                    Events</a>
                 <a href="#blog"
                     class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
                 <a href="#download"
