@@ -20,7 +20,9 @@ class DailyWisdomForm
                     ->columnSpanFull(),
                 TextInput::make('author'),
                 FileUpload::make('background_image_url')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('daily-wisdoms'),
                 DatePicker::make('publish_date')
                     ->required(),
                 Toggle::make('is_active')

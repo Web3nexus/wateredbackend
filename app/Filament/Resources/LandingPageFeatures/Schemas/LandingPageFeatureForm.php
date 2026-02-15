@@ -21,7 +21,9 @@ class LandingPageFeatureForm
                     ->required()
                     ->columnSpanFull(),
                 FileUpload::make('image')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('landing-features'),
                 Select::make('image_position')
                     ->options(['left' => 'Left', 'right' => 'Right'])
                     ->default('left')

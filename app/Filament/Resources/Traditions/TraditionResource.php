@@ -87,6 +87,7 @@ class TraditionResource extends Resource
                         FileUpload::make('deity_image_url')
                             ->label('Banner/Deity Image')
                             ->image()
+                            ->disk('public')
                             ->directory('traditions'),
                     ]),
             ]);

@@ -26,7 +26,9 @@ class BlogPostForm
                     ->required()
                     ->columnSpanFull(),
                 FileUpload::make('featured_image')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('blog-posts'),
                 Toggle::make('is_published')
                     ->required(),
                 DateTimePicker::make('published_at'),

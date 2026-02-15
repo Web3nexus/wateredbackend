@@ -32,7 +32,9 @@ class ProductForm
                     ->prefix('$')
                     ->label('Price in USD'),
                 FileUpload::make('image_url')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('products'),
                 TextInput::make('audio_sample_url')
                     ->url(),
                 Toggle::make('is_digital')

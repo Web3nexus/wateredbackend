@@ -28,7 +28,9 @@ class ConsultationTypeForm
                     ->numeric()
                     ->default(60),
                 FileUpload::make('image_url')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('consultation-types'),
                 Toggle::make('is_active')
                     ->required(),
             ]);

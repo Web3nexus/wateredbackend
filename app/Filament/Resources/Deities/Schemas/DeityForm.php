@@ -19,7 +19,9 @@ class DeityForm
                 Textarea::make('description')
                     ->columnSpanFull(),
                 FileUpload::make('image_url')
-                    ->image(),
+                    ->image()
+                    ->disk('public')
+                    ->directory('deities'),
                 Select::make('tradition_id')
                     ->relationship('tradition', 'name')
                     ->required(),

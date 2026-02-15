@@ -34,10 +34,12 @@ class GlobalSettingForm
                                         FileUpload::make('logo_path')
                                             ->label('Logo')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('branding'),
                                         FileUpload::make('favicon_path')
                                             ->label('Favicon')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('branding'),
                                     ]),
 
@@ -93,6 +95,7 @@ class GlobalSettingForm
                                         FileUpload::make('hero_image')
                                             ->label('Hero Image')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('landing'),
                                     ]),
 
@@ -136,6 +139,7 @@ class GlobalSettingForm
                                         FileUpload::make('rituals_image')
                                             ->label('Rituals Image')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('landing'),
                                     ]),
                             ]),
@@ -300,10 +304,12 @@ class GlobalSettingForm
                                     ->schema([
                                         FileUpload::make('notification_sound_path')
                                             ->label('Default Notification Sound')
+                                            ->disk('public')
                                             ->directory('sounds')
                                             ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg']),
                                         FileUpload::make('alarm_sound_path')
                                             ->label('Alarm Sound')
+                                            ->disk('public')
                                             ->directory('sounds')
                                             ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg']),
                                     ]),

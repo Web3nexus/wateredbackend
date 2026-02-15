@@ -37,10 +37,12 @@ class EventForm
                 TextInput::make('location'),
                 FileUpload::make('banner_image')
                     ->image()
+                    ->disk('public')
                     ->directory('events'),
                 FileUpload::make('image_url')
                     ->label('Legacy Image URL (Optional)')
-                    ->image(),
+                    ->image()
+                    ->disk('public'),
                 Toggle::make('is_paid')
                     ->required(),
                 TextInput::make('price')
