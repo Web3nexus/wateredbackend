@@ -8,6 +8,19 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/apple', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apple']);
     Route::post('/webhooks/paystack', [\App\Http\Controllers\Api\V1\WebhookController::class, 'paystack']);
 
+    // Authentication Routes (Public - Required for app access)
+    Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
+        ->name('verification.verify');
+
+    // Password Reset Routes (Public)
+    Route::post('/forgot-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:6,1')
+        ->name('password.email');
+    Route::post('/reset-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'resetPassword'])
+        ->name('password.update');
+
     // Appointment Tracking & Guest Submission (Public)
     Route::get('/appointments/track/{code}', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'show']);
     Route::post('/appointments/guest', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
