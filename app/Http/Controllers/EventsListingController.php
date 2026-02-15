@@ -29,8 +29,14 @@ class EventsListingController extends Controller
 
     public function show($identifier)
     {
-        $event = Event::where('slug', $identifier)
-            ->orWhere('id', $identifier)
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
             ->firstOrFail();
 
         return view('events.show', compact('event'));
@@ -38,8 +44,14 @@ class EventsListingController extends Controller
 
     public function register(Request $request, $identifier)
     {
-        $event = Event::where('slug', $identifier)
-            ->orWhere('id', $identifier)
+        $hasSlug = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'slug');
+
+        $event = Event::query()
+            ->when($hasSlug, function ($q) use ($identifier) {
+                $q->where('slug', $identifier)->orWhere('id', $identifier);
+            }, function ($q) use ($identifier) {
+                $q->where('id', $identifier);
+            })
             ->firstOrFail();
 
         // Handled via proxy to Api V1 EventController or duplicate logic here
