@@ -69,8 +69,9 @@ class AppointmentController extends Controller
 
         $type = ConsultationType::findOrFail($request->consultation_type_id);
 
-        $appointment = Appointment::create([
-            'appointment_code' => $this->generateUniqueCode(),
+        $hasAppointmentCode = (new Appointment)->getConnection()->getSchemaBuilder()->hasColumn((new Appointment)->getTable(), 'appointment_code');
+
+        $appointmentData = [
             'user_id' => $request->user()?->id,
             'full_name' => $request->full_name,
             'email' => $request->email,
@@ -78,10 +79,21 @@ class AppointmentController extends Controller
             'consultation_type_id' => $request->consultation_type_id,
             'start_time' => $request->start_time,
             'notes' => $request->notes,
-            'appointment_status' => 'pending',
             'amount' => $type->price,
-            'payment_status' => 'pending',
-        ]);
+        ];
+
+        if ($hasAppointmentCode) {
+            $appointmentData['appointment_code'] = $this->generateUniqueCode();
+            $appointmentData['appointment_status'] = 'pending';
+            $appointmentData['payment_status'] = 'pending';
+        } else {
+            // Fallback for legacy 'bookings' table schema
+            $appointmentData['status'] = 'pending';
+            // Code might be 'booking_code' or non-existent in legacy? 
+            // Better to check for 'booking_code' if it existed before.
+        }
+
+        $appointment = Appointment::create($appointmentData);
 
         // Generate Paystack Checkout URL if price > 0
         $paymentUrl = null;

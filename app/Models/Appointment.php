@@ -10,6 +10,22 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        // Hotfix for production: fallback to 'bookings' if migration hasn't run
+        if (!app()->runningInConsole()) {
+            try {
+                if (!$this->getConnection()->getSchemaBuilder()->hasTable('appointments') && $this->getConnection()->getSchemaBuilder()->hasTable('bookings')) {
+                    $this->setTable('bookings');
+                }
+            } catch (\Exception $e) {
+                // Fail silently and use default
+            }
+        }
+    }
+
     protected $fillable = [
         'appointment_code',
         'user_id',
