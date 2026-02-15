@@ -59,7 +59,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                 <!-- Left: Event Info -->
                 <div class="space-y-12">
-                    <div class="rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5 aspect-[16/10]">
+                    <div class="rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5 aspect-16/10">
                         <img src="{{ $event->banner_image_url ?? asset('images/watered-logo.png') }}" alt="{{ $event->title }}" class="w-full h-full object-cover">
                     </div>
                     

@@ -128,7 +128,7 @@ class AppointmentController extends Controller
                     'email' => $appointment->email,
                     'amount' => $appointment->amount * 100, // Kobo
                     'reference' => 'APT_' . $appointment->appointment_code . '_' . time(),
-                    'callback_url' => config('app.url') . '/payment/callback',
+                    'callback_url' => route('payment.callback'),
                     'metadata' => [
                         'appointment_id' => $appointment->id,
                         'type' => 'appointment'

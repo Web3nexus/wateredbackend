@@ -241,7 +241,7 @@ class EventController extends Controller
                 'phone' => $validated['phone'] ?? $user?->phone,
                 'event_title' => $event->title,
             ],
-            // Use external callback if needed or handle via webhook
+            'callback_url' => route('payment.callback'),
         ];
 
         $ch = curl_init();
@@ -272,47 +272,4 @@ class EventController extends Controller
         ], 500);
     }
 
-    /**
-     * Verify Paystack payment webhook
-     */
-    public function verifyPayment(Request $request)
-    {
-        $paystackSecretKey = config('services.paystack.secret_key');
-
-        // Verify webhook signature
-        $signature = $request->header('x-paystack-signature');
-        $body = $request->getContent();
-
-        if ($signature !== hash_hmac('sha512', $body, $paystackSecretKey)) {
-            return response()->json(['message' => 'Invalid signature'], 401);
-        }
-
-        $event = $request->input('event');
-        $data = $request->input('data');
-
-        if ($event === 'charge.success') {
-            $metadata = $data['metadata'];
-            $eventId = $metadata['event_id'];
-            $userId = $metadata['user_id'];
-            $reference = $data['reference'];
-
-            $eventModel = Event::find($eventId);
-
-            if ($eventModel) {
-                // Create registration with payment info
-                $eventModel->registrations()->create([
-                    'user_id' => $userId,
-                    'status' => 'registered',
-                    'payment_reference' => $reference,
-                    'amount' => $data['amount'] / 100, // Convert from kobo
-                    'payment_status' => 'completed',
-                    'payment_method' => $data['channel'],
-                ]);
-
-                // TODO: Send confirmation email
-            }
-        }
-
-        return response()->json(['message' => 'Webhook processed'], 200);
-    }
 }

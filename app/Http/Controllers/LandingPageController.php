@@ -23,4 +23,20 @@ class LandingPageController extends Controller
 
         return view('index', compact('settings', 'traditions', 'features', 'blogPosts'));
     }
+
+    public function paymentCallback(Request $request)
+    {
+        $reference = $request->query('reference') ?? $request->query('trxref');
+        $settings = GlobalSetting::first();
+
+        // This is just the landing page after redirect. 
+        // Logic for confirming payment is in the WebhookController.
+        // We just show a nice message here.
+
+        return view('payment.callback', [
+            'settings' => $settings,
+            'reference' => $reference,
+            'status' => $request->query('status') === 'failed' ? 'failed' : 'success'
+        ]);
+    }
 }

@@ -10,4 +10,4 @@ Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::get('/events', [EventsListingController::class, 'index'])->name('events.index');
 Route::get('/events/{event}', [EventsListingController::class, 'show'])->name('events.show');
 Route::post('/events/{event}/register', [EventsListingController::class, 'register'])->name('events.register');
-Route::get('/events/payment/callback', [EventController::class, 'verifyPayment'])->name('events.payment.callback');
+Route::get('/payment/callback', [LandingPageController::class, 'paymentCallback'])->name('payment.callback');

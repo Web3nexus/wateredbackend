@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function () {
     // Appointment Tracking & Guest Submission (Public)
     Route::get('/appointments/track/{code}', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'show']);
     Route::post('/appointments/guest', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
+    Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'indexTypes']);
 
     // Protected Routes (Sanctum) - ALL app content requires authentication
     Route::middleware('auth:sanctum')->group(function () {
@@ -37,8 +38,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/events', [\App\Http\Controllers\Api\V1\EventController::class, 'index']);
         Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
 
-        // Consultation Types
-        Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'indexTypes']);
 
         // Search & Wisdom
         Route::get('/search', [\App\Http\Controllers\Api\V1\SearchController::class, 'search']);

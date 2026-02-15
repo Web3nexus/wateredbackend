@@ -69,7 +69,7 @@
                 @forelse($events as $event)
                     <div
                         class="group bg-parchment/5 border border-parchment/10 overflow-hidden hover:border-app-blue/50 transition-all duration-500 rounded-3xl">
-                        <div class="aspect-[16/10] overflow-hidden">
+                        <div class="aspect-16/10 overflow-hidden">
                             <img src="{{ $event->banner_image_url ?? asset('images/watered-logo.png') }}"
                                 alt="{{ $event->title }}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
@@ -82,9 +82,11 @@
                                 <span>{{ $event->location ?? 'Online' }}</span>
                             </div>
                             <h3 class="font-heading text-2xl mb-4 group-hover:text-app-blue transition-colors">
-                                {{ $event->title }}</h3>
+                                {{ $event->title }}
+                            </h3>
                             <p class="text-parchment/40 text-sm line-clamp-2 mb-8 leading-relaxed">
-                                {{ Str::limit($event->description, 100) }}</p>
+                                {{ Str::limit($event->description, 100) }}
+                            </p>
 
                             <div class="flex items-center justify-between pt-6 border-t border-parchment/5">
                                 <span class="text-sm font-bold {{ $event->is_paid ? 'text-parchment' : 'text-green-400' }}">
@@ -147,7 +149,8 @@
             </div>
             <div class="pt-10 border-t border-parchment/5 flex flex-col md:flex-row justify-between items-center gap-6">
                 <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }}
-                    {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.</p>
+                    {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.
+                </p>
             </div>
         </div>
     </footer>

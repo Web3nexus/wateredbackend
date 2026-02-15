@@ -538,6 +538,28 @@
     </footer>
 
     <script>
+        async function fetchConsultationTypes() {
+            const select = document.querySelector('select[name="consultation_type_id"]');
+            try {
+                const response = await fetch('/api/v1/consultation-types');
+                const result = await response.json();
+                
+                if (result.data && result.data.length > 0) {
+                    select.innerHTML = '';
+                    result.data.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.id;
+                        option.textContent = `${type.name} - $${parseFloat(type.price).toFixed(2)}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch consultation types:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchConsultationTypes);
+
         document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
