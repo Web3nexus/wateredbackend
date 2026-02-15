@@ -30,7 +30,8 @@
     </div>
 
     {{-- Navigation --}}
-    <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50">
+    <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50"
+        x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <a href="{{ route('home') }}" class="flex items-center gap-4">
@@ -44,20 +45,53 @@
                     @endif
                 </a>
             </div>
-            <div class="flex items-center gap-8">
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-8">
                 <a href="{{ route('home') }}#features"
-                    class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Features</a>
+                    class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Features</a>
                 <a href="{{ route('home') }}#appointments"
-                    class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Book
+                    class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Book
                     Appointment</a>
                 <a href="{{ route('events.index') }}"
-                    class="text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Events</a>
+                    class="text-app-blue text-sm transition uppercase tracking-widest font-medium">Events</a>
                 <a href="{{ route('home') }}#blog"
-                    class="text-parchment/70 hover:text-app-blue text-sm transition hidden md:block uppercase tracking-widest font-medium">Blog</a>
+                    class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Blog</a>
                 <a href="{{ route('home') }}#download"
                     class="px-8 py-3.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
                     Watered App</a>
             </div>
+
+            <!-- Mobile Menu Button -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-app-blue focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                    <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-5" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-5"
+            class="md:hidden absolute top-full left-0 w-full bg-sea-deep border-b border-parchment/10 shadow-2xl py-6 px-6 flex flex-col gap-6"
+            style="display: none;">
+            <a href="{{ route('home') }}#features" @click="mobileMenuOpen = false"
+                class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Features</a>
+            <a href="{{ route('home') }}#appointments" @click="mobileMenuOpen = false"
+                class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Book
+                Appointment</a>
+            <a href="{{ route('events.index') }}"
+                class="text-app-blue text-lg uppercase tracking-widest font-medium">Events</a>
+            <a href="{{ route('home') }}#blog" @click="mobileMenuOpen = false"
+                class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Blog</a>
+            <a href="{{ route('home') }}#download" @click="mobileMenuOpen = false"
+                class="text-center px-8 py-3.5 bg-app-blue text-white text-sm font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
+                Watered App</a>
         </div>
     </nav>
 

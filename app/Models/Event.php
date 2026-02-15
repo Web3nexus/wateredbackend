@@ -54,14 +54,15 @@ class Event extends Model
     {
         $path = $this->banner_image ?? $this->image_url;
 
-        if (!$path)
-            return null;
+        if (!$path) {
+            return asset('images/watered-logo.png');
+        }
 
         if (filter_var($path, FILTER_VALIDATE_URL)) {
             return $path;
         }
 
-        return asset(\Illuminate\Support\Facades\Storage::url($path));
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
     }
 
     public function registrations(): HasMany

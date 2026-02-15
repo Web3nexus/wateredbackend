@@ -91,7 +91,7 @@ class GlobalSetting extends Model
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: function () {
                 if (!$this->logo_path)
-                    return null;
+                    return asset('images/watered-logo.png');
                 if (filter_var($this->logo_path, FILTER_VALIDATE_URL))
                     return $this->logo_path;
                 return asset(\Illuminate\Support\Facades\Storage::url($this->logo_path));
@@ -104,10 +104,36 @@ class GlobalSetting extends Model
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: function () {
                 if (!$this->favicon_path)
-                    return null;
+                    return asset('favicon.ico');
                 if (filter_var($this->favicon_path, FILTER_VALIDATE_URL))
                     return $this->favicon_path;
                 return asset(\Illuminate\Support\Facades\Storage::url($this->favicon_path));
+            }
+        );
+    }
+
+    protected function heroImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                if (!$this->hero_image)
+                    return asset('images/lord-uzih-hero.png');
+                if (filter_var($this->hero_image, FILTER_VALIDATE_URL))
+                    return $this->hero_image;
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->hero_image);
+            }
+        );
+    }
+
+    protected function ritualsImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                if (!$this->rituals_image)
+                    return asset('images/acceptance-ritual.png');
+                if (filter_var($this->rituals_image, FILTER_VALIDATE_URL))
+                    return $this->rituals_image;
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->rituals_image);
             }
         );
     }
