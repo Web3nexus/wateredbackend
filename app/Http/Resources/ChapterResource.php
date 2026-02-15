@@ -14,11 +14,11 @@ class ChapterResource extends JsonResource
             'name' => $this->name,
             'number' => $this->number,
             'description' => $this->description,
-            'collectionId' => $this->collection_id,
+            'collection_id' => $this->collection_id,
             'order' => $this->order,
-            'isActive' => $this->is_active,
-            'createdAt' => $this->created_at?->toISOString(),
-            'updatedAt' => $this->updated_at?->toISOString(),
+            'is_active' => (bool) $this->is_active,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }

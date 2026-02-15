@@ -15,12 +15,12 @@ class TextCollectionResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'cover_image_url' => $this->cover_image_url,
-            'traditionId' => $this->tradition_id,
-            'categoryId' => $this->category_id,
+            'tradition_id' => $this->tradition_id,
+            'category_id' => $this->category_id,
             'order' => $this->order,
-            'isActive' => $this->is_active,
-            'createdAt' => $this->created_at?->toISOString(),
-            'updatedAt' => $this->updated_at?->toISOString(),
+            'is_active' => (bool) $this->is_active,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }
