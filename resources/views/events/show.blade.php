@@ -69,7 +69,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('events.register', $event->slug) }}" method="POST" class="space-y-6">
+                        <form action="{{ route('events.register', $event) }}" method="POST" class="space-y-6">
                             @csrf
                             <div>
                                 <label class="block text-white/40 text-[10px] font-bold uppercase tracking-widest mb-2">Full Name</label>
