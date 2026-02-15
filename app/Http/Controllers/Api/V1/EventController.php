@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EventAdminNotificationMail;
 use App\Mail\EventBookingConfirmationMail;
+use App\Models\AdminUser;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
@@ -161,6 +163,16 @@ class EventController extends Controller
         } catch (\Exception $e) {
             // Log or ignore email failure to not break the response
             \Illuminate\Support\Facades\Log::error('Failed to send event booking email: ' . $e->getMessage());
+        }
+
+        // Send notification to all admins
+        try {
+            $admins = AdminUser::all();
+            foreach ($admins as $admin) {
+                Mail::to($admin->email)->send(new EventAdminNotificationMail($registration));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send admin notification email: ' . $e->getMessage());
         }
 
         return response()->json([
