@@ -71,7 +71,7 @@ class EventsListingController extends Controller
 
         if ($response->getStatusCode() === 402) {
             // Initiate payment for guest/user
-            $paymentResponse = $apiController->initiatePayment($request, $event);
+            $paymentResponse = $apiController->initiatePayment($request, $event->id);
             $paymentData = json_decode($paymentResponse->getContent(), true);
 
             if (isset($paymentData['data']['authorization_url'])) {

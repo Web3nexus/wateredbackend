@@ -59,7 +59,7 @@
     </nav>
 
     {{-- Content --}}
-    <main class="pt-32 pb-64 flex-grow">
+    <main class="pt-32 pb-64 grow">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                 <!-- Left: Event Info -->
@@ -163,19 +163,22 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-sea-deep pt-24 pb-12 border-t border-parchment/5">
+    <footer class="border-t border-parchment/10 bg-sea-deep py-20">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-4 gap-16 mb-20">
-                <div class="col-span-2 space-y-8">
-                    <div class="flex items-center gap-4">
+            <div class="grid md:grid-cols-4 gap-16 mb-20 text-center md:text-left">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="flex items-center gap-4 justify-center md:justify-start">
                         @if($settings?->logo_url)
-                            <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-12 w-12 object-contain">
+                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-12 w-12 object-contain">
                         @else
-                            <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-12 w-12 object-contain">
-                            <span class="font-heading text-2xl text-app-blue tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
+                            <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
+                                class="h-12 w-12 object-contain">
+                            <span
+                                class="font-heading text-2xl text-app-blue tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
                         @endif
                     </div>
-                    <p class="text-parchment/50 max-w-sm">Elevating humanity through ancient wisdom, community, and divine connection. Your journey to clarity starts here.</p>
+                    <p class="text-parchment/50 max-w-sm">Elevating humanity through ancient wisdom, community, and
+                        divine connection. Your journey to clarity starts here.</p>
                 </div>
                 <div class="space-y-6">
                     <h4 class="text-parchment font-bold uppercase tracking-widest text-sm">Navigation</h4>
@@ -196,7 +199,12 @@
                 </div>
             </div>
             <div class="pt-10 border-t border-parchment/5 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }} {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.</p>
+                <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }}
+                    {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.
+                </p>
+                <div class="flex gap-6">
+                    {{-- Social Icons could go here --}}
+                </div>
             </div>
         </div>
     </footer>

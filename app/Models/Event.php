@@ -29,6 +29,8 @@ class Event extends Model
         'category',
     ];
 
+    protected $appends = ['banner_image_url'];
+
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',

@@ -74,7 +74,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 @forelse($events as $event)
                     <div
-                        class="group bg-parchment/5 border border-parchment/10 overflow-hidden hover:border-app-blue/50 transition-all duration-500 rounded-3xl">
+                        class="group bg-parchment/5 border border-parchment/10 overflow-hidden hover:border-app-blue/50 transition-all duration-500 rounded-3xl mb-12">
                         <div class="aspect-16/10 overflow-hidden">
                             <img src="{{ $event->banner_image_url ?? asset('images/watered-logo.png') }}"
                                 alt="{{ $event->title }}"
@@ -124,13 +124,13 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-sea-deep pt-24 pb-12 border-t border-parchment/5">
+    <footer class="border-t border-parchment/10 bg-sea-deep py-20">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-4 gap-16 mb-20">
-                <div class="col-span-2 space-y-8">
-                    <div class="flex items-center gap-4">
+            <div class="grid md:grid-cols-4 gap-16 mb-20 text-center md:text-left">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="flex items-center gap-4 justify-center md:justify-start">
                         @if($settings?->logo_url)
-                            <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-12 w-12 object-contain">
+                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-12 w-12 object-contain">
                         @else
                             <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
                                 class="h-12 w-12 object-contain">
@@ -165,6 +165,9 @@
                 <p class="text-parchment/30 text-xs tracking-widest">&copy; {{ date('Y') }}
                     {{ $settings?->site_name ?? 'Watered' }}. ALL RIGHTS RESERVED.
                 </p>
+                <div class="flex gap-6">
+                    {{-- Social Icons could go here --}}
+                </div>
             </div>
         </div>
     </footer>
