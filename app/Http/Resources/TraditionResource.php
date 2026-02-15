@@ -14,13 +14,12 @@ class TraditionResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'imageUrl' => $this->deity_image_url,
             'image_url' => $this->deity_image_url,
             'background_image' => $this->deity_image_url,
-            'isActive' => $this->is_active,
-            'languageId' => $this->language_id,
-            'createdAt' => $this->created_at?->toISOString(),
-            'updatedAt' => $this->updated_at?->toISOString(),
+            'is_active' => (bool) $this->is_active,
+            'language_id' => $this->language_id,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }
