@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\GlobalSetting;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\Appointment;
+use App\Mail\UserAppointmentConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WebhookController extends Controller
 {
@@ -107,6 +110,32 @@ class WebhookController extends Controller
     protected function handlePaystackChargeSuccess($data)
     {
         $reference = $data['reference'];
+        $metadata = $data['metadata'] ?? [];
+
+        // 1. Handle Appointment Payment
+        if (isset($metadata['type']) && $metadata['type'] === 'appointment') {
+            $appointmentId = $metadata['appointment_id'] ?? null;
+            $appointment = Appointment::find($appointmentId);
+
+            if ($appointment) {
+                $appointment->update([
+                    'payment_status' => 'paid',
+                    'appointment_status' => 'confirmed',
+                    'payment_reference' => $reference,
+                ]);
+
+                // Send Confirmation Email to User
+                try {
+                    Mail::to($appointment->email)->send(new UserAppointmentConfirmationMail($appointment));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send user appointment confirmation: ' . $e->getMessage());
+                }
+
+                return;
+            }
+        }
+
+        // 2. Handle Subscription Payment (Default behavior)
         $subscription = Subscription::where('provider_subscription_id', $reference)->first();
 
         if ($subscription) {

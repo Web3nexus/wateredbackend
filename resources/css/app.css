@@ -13,6 +13,7 @@
     --color-sea-deep: #FCF9F1;
     --color-sea-light: #F5F1E9;
     --color-gold-antique: #B48A32;
+    --color-app-blue: #0077BE;
     --color-parchment: #1E293B;
     --color-glass: rgba(0, 0, 0, 0.05);
 }
@@ -47,6 +48,14 @@
 
 @utility text-parchment {
     color: var(--color-parchment);
+}
+
+@utility bg-app-blue {
+    background-color: var(--color-app-blue);
+}
+
+@utility text-app-blue {
+    color: var(--color-app-blue);
 }
 
 @utility font-heading {
@@ -91,21 +100,23 @@
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    .btn-gold {
+    .btn-blue {
         padding: 0.75rem 2rem;
-        background-color: var(--color-gold-antique);
-        color: var(--color-sea-deep);
+        background-color: var(--color-app-blue);
+        color: white;
         font-weight: bold;
         border-radius: 9999px;
         transition: all 0.3s ease;
+        text-align: center;
+        display: inline-block;
     }
 
-    .btn-gold:hover {
+    .btn-blue:hover {
         transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        box-shadow: 0 0 20px rgba(0, 119, 190, 0.4);
     }
 
-    .btn-gold:active {
+    .btn-blue:active {
         transform: scale(0.95);
     }
 
@@ -117,7 +128,7 @@
     }
 
     .nav-link:hover {
-        color: var(--color-gold-antique);
+        color: var(--color-app-blue);
     }
 }
 

@@ -8,6 +8,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/apple', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apple']);
     Route::post('/webhooks/paystack', [\App\Http\Controllers\Api\V1\WebhookController::class, 'paystack']);
 
+    // Appointment Tracking & Guest Submission (Public)
+    Route::get('/appointments/track/{code}', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'show']);
+    Route::post('/appointments/guest', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
+
     // Protected Routes (Sanctum) - ALL app content requires authentication
     Route::middleware('auth:sanctum')->group(function () {
         // App Settings & Legal Documents (Now Protected)
@@ -34,7 +38,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/events/{event}', [\App\Http\Controllers\Api\V1\EventController::class, 'show']);
 
         // Consultation Types
-        Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\BookingController::class, 'indexTypes']);
+        Route::get('/consultation-types', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'indexTypes']);
 
         // Search & Wisdom
         Route::get('/search', [\App\Http\Controllers\Api\V1\SearchController::class, 'search']);
@@ -97,9 +101,11 @@ Route::prefix('v1')->group(function () {
         Route::delete('/bookmarks/item', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroyByItem']);
         Route::delete('/bookmarks/{bookmark}', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'destroy']);
 
-        // Bookings
-        Route::get('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
-        Route::post('/bookings', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
+        // Appointments (formerly Bookings)
+        Route::get('/appointments', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'index']);
+        Route::get('/bookings', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'index']); // Legacy support
+        Route::post('/appointments', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
+        Route::post('/bookings', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']); // Legacy support
 
         // Community Actions (Disabled)
         /*

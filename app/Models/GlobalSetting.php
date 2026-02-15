@@ -86,7 +86,7 @@ class GlobalSetting extends Model
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn() => $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : null,
+            get: fn() => $this->logo_path ? url(\Illuminate\Support\Facades\Storage::url($this->logo_path)) : null,
         );
     }
 
