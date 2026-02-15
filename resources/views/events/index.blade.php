@@ -17,7 +17,9 @@
     class="bg-sea-deep text-parchment font-sans selection:bg-app-blue selection:text-white min-h-screen flex flex-col">
     <style>
         :root {
-            --color-app-blue: #0077BE;
+            --color-app-blue:
+                {{ $settings->primary_color ?? '#0077BE' }}
+            ;
         }
     </style>
     {{-- Background --}}
