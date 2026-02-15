@@ -21,7 +21,7 @@ class EventController extends Controller
                 return $q->where('tradition_id', $traditionId);
             });
 
-        $hasEventDate = \Illuminate\Support\Facades\Schema::hasColumn('events', 'event_date');
+        $hasEventDate = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'event_date');
 
         switch ($filter) {
             case 'new':
