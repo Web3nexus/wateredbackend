@@ -36,9 +36,9 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 @if($settings?->logo_url)
-                    <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-24 w-auto object-contain">
+                    <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-10 w-10 object-contain">
                 @else
-                    <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-24 w-auto object-contain">
+                    <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
                     <span
                         class="font-heading text-xl text-app-blue tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
                 @endif
@@ -537,10 +537,10 @@
                 <div class="md:col-span-2 space-y-6">
                     <div class="flex items-center gap-4 justify-center md:justify-start">
                         @if($settings?->logo_url)
-                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-32 w-auto object-contain">
+                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-12 w-12 object-contain">
                         @else
                             <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
-                                class="h-32 w-auto object-contain">
+                                class="h-12 w-12 object-contain">
                             <span
                                 class="font-heading text-2xl text-app-blue tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
                         @endif
@@ -584,7 +584,7 @@
             try {
                 const response = await fetch('/api/v1/consultation-types');
                 const result = await response.json();
-                
+
                 if (result.data && result.data.length > 0) {
                     select.innerHTML = '';
                     result.data.forEach(type => {
@@ -625,8 +625,8 @@
 
                 if (response.ok) {
                     msg.innerText = 'Success! Redirecting to payment...';
-                    msg.classList.remove('hidden','bg-red-100', 'text-red-700');
-         msg.classList.add('bg-green-100', 'text-green-700');
+                    msg.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+                    msg.classList.add('bg-green-100', 'text-green-700');
 
                     if (result.payment_url) {
                         window.location.href = result.payment_url;
