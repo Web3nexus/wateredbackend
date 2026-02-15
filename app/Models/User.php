@@ -121,9 +121,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PostLike::class);
     }
 
-    public function bookings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function appointments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Appointment::class);
     }
 
     public function fcmTokens()

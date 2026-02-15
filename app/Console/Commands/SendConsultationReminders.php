@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Booking;
-use App\Mail\BookingReminderMail;
+use App\Models\Appointment;
+use App\Mail\AppointmentReminderMail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
@@ -31,27 +31,33 @@ class SendConsultationReminders extends Command
     {
         $now = Carbon::now();
 
-        // Find bookings in exactly 1 hour (+/- 5 mins to catch run intervals)
+        // Find appointments in exactly 1 hour (+/- 5 mins to catch run intervals)
         $oneHourFromNow = $now->copy()->addHour();
         $this->remind($oneHourFromNow, '1 hour');
 
-        // Find bookings in exactly 30 minutes
+        // Find appointments in exactly 30 minutes
         $thirtyMinsFromNow = $now->copy()->addMinutes(30);
         $this->remind($thirtyMinsFromNow, '30 minutes');
     }
 
     protected function remind(Carbon $targetTime, string $label)
     {
-        $bookings = Booking::where('status', 'confirmed')
+        $appointments = Appointment::where('appointment_status', 'confirmed')
             ->whereBetween('start_time', [
                 $targetTime->copy()->subMinutes(2),
                 $targetTime->copy()->addMinutes(2)
             ])
             ->get();
 
-        foreach ($bookings as $booking) {
-            $this->info("Sending {$label} reminder for booking ID: {$booking->id}");
-            Mail::to($booking->user)->send(new BookingReminderMail($booking));
+        foreach ($appointments as $appointment) {
+            $this->info("Sending {$label} reminder for appointment ID: {$appointment->id}");
+
+            // Handle both auth users and guests
+            $recipient = $appointment->user ? $appointment->user->email : $appointment->email;
+
+            if ($recipient) {
+                Mail::to($recipient)->send(new AppointmentReminderMail($appointment));
+            }
         }
     }
 }
