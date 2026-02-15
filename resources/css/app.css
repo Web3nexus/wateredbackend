@@ -74,7 +74,7 @@
     }
 
     body::selection {
-        background-color: var(--color-gold-antique);
+        background-color: var(--color-app-blue);
         color: var(--color-sea-deep);
     }
 
@@ -87,7 +87,7 @@
         font-family: var(--font-heading);
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: var(--color-gold-antique);
+        color: var(--color-app-blue);
     }
 }
 

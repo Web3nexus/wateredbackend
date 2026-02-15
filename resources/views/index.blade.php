@@ -7,7 +7,7 @@
     <title>{{ $settings?->site_name ?? 'Watered' }} - {{ $settings?->tagline ?? 'The Ancient Spirits' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if($settings?->favicon_url)
-        <link rel="icon" type="image/x-icon" href="{{ $settings->favicon_url }}">
+        <link rel="icon" type="image/x-icon" href="{{ $settings->favicon_url }}?v={{ time() }}">
     @else
         <link rel="icon" type="image/x-icon" href="{{ asset('images/watered-logo.png') }}">
     @endif
@@ -28,7 +28,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 @if($settings?->logo_url)
-                    <img src="{{ $settings->logo_url }}" alt="Logo" class="h-10 w-10 object-contain">
+                    <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-10 w-10 object-contain">
                 @else
                     <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
                     <span
@@ -86,7 +86,7 @@
                                     alt="Watered App" class="w-full h-full object-cover">
                             @else
                                 <div
-                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-antique/10 to-transparent p-12">
+                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-app-blue/10 to-transparent p-12">
                                     <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
                                         class="w-48 h-48 object-contain opacity-50">
                                 </div>
@@ -168,7 +168,7 @@
                 <div
                     class="bg-sea-deep/80 backdrop-blur-xl border border-parchment/10 rounded-[4rem] p-12 md:p-20 text-center space-y-12 shadow-3xl relative overflow-hidden">
                     {{-- Inner subtle glow --}}
-                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-gold-antique/10 blur-[80px] rounded-full"></div>
+                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-app-blue/10 blur-[80px] rounded-full"></div>
 
                     <div class="relative z-10 space-y-6">
                         <div class="space-y-4">
@@ -182,8 +182,8 @@
                         {{-- Actual Download Buttons - Side by Side --}}
                         <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
                             <a href="{{ $settings?->android_download_url ?? '#' }}" target="_blank"
-                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-gold-antique transition-all shadow-xl hover:-translate-y-1">
-                                <svg class="w-10 h-10 text-gold-antique" viewBox="0 0 24 24" fill="currentColor">
+                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-app-blue transition-all shadow-xl hover:-translate-y-1">
+                                <svg class="w-10 h-10 text-app-blue" viewBox="0 0 24 24" fill="currentColor">
                                     <path
                                         d="M17.523 15.3414C16.92 15.3414 16.4297 15.8317 16.4297 16.4347C16.4297 17.0377 16.92 17.528 17.523 17.528C18.126 17.528 18.6163 17.0377 18.6163 16.4347C18.6163 15.8317 18.126 15.3414 17.523 15.3414ZM6.47702 15.3414C5.87402 15.3414 5.38372 15.8317 5.38372 16.4347C5.38372 17.0377 5.87402 17.528 6.47702 17.528C7.08002 17.528 7.57031 17.0377 7.57031 16.4347C7.57031 15.8317 7.08002 15.3414 6.47702 15.3414ZM17.9613 11.6256L19.7226 8.57463C19.8398 8.37135 19.7698 8.11142 19.5665 7.99424C19.3631 7.87706 19.1033 7.94703 18.9861 8.15042L17.2001 11.244C15.6841 10.5529 13.9189 10.1506 12 10.1506C10.0811 10.1506 8.31592 10.5529 6.7999 11.244L5.0139 8.15042C4.89672 7.94703 4.63689 7.87713 4.4335 7.99424C4.23011 8.11142 4.16013 8.37135 4.27731 8.57463L6.0387 11.6256C3.1207 13.2081 1.13401 16.148 1.01162 19.5912H22.9883C22.8659 16.148 20.8793 13.2081 17.9613 11.6256Z" />
                                 </svg>
@@ -195,8 +195,8 @@
                             </a>
 
                             <a href="{{ $settings?->ios_download_url ?? '#' }}" target="_blank"
-                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-gold-antique transition-all shadow-xl hover:-translate-y-1">
-                                <svg class="w-10 h-10 text-gold-antique" viewBox="0 0 24 24" fill="currentColor">
+                                class="w-full sm:w-auto group flex items-center gap-4 px-8 py-5 bg-sea-deep border border-parchment/10 rounded-2xl hover:border-app-blue transition-all shadow-xl hover:-translate-y-1">
+                                <svg class="w-10 h-10 text-app-blue" viewBox="0 0 24 24" fill="currentColor">
                                     <path
                                         d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                                 </svg>
@@ -225,7 +225,7 @@
                                         class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
-                                        <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                        <svg class="w-20 h-20 text-app-blue/20" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                 d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m9-10a4 4 0 100-8 4 4 0 000 8zm6 5h6m-3-3v6" />
@@ -248,8 +248,8 @@
                         <div
                             class="md:order-2 relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
                             <div
-                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-antique/5 to-transparent">
-                                <svg class="w-20 h-20 text-gold-antique/20" fill="none" stroke="currentColor"
+                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-app-blue/5 to-transparent">
+                                <svg class="w-20 h-20 text-app-blue/20" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m9-10a4 4 0 100-8 4 4 0 000 8zm6 5h6m-3-3v6" />
@@ -291,7 +291,7 @@
                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
                                         <div class="w-full h-full bg-parchment/10 flex items-center justify-center">
-                                            <svg class="w-12 h-12 text-gold-antique/30" fill="none" stroke="currentColor"
+                                            <svg class="w-12 h-12 text-app-blue/30" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                     d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2zM3 8h10M9 12h5M9 16h5" />
@@ -300,16 +300,16 @@
                                     @endif
                                 </div>
                                 <div class="space-y-3">
-                                    <p class="text-xs text-gold-antique font-bold uppercase tracking-widest">
+                                    <p class="text-xs text-app-blue font-bold uppercase tracking-widest">
                                         {{ $post->published_at?->format('F d, Y') ?? $post->created_at->format('F d, Y') }}
                                     </p>
-                                    <h3 class="text-2xl text-parchment font-heading group-hover:text-gold-antique transition">
+                                    <h3 class="text-2xl text-parchment font-heading group-hover:text-app-blue transition">
                                         {{ $post->title }}
                                     </h3>
                                     <p class="text-parchment/60 text-sm line-clamp-3 leading-relaxed">{{ $post->summary }}</p>
                                 </div>
                                 <a href="#"
-                                    class="inline-block pt-2 text-gold-antique font-semibold border-b border-transparent hover:border-gold-antique transition">Read
+                                    class="inline-block pt-2 text-app-blue font-semibold border-b border-transparent hover:border-app-blue transition">Read
                                     More</a>
                             </article>
                         @endforeach
@@ -442,7 +442,7 @@
                                 </p>
                             </div>
                             <div
-                                class="p-8 bg-parchment/5 border border-parchment/10 rounded-3xl hover:border-gold-antique/30 transition shadow-inner">
+                                class="p-8 bg-parchment/5 border border-parchment/10 rounded-3xl hover:border-app-blue/30 transition shadow-inner">
                                 <h3 class="text-2xl text-parchment font-heading mb-3">
                                     {{ $settings?->ritual_witnesses_title ?? 'The Watered Four Witnesses' }}
                                 </h3>
