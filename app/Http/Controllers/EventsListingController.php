@@ -9,8 +9,10 @@ class EventsListingController extends Controller
 {
     public function index(Request $request)
     {
+        $hasEventDate = (new Event)->getConnection()->getSchemaBuilder()->hasColumn('events', 'event_date');
+
         $events = Event::query()
-            ->when(\Illuminate\Support\Facades\Schema::hasColumn('events', 'event_date'), function ($q) {
+            ->when($hasEventDate, function ($q) {
                 $q->where(function ($sq) {
                     $sq->where('event_date', '>=', now()->toDateString())
                         ->orWhere(function ($ssq) {
