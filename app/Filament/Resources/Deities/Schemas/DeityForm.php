@@ -19,7 +19,7 @@ class DeityForm
                 Textarea::make('description')
                     ->columnSpanFull(),
                 FileUpload::make('image_url')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('deities'),
                 Select::make('tradition_id')

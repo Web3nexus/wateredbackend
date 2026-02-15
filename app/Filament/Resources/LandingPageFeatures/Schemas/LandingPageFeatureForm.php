@@ -21,7 +21,7 @@ class LandingPageFeatureForm
                     ->required()
                     ->columnSpanFull(),
                 FileUpload::make('image')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('landing-features'),
                 Select::make('image_position')

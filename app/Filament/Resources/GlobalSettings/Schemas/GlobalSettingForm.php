@@ -33,12 +33,12 @@ class GlobalSettingForm
                                             ->rows(3),
                                         FileUpload::make('logo_path')
                                             ->label('Logo')
-                                            ->image()
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                             ->disk('public')
                                             ->directory('branding'),
                                         FileUpload::make('favicon_path')
                                             ->label('Favicon')
-                                            ->image()
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'])
                                             ->disk('public')
                                             ->directory('branding'),
                                     ]),
@@ -94,7 +94,7 @@ class GlobalSettingForm
                                             ->maxLength(100),
                                         FileUpload::make('hero_image')
                                             ->label('Hero Image')
-                                            ->image()
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                             ->disk('public')
                                             ->directory('landing'),
                                     ]),
@@ -138,7 +138,7 @@ class GlobalSettingForm
                                             ->default('Ancient proofs of spiritual truth that connect the physical and spiritual realms.'),
                                         FileUpload::make('rituals_image')
                                             ->label('Rituals Image')
-                                            ->image()
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                             ->disk('public')
                                             ->directory('landing'),
                                     ]),

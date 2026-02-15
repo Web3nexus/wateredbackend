@@ -28,7 +28,7 @@ class ConsultationTypeForm
                     ->numeric()
                     ->default(60),
                 FileUpload::make('image_url')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('consultation-types'),
                 Toggle::make('is_active')

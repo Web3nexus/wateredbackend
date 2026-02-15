@@ -24,7 +24,7 @@ class TempleForm
                 TextInput::make('longitude')
                     ->numeric(),
                 FileUpload::make('image_url')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('temples')
                     ->visibility('public'),

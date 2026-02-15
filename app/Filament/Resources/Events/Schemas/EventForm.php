@@ -36,12 +36,12 @@ class EventForm
                 \Filament\Forms\Components\TimePicker::make('event_time'),
                 TextInput::make('location'),
                 FileUpload::make('banner_image')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('events'),
                 FileUpload::make('image_url')
                     ->label('Legacy Image URL (Optional)')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public'),
                 Toggle::make('is_paid')
                     ->required(),

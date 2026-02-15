@@ -86,7 +86,7 @@ class TraditionResource extends Resource
                     ->schema([
                         FileUpload::make('deity_image_url')
                             ->label('Banner/Deity Image')
-                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                             ->disk('public')
                             ->directory('traditions'),
                     ]),

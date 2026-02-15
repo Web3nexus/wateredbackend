@@ -20,7 +20,7 @@ class DailyWisdomForm
                     ->columnSpanFull(),
                 TextInput::make('author'),
                 FileUpload::make('background_image_url')
-                    ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('daily-wisdoms'),
                 DatePicker::make('publish_date')
