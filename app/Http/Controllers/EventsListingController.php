@@ -27,13 +27,21 @@ class EventsListingController extends Controller
         return view('events.index', compact('events'));
     }
 
-    public function show(Event $event)
+    public function show($identifier)
     {
+        $event = Event::where('slug', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
+
         return view('events.show', compact('event'));
     }
 
-    public function register(Request $request, Event $event)
+    public function register(Request $request, $identifier)
     {
+        $event = Event::where('slug', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
+
         // Handled via proxy to Api V1 EventController or duplicate logic here
         // For simplicity, let's call the API logic
         $apiController = new \App\Http\Controllers\Api\V1\EventController();

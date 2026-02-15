@@ -46,7 +46,7 @@
                                 <span class="text-sm font-bold {{ $event->is_paid ? 'text-white' : 'text-green-400' }}">
                                     {{ $event->is_paid ? '$' . number_format($event->price, 2) : 'FREE' }}
                                 </span>
-                                <a href="{{ route('events.show', $event->slug) }}" class="text-app-blue text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">Details →</a>
+                                <a href="{{ route('events.show', $event) }}" class="text-app-blue text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">Details →</a>
                             </div>
                         </div>
                     </div>
