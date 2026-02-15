@@ -31,13 +31,14 @@
     </div>
 
     {{-- Navigation --}}
-    <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
+    <nav class="border-b border-parchment/10 backdrop-blur-md bg-sea-deep/80 sticky top-0 z-50"
+        x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 @if($settings?->logo_url)
-                    <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-10 w-10 object-contain">
+                    <img src="{{ $settings->logo_url }}?v={{ time() }}" alt="Logo" class="h-24 w-auto object-contain">
                 @else
-                    <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-10 w-10 object-contain">
+                    <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo" class="h-24 w-auto object-contain">
                     <span
                         class="font-heading text-xl text-app-blue tracking-wider">{{ $settings?->site_name ?? 'Watered' }}</span>
                 @endif
@@ -64,22 +65,19 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 6h16M4 12h16M4 18h16"></path>
-                    <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"></path>
+                    <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
         <!-- Mobile Menu Overlay -->
-        <div x-show="mobileMenuOpen" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-5"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-5"
-             class="md:hidden absolute top-full left-0 w-full bg-sea-deep border-b border-parchment/10 shadow-2xl py-6 px-6 flex flex-col gap-6"
-             style="display: none;">
+        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-5" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-5"
+            class="md:hidden absolute top-full left-0 w-full bg-sea-deep border-b border-parchment/10 shadow-2xl py-6 px-6 flex flex-col gap-6"
+            style="display: none;">
             <a href="#features" @click="mobileMenuOpen = false"
                 class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Features</a>
             <a href="#appointments" @click="mobileMenuOpen = false"
@@ -127,8 +125,8 @@
                         <div
                             class="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
                             @if($settings?->hero_image)
-                                <img src="{{ $settings->hero_image_url }}"
-                                    alt="Watered App" class="w-full h-full object-cover">
+                                <img src="{{ $settings->hero_image_url }}" alt="Watered App"
+                                    class="w-full h-full object-cover">
                             @else
                                 <div
                                     class="w-full h-full flex items-center justify-center bg-gradient-to-br from-app-blue/10 to-transparent p-12">
@@ -500,8 +498,8 @@
                     <div class="relative">
                         <div class="aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl border border-parchment/10">
                             @if($settings?->rituals_image)
-                                <img src="{{ $settings->rituals_image_url }}"
-                                    alt="Sacred Rituals" class="w-full h-full object-cover">
+                                <img src="{{ $settings->rituals_image_url }}" alt="Sacred Rituals"
+                                    class="w-full h-full object-cover">
                             @else
                                 <img src="{{ asset('images/acceptance-ritual.png') }}" alt="Acceptance Ritual"
                                     class="w-full h-full object-cover grayscale brightness-75">
@@ -539,10 +537,10 @@
                 <div class="md:col-span-2 space-y-6">
                     <div class="flex items-center gap-4 justify-center md:justify-start">
                         @if($settings?->logo_url)
-                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-12 w-12 object-contain">
+                            <img src="{{ $settings->logo_url }}" alt="Logo" class="h-32 w-auto object-contain">
                         @else
                             <img src="{{ asset('images/watered-logo.png') }}" alt="Watered Logo"
-                                class="h-12 w-12 object-contain">
+                                class="h-32 w-auto object-contain">
                             <span
                                 class="font-heading text-2xl text-app-blue tracking-wider uppercase">{{ $settings?->site_name ?? 'Watered' }}</span>
                         @endif
@@ -627,7 +625,7 @@
 
                 if (response.ok) {
                     msg.innerText = 'Success! Redirecting to payment...';
-                    msg.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+                    msg.classList.remove('hidden','bg-red-100', 'text-red-700');
          msg.classList.add('bg-green-100', 'text-green-700');
 
                     if (result.payment_url) {
