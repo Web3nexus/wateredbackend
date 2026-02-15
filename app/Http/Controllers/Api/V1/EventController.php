@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EventBookingConfirmationMail;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class EventController extends Controller
 {
@@ -153,6 +155,13 @@ class EventController extends Controller
             'status' => 'registered',
             'payment_status' => 'completed', // Free event
         ]);
+
+        try {
+            Mail::to($registration->email)->send(new EventBookingConfirmationMail($registration));
+        } catch (\Exception $e) {
+            // Log or ignore email failure to not break the response
+            \Illuminate\Support\Facades\Log::error('Failed to send event booking email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully registered for event',
