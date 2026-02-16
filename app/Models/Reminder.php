@@ -24,6 +24,28 @@ class Reminder extends Model
         'days' => 'array',
     ];
 
+    protected $appends = ['sound_url'];
+
+    /**
+     * Get the full URL for the sound file.
+     */
+    protected function soundUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                if (!$this->sound_path) {
+                    return null;
+                }
+
+                if (str_starts_with($this->sound_path, 'http')) {
+                    return $this->sound_path;
+                }
+
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->sound_path);
+            },
+        );
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

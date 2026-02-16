@@ -49,14 +49,11 @@ class Audio extends Model
                 if (!$value)
                     return null;
 
-                // Defensive: Ensure localhost is replaced with the correct APP_URL host
-                $appUrl = config('app.url');
-                $appHost = parse_url($appUrl, PHP_URL_HOST);
-                if ($appHost && str_contains($value, 'localhost')) {
-                    $value = str_replace('localhost', $appHost, $value);
+                if (str_starts_with($value, 'http')) {
+                    return $value;
                 }
 
-                return str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value);
+                return Storage::disk('public')->url($value);
             },
         );
     }
@@ -68,14 +65,11 @@ class Audio extends Model
                 if (!$value)
                     return null;
 
-                // Defensive: Ensure localhost is replaced with the correct APP_URL host
-                $appUrl = config('app.url');
-                $appHost = parse_url($appUrl, PHP_URL_HOST);
-                if ($appHost && str_contains($value, 'localhost')) {
-                    $value = str_replace('localhost', $appHost, $value);
+                if (str_starts_with($value, 'http')) {
+                    return $value;
                 }
 
-                return str_starts_with($value, 'http') ? $value : Storage::disk('public')->url($value);
+                return Storage::disk('public')->url($value);
             },
         );
     }

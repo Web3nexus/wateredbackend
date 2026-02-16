@@ -56,29 +56,31 @@ class CalendarController extends Controller
     public function getToday()
     {
         $today = now();
-        $monthNumber = $today->month;
-        $dayNumber = $today->day;
 
-        // Fetch DB Day and Month Metadata
-        $month = CalendarMonth::where('number', $monthNumber)->first();
-        $day = null;
+        // Find the CalendarDay record where gregorian_day matches "MMM d"
+        $gregorianRef = $today->format('M j'); // e.g., "Feb 16" (Note: seeder uses 'M d', let's check format)
 
-        if ($month) {
-            $day = CalendarDay::where('calendar_month_id', $month->id)
-                ->where('day_number', $dayNumber)
+        $day = CalendarDay::with('month')
+            ->where('gregorian_day', $today->format('M d'))
+            ->first();
+
+        if (!$day) {
+            // Fallback or retry with different format if necessary
+            $day = CalendarDay::with('month')
+                ->where('gregorian_day', $today->format('M j'))
                 ->first();
         }
 
         return response()->json([
             'gregorian_date' => $today->toDateString(),
             'kemetic_date' => [
-                'month_number' => $monthNumber,
-                'day_number' => $dayNumber,
-                'month_name' => $month?->display_name ?? 'Unknown',
-                'deities' => $month?->deities ?? 'Unknown',
-                'meaning' => $month?->meaning ?? '',
-                'year' => $today->year + 4241,
-                'gregorian_reference' => $month?->gregorian_reference ?? $today->format('F d'),
+                'month_number' => $day?->month?->number ?? 0,
+                'day_number' => $day?->day_number ?? 0,
+                'month_name' => $day?->month?->standard_name ?? 'Unknown',
+                'deities' => $day?->month?->deities ?? 'Unknown',
+                'meaning' => $day?->month?->meaning ?? '',
+                'year' => $today->year + 4241, // Traditional Kemetic offset
+                'season' => $day?->month?->season ?? '',
             ],
             'day_details' => $day,
         ]);
