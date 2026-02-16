@@ -47,17 +47,19 @@ class AudioForm
                             ->maxSize(102400) // 100MB
                             ->visible(fn($get) => $get('audio_source_type') === 'upload')
                             ->required(fn($get) => $get('audio_source_type') === 'upload')
+                            ->dehydrateStateUsing(function ($state, $get) {
+                                if ($get('audio_source_type') === 'link') {
+                                    return $get('external_audio_url');
+                                }
+                                return $state;
+                            })
                             ->helperText('Upload the audio recording.'),
                         TextInput::make('external_audio_url')
                             ->label('External Audio Link')
                             ->placeholder('https://example.com/audio.mp3')
                             ->visible(fn($get) => $get('audio_source_type') === 'link')
                             ->required(fn($get) => $get('audio_source_type') === 'link')
-                            ->afterStateDehydrated(function ($state, $set, $get) {
-                                if ($get('audio_source_type') === 'link') {
-                                    $set('audio_url', $state);
-                                }
-                            })
+                            ->dehydrated(false)
                             ->helperText('Provide a direct link to the audio file.'),
                         TextInput::make('thumbnail_url')
                             ->label('Artwork Image URL')
