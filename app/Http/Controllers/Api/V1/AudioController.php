@@ -15,6 +15,7 @@ class AudioController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        \Illuminate\Support\Facades\Log::info('AudioController@index - Request params:', $request->all());
         $query = Audio::where('is_active', true);
 
         // Filter by tradition
@@ -61,6 +62,7 @@ class AudioController extends Controller
      */
     public function show(Audio $audio): JsonResponse
     {
+        \Illuminate\Support\Facades\Log::info('AudioController@show - Fetching Audio ID: ' . $audio->id);
         if (!$audio->is_active) {
             return response()->json(['message' => 'Audio not found'], 404);
         }

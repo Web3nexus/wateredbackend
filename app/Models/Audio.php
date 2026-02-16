@@ -52,14 +52,19 @@ class Audio extends Model
         return Attribute::make(
             get: function () {
                 $value = $this->getRawOriginal('audio_url');
+                \Illuminate\Support\Facades\Log::info('Audio Model - Raw URL: ' . ($value ?? 'NULL') . ' for Audio ID: ' . $this->id);
+
                 if (!$value)
                     return null;
 
                 if (str_starts_with($value, 'http')) {
+                    \Illuminate\Support\Facades\Log::info('Audio Model - Returning direct URL: ' . $value);
                     return $value;
                 }
 
-                return Storage::disk('public')->url($value);
+                $url = Storage::disk('public')->url($value);
+                \Illuminate\Support\Facades\Log::info('Audio Model - Generated Storage URL: ' . $url);
+                return $url;
             },
         );
     }

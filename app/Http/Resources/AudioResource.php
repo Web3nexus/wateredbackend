@@ -14,6 +14,11 @@ class AudioResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        \Illuminate\Support\Facades\Log::info('AudioResource - Processing Audio ID: ' . $this->id, [
+            'original_url' => $this->audio_url,
+            'full_url' => $this->full_audio_url,
+            'title' => $this->title
+        ]);
         return [
             'id' => $this->id,
             'title' => $this->title ?? 'Unknown Title',
