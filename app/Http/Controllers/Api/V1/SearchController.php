@@ -48,10 +48,10 @@ class SearchController extends Controller
             ->get();
 
         return response()->json([
-            'audio' => $audio,
-            'products' => $products,
-            'temples' => $temples,
-            'traditions' => $traditions,
+            'audio' => \App\Http\Resources\AudioResource::collection($audio),
+            'products' => \App\Http\Resources\ProductResource::collection($products),
+            'temples' => $temples, // Add TempleResource here if needed
+            'traditions' => \App\Http\Resources\TraditionResource::collection($traditions),
         ]);
     }
 }

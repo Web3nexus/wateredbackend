@@ -26,6 +26,10 @@ class Incantation extends Model
         'is_paid' => 'boolean',
     ];
 
+    protected $appends = [
+        'full_audio_url',
+    ];
+
     /**
      * Get the audio URL.
      */
@@ -33,7 +37,7 @@ class Incantation extends Model
     {
         return Attribute::make(
             get: function () {
-                $value = $this->audio_url;
+                $value = $this->getRawOriginal('audio_url');
                 if (!$value)
                     return null;
 

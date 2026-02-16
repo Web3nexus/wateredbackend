@@ -35,6 +35,11 @@ class Audio extends Model
         'is_featured' => 'boolean',
     ];
 
+    protected $appends = [
+        'full_audio_url',
+        'full_thumbnail_url',
+    ];
+
     // protected $with = ['category'];
 
     public function contentCategory(): BelongsTo
@@ -46,7 +51,7 @@ class Audio extends Model
     {
         return Attribute::make(
             get: function () {
-                $value = $this->audio_url;
+                $value = $this->getRawOriginal('audio_url');
                 if (!$value)
                     return null;
 
@@ -63,7 +68,7 @@ class Audio extends Model
     {
         return Attribute::make(
             get: function () {
-                $value = $this->thumbnail_url;
+                $value = $this->getRawOriginal('thumbnail_url');
                 if (!$value)
                     return null;
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
+use App\Http\Resources\BookmarkResource;
 use Illuminate\Http\Request;
 
 class BookmarkController extends Controller
@@ -11,7 +12,7 @@ class BookmarkController extends Controller
     public function index(Request $request)
     {
         $bookmarks = $request->user()->bookmarks()->with('bookmarkable')->latest()->get();
-        return response()->json(['data' => $bookmarks]);
+        return BookmarkResource::collection($bookmarks);
     }
 
     public function store(Request $request)
