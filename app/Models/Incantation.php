@@ -35,8 +35,10 @@ class Incantation extends Model
             get: function ($value) {
                 if (!$value)
                     return null;
-                if (str_starts_with($value, 'http'))
+
+                if (str_starts_with($value, 'http')) {
                     return $value;
+                }
 
                 return Storage::disk('public')->url($value);
             },
