@@ -16,9 +16,9 @@ class AudioResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
+            'title' => $this->title ?? 'Unknown Title',
             'description' => $this->description,
-            'audio_url' => $this->full_audio_url,
+            'audio_url' => $this->full_audio_url ?? '',
             'thumbnail_url' => $this->full_thumbnail_url,
             'duration' => $this->duration,
             'author' => $this->author,
