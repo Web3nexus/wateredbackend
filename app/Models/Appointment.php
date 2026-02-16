@@ -56,4 +56,36 @@ class Appointment extends Model
     {
         return $this->belongsTo(ConsultationType::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($appointment) {
+            if (empty($appointment->appointment_code)) {
+                $appointment->appointment_code = static::generateBookingCode('CON');
+            }
+        });
+    }
+
+    public static function generateBookingCode($prefix = 'CON')
+    {
+        $year = date('y');
+        $month = date('m');
+
+        // Get the last booking code for this month
+        $lastBooking = static::where('appointment_code', 'LIKE', "{$prefix}-{$year}-{$month}-%")
+            ->orderBy('appointment_code', 'desc')
+            ->first();
+
+        if ($lastBooking) {
+            // Extract index and increment
+            $lastIndex = (int) substr($lastBooking->appointment_code, -3);
+            $newIndex = $lastIndex + 1;
+        } else {
+            $newIndex = 1;
+        }
+
+        return sprintf('%s-%s-%s-%03d', $prefix, $year, $month, $newIndex);
+    }
 }

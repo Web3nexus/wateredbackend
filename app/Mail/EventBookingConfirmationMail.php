@@ -50,6 +50,7 @@ class EventBookingConfirmationMail extends Mailable
             </div>
 
             <h2 style='color: #EAB308; font-size: 18px;'>Your Ticket</h2>
+            <p style='margin-bottom: 5px;'><strong>Booking Code:</strong> {$reg->booking_code}</p>
             <p style='margin-bottom: 5px;'><strong>Name:</strong> {$reg->full_name}</p>
             <p style='margin-bottom: 5px;'><strong>Email:</strong> {$reg->email}</p>
             <p style='margin-bottom: 0;'><strong>Phone:</strong> {$reg->phone}</p>

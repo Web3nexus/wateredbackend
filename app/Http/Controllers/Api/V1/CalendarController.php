@@ -59,25 +59,7 @@ class CalendarController extends Controller
         $monthNumber = $today->month;
         $dayNumber = $today->day;
 
-        // Static Mapping per User Rules
-        $wateredMonths = [
-            1 => ['name' => 'Djehuti / Odomankoma', 'deity' => 'Djehuti', 'meaning' => 'Beginning, Wisdom'],
-            2 => ['name' => 'Hathor / Yemoja', 'deity' => 'Hathor', 'meaning' => 'Love, Beauty'],
-            3 => ['name' => 'Sekhmet / Amadioha', 'deity' => 'Sekhmet', 'meaning' => 'Power, Healing'],
-            4 => ['name' => 'Ma’at / Ovia', 'deity' => 'Ma’at', 'meaning' => 'Balance, Truth'],
-            5 => ['name' => 'Geb / Osun', 'deity' => 'Geb', 'meaning' => 'Earth, Fertility'],
-            6 => ['name' => 'Nut / Etegbere', 'deity' => 'Nut', 'meaning' => 'Sky, Mystery'],
-            7 => ['name' => 'Auset / Rezi', 'deity' => 'Auset', 'meaning' => 'Magic, Motherhood'],
-            8 => ['name' => 'Ausar / Tiurakh', 'deity' => 'Ausar', 'meaning' => 'Resurrection, Eternity'],
-            9 => ['name' => 'Heru / Sango', 'deity' => 'Heru', 'meaning' => 'Victory, Kingship'],
-            10 => ['name' => 'Seth / Kibuka', 'deity' => 'Seth', 'meaning' => 'Chaos, Transformation'],
-            11 => ['name' => 'Nebeth-Het / Oya', 'deity' => 'Nebeth-Het', 'meaning' => 'Protection, Transition'],
-            12 => ['name' => 'Anpu / Inkosazana', 'deity' => 'Anpu', 'meaning' => 'Guidance, Afterlife'],
-        ];
-
-        $currentMonthData = $wateredMonths[$monthNumber] ?? $wateredMonths[1];
-
-        // Fetch DB Day Logic
+        // Fetch DB Day and Month Metadata
         $month = CalendarMonth::where('number', $monthNumber)->first();
         $day = null;
 
@@ -92,13 +74,13 @@ class CalendarController extends Controller
             'kemetic_date' => [
                 'month_number' => $monthNumber,
                 'day_number' => $dayNumber,
-                'month_name' => $currentMonthData['name'],
-                'deities' => $currentMonthData['deity'], // Simplified for UI
-                'meaning' => $currentMonthData['meaning'],
-                'year' => $today->year + 4241, // Optional: Keep Kemetic year offset if desired, or just Gregorian
-                'gregorian_reference' => $today->format('F d'),
+                'month_name' => $month?->display_name ?? 'Unknown',
+                'deities' => $month?->deities ?? 'Unknown',
+                'meaning' => $month?->meaning ?? '',
+                'year' => $today->year + 4241,
+                'gregorian_reference' => $month?->gregorian_reference ?? $today->format('F d'),
             ],
-            'day_details' => $day, // Now includes activities/restrictions if seeded
+            'day_details' => $day,
         ]);
     }
 }

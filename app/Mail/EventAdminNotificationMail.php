@@ -43,6 +43,7 @@ class EventAdminNotificationMail extends Mailable
             
             <div style='background: rgba(234, 179, 8, 0.05); padding: 20px; border-radius: 12px; margin: 20px 0;'>
                 <h2 style='color: #EAB308; font-size: 18px; margin-top: 0;'>Registrant Details</h2>
+                <p style='margin-bottom: 5px;'><strong>Booking Code:</strong> {$reg->booking_code}</p>
                 <p style='margin-bottom: 5px;'><strong>Name:</strong> {$reg->full_name}</p>
                 <p style='margin-bottom: 5px;'><strong>Email:</strong> {$reg->email}</p>
                 <p style='margin-bottom: 5px;'><strong>Phone:</strong> {$reg->phone}</p>

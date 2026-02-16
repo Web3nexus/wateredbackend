@@ -58,6 +58,16 @@ class CalendarMonthResource extends Resource
                             ->placeholder('e.g. 6262')
                             ->columnSpan(1),
 
+                        TextInput::make('deities')
+                            ->label('Deity/Deities')
+                            ->placeholder('e.g. Yemoja')
+                            ->columnSpan(1),
+
+                        TextInput::make('meaning')
+                            ->label('Spiritual Meaning')
+                            ->placeholder('e.g. Life, Motherhood')
+                            ->columnSpan(1),
+
                         Textarea::make('description')
                             ->label('Description')
                             ->columnSpanFull(),
