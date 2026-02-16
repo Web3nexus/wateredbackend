@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('calendar_months', function (Illuminate\Database\Schema\Blueprint $table) {
-            $table->string('meaning')->nullable()->after('deities');
-        });
+        if (!Schema::hasColumn('calendar_months', 'meaning')) {
+            Schema::table('calendar_months', function (Illuminate\Database\Schema\Blueprint $table) {
+                $table->string('meaning')->nullable()->after('deities');
+            });
+        }
     }
 
     /**

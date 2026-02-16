@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('event_registrations', function (Blueprint $table) {
-            $table->string('booking_code')->unique()->after('id');
-        });
+        if (!Schema::hasColumn('event_registrations', 'booking_code')) {
+            Schema::table('event_registrations', function (Blueprint $table) {
+                $table->string('booking_code')->unique()->after('id');
+            });
+        }
     }
 
     /**
