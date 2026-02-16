@@ -32,7 +32,8 @@ class Incantation extends Model
     protected function fullAudioUrl(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function () {
+                $value = $this->audio_url;
                 if (!$value)
                     return null;
 
