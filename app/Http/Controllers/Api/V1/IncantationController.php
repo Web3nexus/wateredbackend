@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\IncantationResource;
 use App\Models\Incantation;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class IncantationController extends Controller
             return $query->where('category', $category);
         })->latest()->paginate(20);
 
-        return response()->json($incantations);
+        return IncantationResource::collection($incantations);
     }
 
     /**
@@ -25,6 +26,6 @@ class IncantationController extends Controller
      */
     public function show(Incantation $incantation)
     {
-        return response()->json($incantation);
+        return new IncantationResource($incantation);
     }
 }

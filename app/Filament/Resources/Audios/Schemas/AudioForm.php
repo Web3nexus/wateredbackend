@@ -10,6 +10,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 
 class AudioForm
 {
@@ -25,14 +26,39 @@ class AudioForm
                         Textarea::make('description')
                             ->rows(3)
                             ->maxLength(1000),
+                        Radio::make('audio_source_type')
+                            ->label('Audio Source')
+                            ->options([
+                                'upload' => 'File Upload',
+                                'link' => 'External Link',
+                            ])
+                            ->default('upload')
+                            ->reactive()
+                            ->afterStateHydrated(function ($set, $state, $record) {
+                                if ($record && $record->audio_url && str_starts_with($record->getRawOriginal('audio_url'), 'http')) {
+                                    $set('audio_source_type', 'link');
+                                    $set('external_audio_url', $record->getRawOriginal('audio_url'));
+                                }
+                            }),
                         FileUpload::make('audio_url')
                             ->label('Audio File')
-                            ->required()
                             ->disk('public')
                             ->directory('audios')
-                            // ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'audio/mp4', 'audio/x-m4a'])
                             ->maxSize(102400) // 100MB
+                            ->visible(fn($get) => $get('audio_source_type') === 'upload')
+                            ->required(fn($get) => $get('audio_source_type') === 'upload')
                             ->helperText('Upload the audio recording.'),
+                        TextInput::make('external_audio_url')
+                            ->label('External Audio Link')
+                            ->placeholder('https://example.com/audio.mp3')
+                            ->visible(fn($get) => $get('audio_source_type') === 'link')
+                            ->required(fn($get) => $get('audio_source_type') === 'link')
+                            ->afterStateDehydrated(function ($state, $set, $get) {
+                                if ($get('audio_source_type') === 'link') {
+                                    $set('audio_url', $state);
+                                }
+                            })
+                            ->helperText('Provide a direct link to the audio file.'),
                         TextInput::make('thumbnail_url')
                             ->label('Artwork Image URL')
                             ->url()

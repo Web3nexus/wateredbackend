@@ -42,7 +42,7 @@ class Audio extends Model
         return $this->belongsTo(\App\Models\ContentCategory::class, 'category_id');
     }
 
-    protected function audioUrl(): Attribute
+    protected function fullAudioUrl(): Attribute
     {
         return Attribute::make(
             get: function (?string $value) {
@@ -58,7 +58,7 @@ class Audio extends Model
         );
     }
 
-    protected function thumbnailUrl(): Attribute
+    protected function fullThumbnailUrl(): Attribute
     {
         return Attribute::make(
             get: function (?string $value) {

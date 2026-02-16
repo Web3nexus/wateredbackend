@@ -29,7 +29,7 @@ class Incantation extends Model
     /**
      * Get the audio URL.
      */
-    protected function audioUrl(): Attribute
+    protected function fullAudioUrl(): Attribute
     {
         return Attribute::make(
             get: function ($value) {
