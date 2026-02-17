@@ -173,6 +173,9 @@ Route::prefix('v1')->group(function () {
         // Informational Content (Now Protected)
         Route::get('/faqs', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexFaqs']);
         Route::get('/user-guides', [\App\Http\Controllers\Api\V1\InformationalController::class, 'indexUserGuides']);
+
+        // Sacred Sounds
+        Route::get('/sacred-sounds', [\App\Http\Controllers\Api\V1\SacredSoundController::class, 'index']);
     });
 
 }); // End of v1 Prefix
