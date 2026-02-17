@@ -265,14 +265,49 @@ class GlobalSettingForm
                                             ->dehydrated(fn(?string $state) => filled($state)),
                                     ])->columns(2),
 
-                                Section::make('In-App Purchase (IAP) Product IDs')
+                                Section::make('Premium Subscription Pricing (Local/NGN)')
                                     ->schema([
                                         TextInput::make('premium_monthly_id')
-                                            ->label('Monthly Subscription ID')
+                                            ->label('Monthly Product ID')
                                             ->placeholder('e.g. premium_monthly'),
+                                        TextInput::make('premium_monthly_price')
+                                            ->label('Monthly Display Price')
+                                            ->placeholder('e.g. ₦5,000'),
+                                        TextInput::make('premium_monthly_amount')
+                                            ->label('Monthly Charge Amount (Kobo)')
+                                            ->numeric()
+                                            ->placeholder('500000'),
+
                                         TextInput::make('premium_yearly_id')
-                                            ->label('Yearly Subscription ID')
+                                            ->label('Yearly Product ID')
                                             ->placeholder('e.g. premium_yearly'),
+                                        TextInput::make('premium_yearly_price')
+                                            ->label('Yearly Display Price')
+                                            ->placeholder('e.g. ₦50,000'),
+                                        TextInput::make('premium_yearly_amount')
+                                            ->label('Yearly Charge Amount (Kobo)')
+                                            ->numeric()
+                                            ->placeholder('5000000'),
+                                    ])->columns(3),
+
+                                Section::make('Premium Subscription Pricing (International/USD)')
+                                    ->description('These prices will be shown to users outside Nigeria.')
+                                    ->schema([
+                                        TextInput::make('premium_monthly_price_usd')
+                                            ->label('Monthly Display Price (USD)')
+                                            ->placeholder('e.g. $9.99'),
+                                        TextInput::make('premium_monthly_amount_usd')
+                                            ->label('Monthly Charge Amount (Cents)')
+                                            ->numeric()
+                                            ->placeholder('999'),
+
+                                        TextInput::make('premium_yearly_price_usd')
+                                            ->label('Yearly Display Price (USD)')
+                                            ->placeholder('e.g. $99.99'),
+                                        TextInput::make('premium_yearly_amount_usd')
+                                            ->label('Yearly Charge Amount (Cents)')
+                                            ->numeric()
+                                            ->placeholder('9999'),
                                     ])->columns(2),
                             ]),
 
