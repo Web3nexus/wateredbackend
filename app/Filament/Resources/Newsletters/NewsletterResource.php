@@ -21,6 +21,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use UnitEnum;
 
 class NewsletterResource extends Resource
 {
