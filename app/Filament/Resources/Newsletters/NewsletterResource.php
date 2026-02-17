@@ -27,7 +27,7 @@ class NewsletterResource extends Resource
     protected static ?string $model = Newsletter::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-    protected static ?string $navigationGroup = 'Community';
+    protected static UnitEnum|string|null $navigationGroup = 'Community';
 
     public static function form(Schema $schema): Schema
     {
