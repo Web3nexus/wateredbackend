@@ -10,6 +10,8 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -246,51 +248,59 @@ class EventController extends Controller
 
         // Initialize Paystack payment
         $settings = \App\Models\GlobalSetting::first();
-        $paystackSecretKey = $settings->paystack_secret_key;
-
-        $url = "https://api.paystack.co/transaction/initialize";
-
-        $fields = [
-            'email' => $validated['email'] ?? $user?->email,
-            'amount' => $event->price * 100, // Convert to kobo
-            'metadata' => [
-                'type' => 'event',
-                'event_id' => $event->id,
-                'user_id' => $user?->id,
-                'full_name' => $validated['full_name'] ?? $user?->name,
-                'email' => $validated['email'] ?? $user?->email,
-                'phone' => $validated['phone'] ?? $user?->phone,
-                'event_title' => $event->title,
-            ],
-            'callback_url' => route('payment.callback'),
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: Bearer " . $paystackSecretKey,
-            "Content-Type: application/json",
-        ]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $result = json_decode($response, true);
-
-        if ($result && $result['status']) {
+        if (!$settings) {
             return response()->json([
-                'message' => 'Payment initialized',
-                'data' => $result['data']
-            ]);
+                'message' => 'Payment settings not configured',
+                'error' => 'Global settings not found'
+            ], 500);
         }
 
-        return response()->json([
-            'message' => 'Failed to initialize payment',
-            'error' => $result['message'] ?? 'Unknown error'
-        ], 500);
+        $paystackSecretKey = $settings->paystack_secret_key;
+
+        if (!$paystackSecretKey) {
+            return response()->json([
+                'message' => 'Payment gateway not configured',
+                'error' => 'Paystack secret key missing'
+            ], 500);
+        }
+
+        try {
+            $response = Http::withToken($paystackSecretKey)
+                ->post('https://api.paystack.co/transaction/initialize', [
+                    'email' => $validated['email'] ?? $user?->email,
+                    'amount' => (int) ($event->price * 100), // Convert to kobo
+                    'metadata' => [
+                        'type' => 'event',
+                        'event_id' => $event->id,
+                        'user_id' => $user?->id,
+                        'full_name' => $validated['full_name'] ?? $user?->name,
+                        'email' => $validated['email'] ?? $user?->email,
+                        'phone' => $validated['phone'] ?? $user?->phone,
+                        'event_title' => $event->title,
+                    ],
+                    'callback_url' => route('payment.callback'),
+                ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                return response()->json([
+                    'message' => 'Payment initialized',
+                    'data' => $result['data']
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Failed to initialize payment',
+                'error' => $response->json()['message'] ?? 'Unknown Paystack error'
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error('Event Payment Initialization Error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Server error during payment initialization',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }

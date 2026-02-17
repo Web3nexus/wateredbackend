@@ -39,7 +39,8 @@ class EventRegistration extends Model
         parent::boot();
 
         static::creating(function ($registration) {
-            if (empty($registration->booking_code)) {
+            $hasBookingCode = $registration->getConnection()->getSchemaBuilder()->hasColumn($registration->getTable(), 'booking_code');
+            if ($hasBookingCode && empty($registration->booking_code)) {
                 $registration->booking_code = static::generateBookingCode('EVT');
             }
         });
@@ -49,6 +50,12 @@ class EventRegistration extends Model
     {
         $year = date('y');
         $month = date('m');
+
+        // Check if column exists to avoid SQL errors on legacy tables
+        $hasColumn = (new static)->getConnection()->getSchemaBuilder()->hasColumn((new static)->getTable(), 'booking_code');
+        if (!$hasColumn) {
+            return null;
+        }
 
         // Get the last booking code for this month
         $lastBooking = static::where('booking_code', 'LIKE', "{$prefix}-{$year}-{$month}-%")

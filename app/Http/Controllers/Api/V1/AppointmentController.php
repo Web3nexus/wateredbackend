@@ -115,7 +115,12 @@ class AppointmentController extends Controller
     protected function generatePaystackUrl(Appointment $appointment)
     {
         $settings = GlobalSetting::first();
-        $secretKey = $settings?->paystack_secret_key;
+        if (!$settings) {
+            Log::error('Global settings not found when generating Paystack URL');
+            return null;
+        }
+
+        $secretKey = $settings->paystack_secret_key;
 
         if (!$secretKey) {
             Log::error('Paystack Secret Key not found in settings');
@@ -126,8 +131,8 @@ class AppointmentController extends Controller
             $response = Http::withToken($secretKey)
                 ->post('https://api.paystack.co/transaction/initialize', [
                     'email' => $appointment->email,
-                    'amount' => $appointment->amount * 100, // Kobo
-                    'reference' => 'APT_' . $appointment->appointment_code . '_' . time(),
+                    'amount' => (int) ($appointment->amount * 100), // Ensure integer Kobo
+                    'reference' => 'APT_' . ($appointment->appointment_code ?? $appointment->id) . '_' . time(),
                     'callback_url' => route('payment.callback'),
                     'metadata' => [
                         'appointment_id' => $appointment->id,
@@ -137,6 +142,8 @@ class AppointmentController extends Controller
 
             if ($response->successful()) {
                 return $response->json()['data']['authorization_url'];
+            } else {
+                Log::error('Paystack initialization failed: ' . $response->body());
             }
         } catch (\Exception $e) {
             Log::error('Paystack Initialization Error: ' . $e->getMessage());

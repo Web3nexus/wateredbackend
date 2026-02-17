@@ -62,7 +62,8 @@ class Appointment extends Model
         parent::boot();
 
         static::creating(function ($appointment) {
-            if (empty($appointment->appointment_code)) {
+            $hasAppointmentCode = $appointment->getConnection()->getSchemaBuilder()->hasColumn($appointment->getTable(), 'appointment_code');
+            if ($hasAppointmentCode && empty($appointment->appointment_code)) {
                 $appointment->appointment_code = static::generateBookingCode('CON');
             }
         });
@@ -72,6 +73,12 @@ class Appointment extends Model
     {
         $year = date('y');
         $month = date('m');
+
+        // Check if column exists to avoid SQL errors on legacy tables
+        $hasColumn = (new static)->getConnection()->getSchemaBuilder()->hasColumn((new static)->getTable(), 'appointment_code');
+        if (!$hasColumn) {
+            return null;
+        }
 
         // Get the last booking code for this month
         $lastBooking = static::where('appointment_code', 'LIKE', "{$prefix}-{$year}-{$month}-%")
