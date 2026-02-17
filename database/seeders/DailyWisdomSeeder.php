@@ -51,7 +51,7 @@ class DailyWisdomSeeder extends Seeder
                 'quote' => 'When you pray, move your feet.',
                 'author' => 'Shared Wisdom',
                 'active_date' => Carbon::now()->addDays(6)->toDateString(),
-                'background_image_url' => 'https://images.unsplash.com/photo-1507608869269-bfac20366eb6?auto=format&fit=crop&q=80',
+                'background_image_url' => 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?auto=format&fit=crop&q=80',
             ],
             [
                 'quote' => 'Do not follow the path. Go where there is no path and leave a trail.',

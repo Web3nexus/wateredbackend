@@ -18,7 +18,7 @@ class SacredSoundResource extends Resource
 {
     protected static ?string $model = SacredSound::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMusicalNote;
 
     public static function form(Schema $schema): Schema
     {
