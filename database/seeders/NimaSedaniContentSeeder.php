@@ -16,7 +16,15 @@ class NimaSedaniContentSeeder extends Seeder
         $tradition = Tradition::where('slug', 'nima-sedani')->first();
 
         if (!$tradition) {
-            return;
+            $english = \App\Models\Language::where('code', 'en')->first();
+            $tradition = Tradition::create([
+                'name' => ['en' => 'Nima Sedani'],
+                'slug' => 'nima-sedani',
+                'description' => ['en' => 'The Holy Book of The Reminder. Containing the sacred verses that guide humanity first towards the God of Seas & Voices.'],
+                'language_id' => $english?->id ?? 1,
+                'is_active' => true,
+                'tradition_type' => 'scripture',
+            ]);
         }
 
         $collection = TextCollection::updateOrCreate(

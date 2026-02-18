@@ -49,7 +49,9 @@ class TextCollectionResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->whereNull('tradition_id');
+        return parent::getEloquentQuery()->whereHas('tradition', function ($query) {
+            $query->where('slug', 'nima-sedani');
+        })->orWhereNull('tradition_id');
     }
 
     public static function getPages(): array
