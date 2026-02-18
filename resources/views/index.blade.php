@@ -468,9 +468,9 @@
                                     </template>
                                 </select>
                             </div>
-                            {{-- For temple visit, we auto-select the type if only one exists --}}
-                            <input type="hidden" name="consultation_type_id" :value="templeVisitTypeId"
-                                x-if="selectedCategory === 'temple_visit'">
+                            <template x-if="selectedCategory === 'temple_visit'">
+                                <input type="hidden" name="consultation_type_id" :value="templeVisitTypeId">
+                            </template>
                         </div>
 
                         <div x-show="selectedCategory === 'temple_visit'"
@@ -737,7 +737,7 @@
             const form = e.target;
             const msg = document.getElementById('appointmentMessage');
             const submitBtn = form.querySelector('button[type="submit"]');
-            const alpineData = document.querySelector('[x-data]').__x.$data;
+            const alpineData = form.__x ? form.__x.$data : document.querySelector('[x-data="bookingSystem()"]').__x.$data;
 
             alpineData.isSubmitting = true;
             msg.classList.add('hidden');
