@@ -23,7 +23,7 @@ class AudioResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title ?? 'Unknown Title',
             'description' => $this->description,
-            'audio_url' => $this->full_audio_url ?? '',
+            'audio_url' => $this->full_audio_url ?: null,
             'thumbnail_url' => $this->full_thumbnail_url,
             'duration' => $this->duration,
             'author' => $this->author,
