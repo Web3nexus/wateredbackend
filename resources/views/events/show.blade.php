@@ -131,9 +131,9 @@
                                 <p class="text-app-blue font-heading text-2xl uppercase tracking-wider">
                                     @if($event->is_paid)
                                         @if(($settings->currency_position ?? 'before') === 'before')
-                                            {{ $settings->currency_symbol ?? '$' }}{{ number_format($event->price, 2) }}
+                                            {{ $settings->currency_symbol ?? '₦' }}{{ number_format($event->price, 2) }}
                                         @else
-                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '$' }}
+                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '₦' }}
                                         @endif
                                     @else
                                         FREE

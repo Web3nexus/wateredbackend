@@ -199,10 +199,10 @@ class GlobalSettingForm
                                                 'GBP' => 'GBP (£)',
                                                 'EUR' => 'EUR (€)',
                                             ])
-                                            ->default('USD'),
+                                            ->default('NGN'),
                                         TextInput::make('currency_symbol')
                                             ->label('Currency Symbol')
-                                            ->default('$')
+                                            ->default('₦')
                                             ->maxLength(10),
                                         Select::make('currency_position')
                                             ->label('Currency Position')

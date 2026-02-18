@@ -136,9 +136,9 @@
                                 <span class="text-sm font-bold {{ $event->is_paid ? 'text-parchment' : 'text-green-400' }}">
                                     @if($event->is_paid)
                                         @if(($settings->currency_position ?? 'before') === 'before')
-                                            {{ $settings->currency_symbol ?? '$' }}{{ number_format($event->price, 2) }}
+                                            {{ $settings->currency_symbol ?? '₦' }}{{ number_format($event->price, 2) }}
                                         @else
-                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '$' }}
+                                            {{ number_format($event->price, 2) }}{{ $settings->currency_symbol ?? '₦' }}
                                         @endif
                                     @else
                                         FREE
