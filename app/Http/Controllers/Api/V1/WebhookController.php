@@ -118,6 +118,17 @@ class WebhookController extends Controller
             $appointment = Appointment::find($appointmentId);
 
             if ($appointment) {
+                // Verify amount (Naira to Kobo) and Currency
+                $paidAmount = $data['amount'] / 100;
+                $expectedAmount = (float) $appointment->amount;
+                $paidCurrency = $data['currency'] ?? 'NGN';
+
+                if ($paidAmount < $expectedAmount || $paidCurrency !== 'NGN') {
+                    Log::error("Payment mismatch for Appointment #{$appointment->id}: Expected {$expectedAmount} NGN, Got {$paidAmount} {$paidCurrency}");
+                    $appointment->update(['payment_status' => 'failed', 'notes' => 'Payment validation failed: Amount or Currency mismatch.']);
+                    return;
+                }
+
                 $appointment->update([
                     'payment_status' => 'paid',
                     'appointment_status' => 'confirmed',

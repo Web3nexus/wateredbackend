@@ -411,57 +411,91 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-sea-deep p-10 rounded-[3rem] shadow-2xl border border-parchment/5">
-                        <form id="appointmentForm" class="space-y-6">
-                            @csrf
-                            <div class="grid grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Full
-                                        Name</label>
-                                    <input type="text" name="full_name" required
-                                        class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Phone
-                                        Number</label>
-                                    <input type="tel" name="phone" required
-                                        class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition">
-                                </div>
+                    <form id="appointmentForm" class="space-y-6" x-data="bookingSystem()">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Full
+                                    Name</label>
+                                <input type="text" name="full_name" required
+                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Email
-                                    Address</label>
-                                <input type="email" name="email" required
-                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition">
+                                <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Phone
+                                    Number</label>
+                                <input type="tel" name="phone" required
+                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                             </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Email
+                                Address</label>
+                            <input type="email" name="email" required
+                                class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
-                                <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Service
-                                    Type</label>
-                                <select name="consultation_type_id" required
-                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition">
-                                    @foreach($traditions->flatMap->consultationTypes ?? [] as $consultation)
-                                        <option value="{{ $consultation->id }}">{{ $consultation->name }} -
-                                            ${{ $consultation->price }}</option>
-                                    @endforeach
-                                    @if(!isset($traditions) || $traditions->flatMap->consultationTypes->isEmpty())
-                                        <option value="1">General Consultation - $50.00</option>
-                                        <option value="2">Spiritual Reading - $75.00</option>
-                                    @endif
+                                <label
+                                    class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Category</label>
+                                <select x-model="selectedCategory" @change="updateSubTypes()"
+                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                                    <option value="">Select Category</option>
+                                    <option value="temple_visit">Visit the Temple (FREE)</option>
+                                    <option value="lord_uzih">Talk to Lord Uzih</option>
                                 </select>
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred
-                                    Date & Time</label>
-                                <input type="datetime-local" name="start_time" required
-                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition">
+
+                            <div class="space-y-2" x-show="selectedCategory === 'lord_uzih'">
+                                <label
+                                    class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Consultation
+                                    Type</label>
+                                <select name="consultation_type_id" x-model="selectedSubType" required
+                                    class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                                    <option value="">Select Type</option>
+                                    <template x-for="type in filteredTypes" :key="type.id">
+                                        <option :value="type.id" x-text="`${type.name} - ₦${formatNumber(type.price)}`">
+                                        </option>
+                                    </template>
+                                </select>
                             </div>
-                            <button type="submit"
-                                class="w-full py-5 bg-app-blue text-white font-bold rounded-xl hover:bg-app-blue/90 transition shadow-xl shadow-app-blue/20 uppercase tracking-widest">Confirm
-                                & Pay</button>
-                        </form>
-                        <div id="appointmentMessage" class="hidden mt-6 p-4 rounded-xl text-center"></div>
-                    </div>
+                            {{-- For temple visit, we auto-select the type if only one exists --}}
+                            <input type="hidden" name="consultation_type_id" :value="templeVisitTypeId"
+                                x-if="selectedCategory === 'temple_visit'">
+                        </div>
+
+                        <div x-show="selectedCategory === 'temple_visit'"
+                            class="p-4 bg-app-blue/10 border border-app-blue/20 rounded-xl">
+                            <p class="text-sm text-app-blue font-medium italic">"Visitors may not meet Lord Uzih the
+                                priest during temple visits."</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date
+                                & Time</label>
+                            <input type="datetime-local" name="start_time" x-model="startTime" required
+                                @change="validateTime()"
+                                class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                            <p x-show="timeError" class="text-xs text-red-400 mt-1" x-text="timeError"></p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Notes
+                                (Optional)</label>
+                            <textarea name="notes" rows="3"
+                                class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment"
+                                placeholder="Any specific questions..."></textarea>
+                        </div>
+
+                        <button type="submit"
+                            :disabled="isSubmitting || !!timeError || !selectedCategory || (selectedCategory === 'lord_uzih' && !selectedSubType)"
+                            class="w-full py-5 bg-app-blue text-white font-bold rounded-xl hover:bg-app-blue/90 transition shadow-xl shadow-app-blue/20 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                            x-text="isSubmitting ? 'Processing...' : (selectedCategory === 'temple_visit' ? 'Book Temple Visit' : 'Confirm & Pay')">
+                        </button>
+                    </form>
+                    <div id="appointmentMessage" class="hidden mt-6 p-4 rounded-xl text-center"></div>
                 </div>
+            </div>
             </div>
         </section>
 
@@ -578,39 +612,95 @@
             </div>
         </div>
     </footer>
-    </footer>
 
     <script>
-        async function fetchConsultationTypes() {
-            const select = document.querySelector('select[name="consultation_type_id"]');
-            try {
-                const response = await fetch('/api/v1/consultation-types');
-                const result = await response.json();
+        function bookingSystem() {
+            return {
+                allTypes: [],
+                filteredTypes: [],
+                selectedCategory: '',
+                selectedSubType: '',
+                templeVisitTypeId: '',
+                startTime: '',
+                timeError: '',
+                isSubmitting: false,
 
-                if (result.data && result.data.length > 0) {
-                    select.innerHTML = '';
-                    result.data.forEach(type => {
-                        const option = document.createElement('option');
-                        option.value = type.id;
-                        option.textContent = `${type.name} - $${parseFloat(type.price).toFixed(2)}`;
-                        select.appendChild(option);
-                    });
+                async init() {
+                    try {
+                        const response = await fetch('/api/v1/consultation-types');
+                        const result = await response.json();
+                        this.allTypes = result.data || [];
+                    } catch (error) {
+                        console.error('Failed to fetch types:', error);
+                    }
+                },
+
+                updateSubTypes() {
+                    this.filteredTypes = this.allTypes.filter(t => t.category === this.selectedCategory);
+                    if (this.selectedCategory === 'temple_visit' && this.filteredTypes.length > 0) {
+                        this.templeVisitTypeId = this.filteredTypes[0].id;
+                    } else {
+                        this.templeVisitTypeId = '';
+                    }
+                    this.selectedSubType = '';
+                    this.validateTime();
+                },
+
+                validateTime() {
+                    if (!this.startTime || !this.selectedCategory) {
+                        this.timeError = '';
+                        return;
+                    }
+
+                    const date = new Date(this.startTime);
+                    const day = date.getDay(); // 0-6 (Sun-Sat)
+                    const hour = date.getHours();
+                    const minutes = date.getMinutes();
+                    const timeInt = hour * 100 + minutes;
+
+                    if (this.selectedCategory === 'temple_visit') {
+                        // Mon-Wed, Fri, Sun: 10:00 AM – 4:00 PM (1000 - 1600)
+                        // Thu, Sat: 7:00 AM – 6:00 PM (0700 - 1800)
+                        if ([1, 2, 3, 5, 0].includes(day)) {
+                            if (timeInt < 1000 || timeInt > 1600) {
+                                this.timeError = 'Temple visits are only available 10:00 AM - 4:00 PM on this day.';
+                                return;
+                            }
+                        } else if ([4, 6].includes(day)) {
+                            if (timeInt < 700 || timeInt > 1800) {
+                                this.timeError = 'Temple visits are only available 7:00 AM - 6:00 PM on this day.';
+                                return;
+                            }
+                        }
+                    } else if (this.selectedCategory === 'lord_uzih') {
+                        // Tue, Wed, Fri: 10:00 AM – 4:00 PM
+                        if (![2, 3, 5].includes(day)) {
+                            this.timeError = 'Consultations with Lord Uzih are only available on Tuesday, Wednesday, and Friday.';
+                            return;
+                        }
+                        if (timeInt < 1000 || timeInt > 1600) {
+                            this.timeError = 'Consultations with Lord Uzih are only available 10:00 AM - 4:00 PM.';
+                            return;
+                        }
+                    }
+
+                    this.timeError = '';
+                },
+
+                formatNumber(num) {
+                    return new Intl.NumberFormat('en-NG').format(num);
                 }
-            } catch (error) {
-                console.error('Failed to fetch consultation types:', error);
             }
         }
-
-        document.addEventListener('DOMContentLoaded', fetchConsultationTypes);
 
         document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             const msg = document.getElementById('appointmentMessage');
             const submitBtn = form.querySelector('button[type="submit"]');
+            const alpineData = document.querySelector('[x-data]').__x.$data;
 
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'Creating Appointment...';
+            alpineData.isSubmitting = true;
             msg.classList.add('hidden');
 
             try {
@@ -626,27 +716,26 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    msg.innerText = 'Success! Redirecting to payment...';
-                    msg.classList.remove('hidden', 'bg-red-100', 'text-red-700');
-                    msg.classList.add('bg-green-100', 'text-green-700');
+                    msg.innerText = 'Success! Redirecting...';
+                    msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20');
+                    msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
 
                     if (result.payment_url) {
                         window.location.href = result.payment_url;
                     } else {
-                        msg.innerText = 'Appointment confirmed! Check your email for code: ' + result.data.appointment_code;
+                        msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code;
                         form.reset();
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = 'Confirm & Pay';
+                        alpineData.selectedCategory = '';
+                        alpineData.isSubmitting = false;
                     }
                 } else {
                     throw new Error(result.message || 'Failed to create appointment');
                 }
             } catch (error) {
                 msg.innerText = error.message;
-                msg.classList.remove('hidden', 'bg-green-100', 'text-green-700');
-                msg.classList.add('bg-red-100', 'text-red-700');
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Confirm & Pay';
+                msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20');
+                msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border');
+                alpineData.isSubmitting = false;
             }
         });
     </script>

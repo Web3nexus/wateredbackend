@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ConsultationTypes\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -16,9 +17,15 @@ class ConsultationTypeForm
             ->components([
                 TextInput::make('name')
                     ->required(),
+                Select::make('category')
+                    ->options([
+                        'temple_visit' => 'Visit the Temple',
+                        'lord_uzih' => 'Talk to Lord Uzih',
+                    ])
+                    ->required(),
                 TextInput::make('price')
                     ->numeric()
-                    ->prefix('$') // Assuming USD for now
+                    ->prefix('₦')
                     ->required()
                     ->step(0.01),
                 Textarea::make('description')

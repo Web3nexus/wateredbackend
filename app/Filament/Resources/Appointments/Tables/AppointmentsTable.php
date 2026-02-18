@@ -50,7 +50,7 @@ class AppointmentsTable
                     })
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->money('USD')
+                    ->money('NGN')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

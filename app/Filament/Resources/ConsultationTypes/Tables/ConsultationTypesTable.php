@@ -18,11 +18,19 @@ class ConsultationTypesTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('category')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'temple_visit' => 'info',
+                        'lord_uzih' => 'success',
+                        default => 'gray',
+                    })
+                    ->searchable(),
                 TextColumn::make('duration_minutes')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->money('NGN')
                     ->sortable(),
                 ImageColumn::make('image_url'),
                 IconColumn::make('is_active')

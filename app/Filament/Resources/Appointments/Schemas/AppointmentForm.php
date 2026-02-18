@@ -41,7 +41,7 @@ class AppointmentForm
                     ->default('pending'),
                 TextInput::make('amount')
                     ->numeric()
-                    ->prefix('$')
+                    ->prefix('₦')
                     ->default(0),
                 TextInput::make('payment_status')
                     ->default('pending'),
