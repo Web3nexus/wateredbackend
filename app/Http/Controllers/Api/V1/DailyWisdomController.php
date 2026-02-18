@@ -13,6 +13,7 @@ class DailyWisdomController extends Controller
         try {
             // Get Nima Sedani tradition with more robust search
             $nimasedani = \App\Models\Tradition::whereIn('slug', ['nima-sedani', 'nimasedani', 'ni-maseani'])
+                ->orWhere('name->en', 'LIKE', '%Nima Sedani%')
                 ->orWhere('name', 'LIKE', '%Nima Sedani%')
                 ->orWhere('name', 'LIKE', '%ni maseani%')
                 ->first();
@@ -20,14 +21,13 @@ class DailyWisdomController extends Controller
             if ($nimasedani) {
                 // Get all active entries for Nima Sedani
                 // Joining through collections and chapters
-                $query = \App\Models\Entry::where('is_active', true)
-                    ->whereHas('chapter', function ($q) {
-                        $q->where('is_active', true);
-                    })
-                    ->whereHas('chapter.collection', function ($q) use ($nimasedani) {
-                        $q->where('tradition_id', $nimasedani->id)
-                            ->where('is_active', true);
-                    });
+                $query = \App\Models\Entry::where('entries.is_active', true)
+                    ->join('chapters', 'entries.chapter_id', '=', 'chapters.id')
+                    ->join('text_collections', 'chapters.collection_id', '=', 'text_collections.id')
+                    ->where('text_collections.tradition_id', $nimasedani->id)
+                    ->where('chapters.is_active', true)
+                    ->where('text_collections.is_active', true)
+                    ->select('entries.*');
 
                 $totalEntries = $query->count();
 
@@ -36,13 +36,13 @@ class DailyWisdomController extends Controller
                     $dayOfYear = (int) date('z'); // 0 to 365
                     $offset = $dayOfYear % $totalEntries;
 
-                    $entry = $query->orderBy('id')
+                    $entry = $query->orderBy('id', 'asc')
                         ->offset($offset)
                         ->first();
 
                     if ($entry) {
-                        // Get fallback background image - use image_url instead of deity_image_url
-                        $backgroundImage = $nimasedani->image_url ?? null;
+                        // Use deity_image_url for background
+                        $backgroundImage = $nimasedani->deity_image_url;
 
                         if (!$backgroundImage) {
                             $fallbackWisdom = \App\Models\DailyWisdom::whereNotNull('background_image_url')->inRandomOrder()->first();
@@ -57,8 +57,8 @@ class DailyWisdomController extends Controller
                                 'author' => 'Nima Sedani',
                                 'background_image_url' => $backgroundImage,
                                 'active_date' => now()->toDateString(),
-                                'is_active' => true,
                                 'publish_date' => now()->toDateString(),
+                                'is_active' => true,
                             ]
                         ]);
                     }
