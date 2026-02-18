@@ -32,8 +32,10 @@ class DailyWisdomController extends Controller
                 $totalEntries = $query->count();
 
                 if ($totalEntries > 0) {
+                    // Use date as seed for randomization to ensure 24h consistency
+                    $seed = (int) date('Ymd');
                     $entry = $query->with(['chapter'])
-                        ->inRandomOrder()
+                        ->orderByRaw("RAND($seed)")
                         ->first();
 
                     if ($entry) {
