@@ -2,6 +2,14 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0F172A">
+
+    <!-- Flatpickr for advanced date/time selection -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $settings?->site_name ?? 'Watered' }} - {{ $settings?->tagline ?? 'The Ancient Spirits' }}</title>
@@ -380,6 +388,7 @@
                             <p class="text-xl text-parchment/60 leading-relaxed">Seek guidance and clarity. Schedule a
                                 private consultation with Lord Uzih or our spiritual advisors.</p>
                         </div>
+
                         <div class="space-y-4">
                             <div class="flex items-start gap-4">
                                 <div
@@ -473,9 +482,9 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date
                                 & Time</label>
-                            <input type="datetime-local" name="start_time" x-model="startTime" required
-                                @change="validateTime()"
-                                class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                            <input type="text" id="start_time_picker" name="start_time" x-model="startTime" required
+                                class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment"
+                                placeholder="Select Day & Hour">
                             <p x-show="timeError" class="text-xs text-red-400 mt-1" x-text="timeError"></p>
                         </div>
 
@@ -624,15 +633,43 @@
                 startTime: '',
                 timeError: '',
                 isSubmitting: false,
+                fp: null,
 
                 async init() {
                     try {
                         const response = await fetch('/api/v1/consultation-types');
                         const result = await response.json();
                         this.allTypes = result.data || [];
+                        this.initFlatpickr();
                     } catch (error) {
                         console.error('Failed to fetch types:', error);
                     }
+                },
+
+                initFlatpickr() {
+                    this.fp = flatpickr("#start_time_picker", {
+                        enableTime: true,
+                        dateFormat: "Y-m-d H:i",
+                        minDate: "today",
+                        theme: "dark",
+                        disable: [
+                            (date) => {
+                                if (!this.selectedCategory) return true;
+                                if (this.selectedCategory === 'lord_uzih') {
+                                    // Only Tue(2), Wed(3), Fri(5)
+                                    return ![2, 3, 5].includes(date.getDay());
+                                }
+                                return false; // Temple visits all days
+                            }
+                        ],
+                        onChange: (selectedDates, dateStr) => {
+                            this.startTime = dateStr;
+                            this.validateTime();
+                        },
+                        onOpen: (selectedDates, dateStr, instance) => {
+                            // Ensure instance is ready for category-specific disabling
+                        }
+                    });
                 },
 
                 updateSubTypes() {
@@ -643,6 +680,8 @@
                         this.templeVisitTypeId = '';
                     }
                     this.selectedSubType = '';
+                    this.startTime = '';
+                    if (this.fp) this.fp.clear();
                     this.validateTime();
                 },
 
