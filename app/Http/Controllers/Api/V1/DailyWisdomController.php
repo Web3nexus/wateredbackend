@@ -12,7 +12,6 @@ class DailyWisdomController extends Controller
         try {
             // Get Nima Sedani tradition with more robust search
             $nimasedani = \App\Models\Tradition::whereIn('slug', ['nima-sedani', 'nimasedani', 'ni-maseani'])
-                ->orWhere('name->en', 'LIKE', '%Nima Sedani%')
                 ->orWhere('name', 'LIKE', '%Nima Sedani%')
                 ->orWhere('name', 'LIKE', '%ni maseani%')
                 ->first();
