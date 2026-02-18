@@ -32,12 +32,8 @@ class DailyWisdomController extends Controller
                 $totalEntries = $query->count();
 
                 if ($totalEntries > 0) {
-                    // Deterministic selection: one per day
-                    $dayOfYear = (int) date('z'); // 0 to 365
-                    $offset = $dayOfYear % $totalEntries;
-
-                    $entry = $query->orderBy('id', 'asc')
-                        ->offset($offset)
+                    $entry = $query->with(['chapter'])
+                        ->inRandomOrder()
                         ->first();
 
                     if ($entry) {
@@ -53,12 +49,15 @@ class DailyWisdomController extends Controller
                         return response()->json([
                             'data' => [
                                 'id' => $entry->id,
-                                'quote' => $entry->text,
+                                'quote' => strip_tags($entry->text), // Strip HTML tags if any
                                 'author' => 'Nima Sedani',
+                                'chapter_number' => $entry->chapter?->order ?? 1,
+                                'verse_number' => $entry->order ?? 1,
                                 'background_image_url' => $backgroundImage,
                                 'active_date' => now()->toDateString(),
                                 'publish_date' => now()->toDateString(),
                                 'is_active' => true,
+                                'citation' => "Chapter " . ($entry->chapter?->order ?? 1) . ":" . ($entry->order ?? 1),
                             ]
                         ]);
                     }

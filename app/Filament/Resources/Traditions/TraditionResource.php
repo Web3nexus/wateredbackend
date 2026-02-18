@@ -71,11 +71,31 @@ class TraditionResource extends Resource
                             ->preload()
                             ->required(),
 
-                        TextInput::make('tradition_type')
-                            ->maxLength(255),
+                        Select::make('tradition_type')
+                            ->options([
+                                'scripture' => 'Scripture',
+                                'history' => 'History',
+                                'deity' => 'Deity',
+                                'orders' => 'Orders',
+                            ])
+                            ->default('scripture')
+                            ->searchable()
+                            ->creatable()
+                            ->required(),
 
-                        TextInput::make('african_origin')
-                            ->maxLength(255),
+                        Select::make('african_origin')
+                            ->options([
+                                'igbo' => 'Igbo',
+                                'yoruba' => 'Yoruba',
+                                'kemetic' => 'Kemetic',
+                                'kush' => 'Kush',
+                                'akan' => 'Akan',
+                                'zulu' => 'Zulu',
+                                'other' => 'Other',
+                            ])
+                            ->searchable()
+                            ->creatable()
+                            ->nullable(),
 
                         Toggle::make('is_active')
                             ->default(true)
