@@ -7,7 +7,6 @@ use App\Filament\Resources\Entries\EntryResource;
 use App\Filament\Resources\TextCollections\TextCollectionResource;
 use App\Filament\Resources\Rituals\RitualResource;
 use App\Filament\Resources\Incantations\IncantationResource;
-use App\Filament\Resources\DailyWisdoms\DailyWisdomResource;
 use App\Filament\Resources\Events\EventResource;
 use Filament\Widgets\Widget;
 
@@ -55,13 +54,6 @@ class QuickActionsWidget extends Widget
                 'description' => 'Add a new sacred chant or incantation.',
                 'url' => IncantationResource::getUrl('create'),
                 'color' => 'primary',
-            ],
-            [
-                'label' => 'Daily Wisdom',
-                'icon' => 'heroicon-o-sun',
-                'description' => 'Post a new inspirational quote or daily teaching.',
-                'url' => DailyWisdomResource::getUrl('create'),
-                'color' => 'warning',
             ],
             [
                 'label' => 'Add New Event',

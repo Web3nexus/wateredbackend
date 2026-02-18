@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\DailyWisdom;
 use Illuminate\Http\Request;
 
 class DailyWisdomController extends Controller
@@ -43,8 +42,7 @@ class DailyWisdomController extends Controller
                         $backgroundImage = $nimasedani->deity_image_url;
 
                         if (!$backgroundImage) {
-                            $fallbackWisdom = \App\Models\DailyWisdom::whereNotNull('background_image_url')->inRandomOrder()->first();
-                            $backgroundImage = $fallbackWisdom?->background_image_url ?? 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80';
+                            $backgroundImage = 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80';
                         }
 
                         // Format the entry as daily wisdom
@@ -66,27 +64,20 @@ class DailyWisdomController extends Controller
                 }
             }
 
-            // Fallback to old behavior if Nimasedani doesn't exist or has no entries
-            $wisdom = DailyWisdom::where('is_active', true)
-                ->whereDate('active_date', now())
-                ->first();
-
-            if (!$wisdom) {
-                $wisdom = DailyWisdom::where('is_active', true)
-                    ->latest('updated_at')
-                    ->first();
-            }
-
-            return response()->json(['data' => $wisdom]);
+            // Ultimate fallback if no Nima Sedani entries are found
+            return response()->json([
+                'data' => [
+                    'id' => 0,
+                    'quote' => 'The God of Seas and Voices guides those who acknowledge the current of divine will.',
+                    'author' => 'Nima Sedani',
+                    'background_image_url' => 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80',
+                    'active_date' => now()->toDateString(),
+                    'is_active' => true,
+                    'publish_date' => now()->toDateString(),
+                ]
+            ]);
         } catch (\Exception $e) {
             \Log::error('Daily Wisdom Error: ' . $e->getMessage());
-
-            // Return a fallback wisdom
-            $fallback = DailyWisdom::where('is_active', true)->latest()->first();
-
-            if ($fallback) {
-                return response()->json(['data' => $fallback]);
-            }
 
             // Ultimate fallback
             return response()->json([
