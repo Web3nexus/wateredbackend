@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
 
+        $middleware->alias([
+            'premium' => \App\Http\Middleware\PremiumAccess::class,
+        ]);
+
         $middleware->trustProxies(
             at: '*',
             headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |

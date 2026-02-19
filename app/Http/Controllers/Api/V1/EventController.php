@@ -31,15 +31,13 @@ class EventController extends Controller
 
         switch ($filter) {
             case 'new':
-                $query->orderBy('created_at', 'desc');
+                $query->where('event_date', '>=', now()->toDateString())
+                    ->orderBy('created_at', 'desc');
                 break;
             case 'past':
                 $query->where(function ($q) use ($hasEventDate) {
                     if ($hasEventDate) {
-                        $q->where('event_date', '<', now()->toDateString())
-                            ->orWhere(function ($sq) {
-                                $sq->whereNull('event_date')->where('start_time', '<', now());
-                            });
+                        $q->where('event_date', '<', now()->toDateString());
                     } else {
                         $q->where('start_time', '<', now());
                     }
@@ -54,10 +52,7 @@ class EventController extends Controller
             default:
                 $query->where(function ($q) use ($hasEventDate) {
                     if ($hasEventDate) {
-                        $q->where('event_date', '>=', now()->toDateString())
-                            ->orWhere(function ($sq) {
-                                $sq->whereNull('event_date')->where('start_time', '>=', now());
-                            });
+                        $q->where('event_date', '>=', now()->toDateString());
                     } else {
                         $q->where('start_time', '>=', now());
                     }

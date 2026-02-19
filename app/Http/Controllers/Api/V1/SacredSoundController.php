@@ -16,14 +16,16 @@ class SacredSoundController extends Controller
             ->latest()
             ->get();
 
-        // Map to ensure full URL is returned
-        return JsonResource::collection($sounds)->map(function ($sound) {
-            return [
-                'id' => $sound->id,
-                'title' => $sound->title,
-                'file_path' => asset('storage/' . $sound->file_path),
-                'type' => $sound->type,
-            ];
-        });
+        // Return wrapped in 'data' for Flutter consumption
+        return response()->json([
+            'data' => $sounds->map(function ($sound) {
+                return [
+                    'id' => $sound->id,
+                    'title' => $sound->title,
+                    'file_path' => asset('storage/' . $sound->file_path),
+                    'type' => $sound->type,
+                ];
+            })
+        ]);
     }
 }
