@@ -420,7 +420,7 @@
                             </div>
                         </div>
                     </div>
-                    <form id="appointmentForm" class="space-y-6" x-data="bookingSystem()">
+                    <form id="appointmentForm" class="space-y-6" x-data="bookingSystem()" @submit.prevent="submitForm">
                         @csrf
                         <div class="grid grid-cols-2 gap-6">
                             <div class="space-y-2">
@@ -459,7 +459,9 @@
                                 <label
                                     class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Consultation
                                     Type</label>
-                                <select name="consultation_type_id" x-model="selectedSubType" required
+                                <select name="consultation_type_id" x-model="selectedSubType"
+                                    :required="selectedCategory === 'lord_uzih'"
+                                    :disabled="selectedCategory !== 'lord_uzih'"
                                     class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                                     <option value="">Select Type</option>
                                     <template x-for="type in filteredTypes" :key="type.id">
@@ -728,55 +730,54 @@
 
                 formatNumber(num) {
                     return new Intl.NumberFormat('en-NG').format(num);
+                },
+
+                async submitForm(e) {
+                    const form = e.target;
+                    const msg = document.getElementById('appointmentMessage');
+
+                    this.isSubmitting = true;
+                    msg.classList.add('hidden');
+
+                    try {
+                        const formData = new FormData(form);
+                        const response = await fetch('/api/v1/appointments/guest', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            msg.innerText = 'Success! Redirecting...';
+                            msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20');
+                            msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
+
+                            if (result.payment_url) {
+                                window.location.href = result.payment_url;
+                            } else {
+                                msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code;
+                                form.reset();
+                                this.selectedCategory = '';
+                                this.isSubmitting = false;
+                            }
+                        } else {
+                            throw new Error(result.message || 'Failed to create appointment');
+                        }
+                    } catch (error) {
+                        msg.innerText = error.message;
+                        msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20');
+                        msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border');
+                        this.isSubmitting = false;
+                    }
                 }
             }
         }
 
-        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const msg = document.getElementById('appointmentMessage');
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const alpineData = form.__x ? form.__x.$data : document.querySelector('[x-data="bookingSystem()"]').__x.$data;
 
-            alpineData.isSubmitting = true;
-            msg.classList.add('hidden');
-
-            try {
-                const formData = new FormData(form);
-                const response = await fetch('/api/v1/appointments/guest', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    msg.innerText = 'Success! Redirecting...';
-                    msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20');
-                    msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
-
-                    if (result.payment_url) {
-                        window.location.href = result.payment_url;
-                    } else {
-                        msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code;
-                        form.reset();
-                        alpineData.selectedCategory = '';
-                        alpineData.isSubmitting = false;
-                    }
-                } else {
-                    throw new Error(result.message || 'Failed to create appointment');
-                }
-            } catch (error) {
-                msg.innerText = error.message;
-                msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20');
-                msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border');
-                alpineData.isSubmitting = false;
-            }
-        });
     </script>
 </body>
 
