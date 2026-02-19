@@ -10,21 +10,22 @@ class DailyWisdomController extends Controller
     public function index()
     {
         try {
-            // Get Nima Sedani tradition with more robust search
-            $nimasedani = \App\Models\Tradition::whereIn('slug', ['nima-sedani', 'nimasedani', 'ni-maseani'])
-                ->orWhere('name', 'LIKE', '%Nima Sedani%')
-                ->orWhere('name', 'LIKE', '%ni maseani%')
-                ->first();
+            // Priority: Explicitly fetch from TextCollection ID 1 (Nima Sedani as per user)
+            $collection = \App\Models\TextCollection::find(1);
 
-            if ($nimasedani) {
-                // Get all active entries for Nima Sedani
-                // Joining through collections and chapters
+            // Fallback: If ID 1 is missing, search by name
+            if (!$collection) {
+                $collection = \App\Models\TextCollection::where('name', 'LIKE', '%Nima Sedani%')
+                    ->orWhere('name', 'LIKE', '%ni maseani%')
+                    ->first();
+            }
+
+            if ($collection) {
+                // Get all active entries for this collection through its chapters
                 $query = \App\Models\Entry::where('entries.is_active', true)
                     ->join('chapters', 'entries.chapter_id', '=', 'chapters.id')
-                    ->join('text_collections', 'chapters.collection_id', '=', 'text_collections.id')
-                    ->where('text_collections.tradition_id', $nimasedani->id)
+                    ->where('chapters.collection_id', $collection->id)
                     ->where('chapters.is_active', true)
-                    ->where('text_collections.is_active', true)
                     ->select('entries.*');
 
                 $totalEntries = $query->count();
@@ -37,8 +38,14 @@ class DailyWisdomController extends Controller
                         ->first();
 
                     if ($entry) {
-                        // Use deity_image_url for background
-                        $backgroundImage = $nimasedani->deity_image_url;
+                        // Background image logic
+                        $backgroundImage = $collection->background_image_url;
+
+                        // If collection doesn't have one, try its tradition
+                        if (!$backgroundImage && $collection->tradition_id) {
+                            $tradition = \App\Models\Tradition::find($collection->tradition_id);
+                            $backgroundImage = $tradition?->deity_image_url;
+                        }
 
                         if (!$backgroundImage) {
                             $backgroundImage = 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80';
@@ -48,7 +55,7 @@ class DailyWisdomController extends Controller
                         return response()->json([
                             'data' => [
                                 'id' => $entry->id,
-                                'quote' => strip_tags($entry->text), // Strip HTML tags if any
+                                'quote' => strip_tags($entry->text),
                                 'author' => 'Nima Sedani',
                                 'chapter_number' => $entry->chapter?->order ?? 1,
                                 'verse_number' => $entry->order ?? 1,
