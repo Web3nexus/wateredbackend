@@ -19,6 +19,20 @@ class UsersTable
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
+                TextColumn::make('provider')
+                    ->label('Source')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'google' => 'success',
+                        'apple' => 'gray',
+                        'firebase_email' => 'info',
+                        default => 'warning',
+                    })
+                    ->searchable(),
+                \Filament\Tables\Columns\IconColumn::make('is_premium')
+                    ->label('Premium')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),

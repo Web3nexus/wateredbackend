@@ -151,7 +151,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'nullable|email',
             'name' => 'required|string',
-            'provider' => 'required|string|in:google,apple',
+            'provider' => 'required|string|in:google,apple,firebase_email',
             'provider_id' => 'required|string',
             'device_name' => 'required|string',
         ]);

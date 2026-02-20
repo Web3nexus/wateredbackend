@@ -23,6 +23,12 @@ class UserForm
                 Toggle::make('is_premium')
                     ->label('Premium Status')
                     ->default(false),
+                TextInput::make('provider')
+                    ->label('Source')
+                    ->disabled(),
+                TextInput::make('provider_id')
+                    ->label('Source ID')
+                    ->disabled(),
                 TextInput::make('password')
                     ->password()
                     ->required(fn(string $operation): bool => $operation === 'create')

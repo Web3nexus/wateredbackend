@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function () {
     // Authentication Routes (Public - Required for app access)
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
     Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
         ->name('verification.verify');
 
