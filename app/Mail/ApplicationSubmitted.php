@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\OrderApplication;
+use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -19,13 +20,40 @@ class ApplicationSubmitted extends Mailable
 
     public function envelope(): Envelope
     {
+        $template = EmailTemplate::where('key', 'order_submitted')->first();
+        $subject = 'Application Received: ' . $this->application->order->title;
+
+        if ($template) {
+            $rendered = EmailTemplate::render('order_submitted', [
+                'order_title' => $this->application->order->title,
+                'user_name' => $this->application->user->name,
+                'app_name' => config('app.name'),
+            ]);
+            $subject = $rendered['subject'];
+        }
+
         return new Envelope(
-            subject: 'Application Submitted: ' . $this->application->order->title,
+            subject: $subject,
         );
     }
 
     public function content(): Content
     {
+        $template = EmailTemplate::where('key', 'order_submitted')->first();
+
+        if ($template) {
+            $rendered = EmailTemplate::render('order_submitted', [
+                'order_title' => $this->application->order->title,
+                'user_name' => $this->application->user->name,
+                'app_name' => config('app.name'),
+            ]);
+
+            return new Content(
+                view: 'emails.premium',
+                with: ['body' => $rendered['body']],
+            );
+        }
+
         return new Content(
             markdown: 'emails.orders.submitted',
             with: [
