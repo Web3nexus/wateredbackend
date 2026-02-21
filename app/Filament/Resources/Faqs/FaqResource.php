@@ -9,7 +9,7 @@ use App\Filament\Resources\Faqs\Pages;
 class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
-    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-question-mark-circle';
     protected static \UnitEnum|string|null $navigationGroup = 'Content';
     protected static ?int $navigationSort = 5;
     protected static \UnitEnum|string|null $navigationLabel = 'FAQs';
