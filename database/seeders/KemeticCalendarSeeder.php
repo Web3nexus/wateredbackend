@@ -41,7 +41,7 @@ class KemeticCalendarSeeder extends Seeder
                 'gregorian_reference' => $data['name'],
                 'deities' => $data['deity'] ?? null,
                 'meaning' => $data['meaning'] ?? null,
-                'year' => '6262',
+                'year' => date('Y'),
             ]);
 
             $daysInMonth = Carbon::create(2025, $num, 1)->daysInMonth;

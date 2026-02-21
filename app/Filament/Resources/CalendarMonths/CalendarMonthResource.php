@@ -37,11 +37,11 @@ class CalendarMonthResource extends Resource
                             ->content(fn($record) => $record?->number),
 
                         Placeholder::make('standard_name')
-                            ->label('Standard Kemetic Name')
+                            ->label('Standard Month Name')
                             ->content(fn($record) => $record?->standard_name),
 
                         Placeholder::make('season')
-                            ->label('Egyptian Season')
+                            ->label('Season (Akhet/Peret/Shemu)')
                             ->content(fn($record) => $record?->season),
 
                         Placeholder::make('gregorian_reference')
@@ -55,7 +55,7 @@ class CalendarMonthResource extends Resource
 
                         TextInput::make('year')
                             ->label('Calendar Year')
-                            ->placeholder('e.g. 6262')
+                            ->placeholder('e.g. 2026')
                             ->columnSpan(1),
 
                         TextInput::make('deities')

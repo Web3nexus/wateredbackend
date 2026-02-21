@@ -75,7 +75,7 @@ class CalendarController extends Controller
                 'custom_month_name' => $month?->custom_name ?? '',
                 'deities' => $month?->deities ?? 'Unknown',
                 'meaning' => $month?->meaning ?? '',
-                'year' => $today->year + 4241, // Traditional Kemetic offset
+                'year' => (string) $today->year, // Standard Gregorian year
                 'season' => $month?->season ?? '',
             ],
             'day_details' => $day,
