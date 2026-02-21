@@ -13,9 +13,10 @@ class OrdersTable
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\SpatieMediaLibraryImageColumn::make('image')
-                    ->collection('order_images')
-                    ->circular(),
+                \Filament\Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Image')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/placeholder.png')),
                 \Filament\Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
