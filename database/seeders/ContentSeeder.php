@@ -14,7 +14,7 @@ class ContentSeeder extends Seeder
             [
                 'question' => 'What is Watered?',
                 'answer' => 'Watered is a spiritual platform dedicated to ancient African spirituality, providing access to sacred texts, teachings, rituals, and community connection.',
-                'order' => 1,
+                'sort_order' => 1,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -22,7 +22,7 @@ class ContentSeeder extends Seeder
             [
                 'question' => 'How do I access premium content?',
                 'answer' => 'Premium content is available through our subscription service. Tap "GET PLUS+" to subscribe and unlock exclusive teachings, audio, video content, and more.',
-                'order' => 2,
+                'sort_order' => 2,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -30,7 +30,7 @@ class ContentSeeder extends Seeder
             [
                 'question' => 'Can I book a consultation?',
                 'answer' => 'Yes! Navigate to the Consultation tab to view available consultation types and book a session with our spiritual guides.',
-                'order' => 3,
+                'sort_order' => 3,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -38,7 +38,7 @@ class ContentSeeder extends Seeder
             [
                 'question' => 'How do I find temples near me?',
                 'answer' => 'Visit the Temple Discovery section in your Profile to find temples and spiritual centers near your location.',
-                'order' => 4,
+                'sort_order' => 4,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -46,7 +46,7 @@ class ContentSeeder extends Seeder
             [
                 'question' => 'What payment methods do you accept?',
                 'answer' => 'We accept Stripe for international payments, and Paystack/Flutterwave for Nigerian users. All major cards are supported.',
-                'order' => 5,
+                'sort_order' => 5,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
