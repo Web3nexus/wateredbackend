@@ -114,49 +114,49 @@ class TraditionsAndDeitiesSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'Kemet (Egyptian)',
+                'name' => 'Watered',
                 'slug' => 'kemet',
-                'description' => 'The ancient spiritual path of the Nile Valley, focusing on Ma\'at (Universal Order) and the cycle of death and rebirth.',
-                'origin' => 'Nile Valley (Egypt and Sudan)',
+                'description' => 'The spiritual path of the Nile Valley, focusing on Universal Order and the cycle of renewal.',
+                'origin' => 'Nile Valley',
                 'deities' => [
                     [
-                        'name' => 'Ra (Amon-Ra)',
+                        'name' => 'Ra',
                         'domains' => 'Sun, Creation, Eternal Life',
                         'symbols' => 'Solar Disk, Falcon, Obelisk',
                         'mythology' => 'The sun god and king of the deities. He travels the sky in his solar barque, renewing life daily.'
                     ],
                     [
-                        'name' => 'Aset (Isis)',
+                        'name' => 'Rezi',
                         'domains' => 'Magic, Protection, Healing, Motherhood',
                         'symbols' => 'Throne, Wings, Tyet knot',
-                        'mythology' => 'The great enchantress who resurrected her husband Osiris. She represents the power of love and devotion.'
+                        'mythology' => 'The great enchantress who represents the power of love and devotion.'
                     ],
                     [
-                        'name' => 'Wesir (Osiris)',
+                        'name' => 'Tiurakh',
                         'domains' => 'Afterlife, Resurrection, Agriculture',
                         'symbols' => 'Crook and Flail, Atef crown, Djed pillar',
                         'mythology' => 'The lord of the dead and judge of souls. His resurrection symbolizes the eternal cycle of life.'
                     ],
                     [
-                        'name' => 'Heru (Horus)',
+                        'name' => 'Sango',
                         'domains' => 'Kingship, Sky, Divine Justice',
                         'symbols' => 'Eye of Horus (Wedjat), Falcon, Double Crown',
-                        'mythology' => 'The son of Aset and Wesir, যিনি Wesir\'s throne back from Set. He reflects the ideal leader.'
+                        'mythology' => 'The son of Rezi and Tiurakh, who reflects the ideal leader.'
                     ],
                     [
-                        'name' => 'Djehuty (Thoth)',
+                        'name' => 'Odomankoma',
                         'domains' => 'Wisdom, Writing, Science, Moon',
                         'symbols' => 'Ibis, Baboon, Stylus, Writing tablet',
                         'mythology' => 'The scribe of the gods who recorded the judgments of the heart. He is the master of all knowledge.'
                     ],
                     [
-                        'name' => 'Ma\'at',
+                        'name' => 'Ovia',
                         'domains' => 'Truth, Balance, Order, Harmony',
                         'symbols' => 'Ostrich Feather, Scales',
-                        'mythology' => 'Ma\'at is the personification of the cosmic order. The "Weighing of the Heart" ceremony is based on her principles.'
+                        'mythology' => 'The personification of the cosmic order. The "Weighing of the Heart" ceremony is based on these principles.'
                     ],
                     [
-                        'name' => 'Anpu (Anubis)',
+                        'name' => 'Inkosazana',
                         'domains' => 'Embalming, Funerals, Protection of Graves',
                         'symbols' => 'Jackal, Ankh, Flail',
                         'mythology' => 'The guardian of the scales in the underworld, he ensures the proper passage of souls to the afterlife.'

@@ -59,7 +59,7 @@ class InformationalSeeder extends Seeder
             ],
             [
                 'title' => 'Navigating the Sacred Library',
-                'content' => 'The Library (Echoes) contains wisdom from various traditions. Use filters to explore specific paths like Kemet or Yoruba, or search for topics like "Healing" or "Protection".',
+                'content' => 'The Library (Echoes) contains wisdom from various traditions. Use filters to explore specific paths like Watered or Yoruba, or search for topics like "Healing" or "Protection".',
                 'type' => 'text',
                 'sort_order' => 2,
             ],

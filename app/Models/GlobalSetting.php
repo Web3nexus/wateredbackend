@@ -75,6 +75,9 @@ class GlobalSetting extends Model
         'system_currency',
         'currency_symbol',
         'currency_position',
+        'premium_title',
+        'premium_subtitle',
+        'premium_features',
     ];
 
     protected $hidden = [
@@ -93,6 +96,7 @@ class GlobalSetting extends Model
         'is_landing_page_enabled' => 'boolean',
         'is_ads_enabled' => 'boolean',
         'ads_screens' => 'json',
+        'premium_features' => 'json',
     ];
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {

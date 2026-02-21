@@ -290,6 +290,31 @@ class GlobalSettingForm
                                             ->placeholder('5000000'),
                                     ])->columns(3),
 
+                                Section::make('Premium Plan Marketing Text')
+                                    ->schema([
+                                        TextInput::make('premium_title')
+                                            ->label('Premium Page Title')
+                                            ->placeholder('e.g. WATERED PLUS+')
+                                            ->default('WATERED PLUS+'),
+                                        TextInput::make('premium_subtitle')
+                                            ->label('Premium Page Subtitle')
+                                            ->placeholder('e.g. Unlock the full depth of African spirituality.')
+                                            ->default('Unlock the full depth of African spirituality.'),
+                                        Select::make('premium_features')
+                                            ->label('Plan Features')
+                                            ->multiple()
+                                            ->placeholder('Type a feature and press enter...')
+                                            ->options([]) // We use it as a tag input
+                                            ->searchable()
+                                            ->createOptionForm([
+                                                TextInput::make('feature')
+                                                    ->required()
+                                            ])
+                                            ->getSearchResultsUsing(fn(string $search): array => [$search => $search])
+                                            ->getOptionLabelUsing(fn($value): ?string => $value)
+                                            ->helperText('Selected features will be displayed on the subscription plans.'),
+                                    ])->columns(2),
+
                                 Section::make('Premium Subscription Pricing (International/USD)')
                                     ->description('These prices will be shown to users outside Nigeria.')
                                     ->schema([

@@ -22,7 +22,7 @@ class ComprehensiveSeeder extends Seeder
 
         // 1. Seed Traditions (The Ancient Paths)
         $traditionData = [
-            ['name' => 'Kemet', 'slug' => 'kemet', 'description' => 'Ancient Egyptian spiritual tradition.'],
+            ['name' => 'Watered', 'slug' => 'kemet', 'description' => 'The spiritual path of the Nile Valley, focusing on Universal Order and the cycle of renewal.'],
             ['name' => 'Kush', 'slug' => 'kush', 'description' => 'Ancient Nubian spiritual heritage.'],
             ['name' => 'Yoruba', 'slug' => 'yoruba', 'description' => 'Traditions of the Orishas from West Africa.'],
             ['name' => 'Igbo', 'slug' => 'igbo', 'description' => 'Odinani - the traditional faith of the Igbo people.'],
@@ -152,18 +152,18 @@ class ComprehensiveSeeder extends Seeder
             [
                 'name' => 'Ra',
                 'tradition_id' => $kemetId,
-                'origin' => 'Kemet',
+                'origin' => 'Watered',
                 'domains' => 'Sun, Creation, Sovereignty',
                 'symbols' => 'Sun disk, Falcon, Obelisk',
                 'mythology_story' => 'Ra is the sun god of Ancient Egypt. He travels across the sky in his solar barque, fighting the serpent Apep every night to bring the dawn again.',
             ],
             [
-                'name' => 'Isis (Aset)',
+                'name' => 'Rezi',
                 'tradition_id' => $kemetId,
-                'origin' => 'Kemet',
+                'origin' => 'Watered',
                 'domains' => 'Magic, Motherhood, Healing',
                 'symbols' => 'Throne, Tyet knot, Wings',
-                'mythology_story' => 'Isis is the great enchantress who used her magic to resurrect her husband Osiris and birth Horus. She is the protector of the throne.',
+                'mythology_story' => 'Rezi is the great enchantress who used her magic to restore life and protect the sacred throne.',
             ],
             [
                 'name' => 'Oshun',
@@ -219,7 +219,7 @@ class ComprehensiveSeeder extends Seeder
                 'category' => 'Symposium',
                 'recurrence' => 'Special',
                 'cultural_origin' => 'Watered',
-                'tradition_id' => $kemetId, // Default to Kemet for now
+                'tradition_id' => $kemetId,
                 'description' => 'A spiritual gathering organized by Watered to discuss the ancient wisdom of the Nile.',
                 'start_time' => Carbon::create(2025, 6, 15, 14, 0, 0),
             ],

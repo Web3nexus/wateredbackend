@@ -143,7 +143,7 @@ class ContentSeeder extends Seeder
 <h2>Library</h2>
 <p>Browse our extensive collection of:</p>
 <ul>
-<li><strong>Scriptures</strong>: Sacred texts organized by tradition (Igbo, Yoruba, Kemetic, etc.)</li>
+<li><strong>Scriptures</strong>: Sacred texts organized by tradition (Igbo, Yoruba, Watered, etc.)</li>
 <li><strong>Audio Teachings</strong>: Listen to spiritual lessons</li>
 <li><strong>Video Content</strong>: Watch teachings in TikTok-style format</li>
 </ul>

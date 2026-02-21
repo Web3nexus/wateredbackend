@@ -51,8 +51,8 @@ class MvpUpdatesSeeder extends Seeder
         );
 
         $kemetTradition = Tradition::updateOrCreate(['slug' => 'kemet'], [
-            'name' => ['en' => 'Kemet'],
-            'description' => ['en' => 'Ancient Egyptian spiritual tradition'],
+            'name' => ['en' => 'Watered'],
+            'description' => ['en' => 'The spiritual path of the Nile Valley.'],
             'language_id' => $english->id,
             'is_active' => true,
         ]);
@@ -77,11 +77,11 @@ class MvpUpdatesSeeder extends Seeder
                 'sacred_elements' => 'Water, Gold, Honey',
             ],
             [
-                'name' => 'Thoth',
-                'origin' => 'Kemet',
+                'name' => 'Odomankoma',
+                'origin' => 'Watered',
                 'tradition_id' => $kemetTradition->id,
                 'description' => 'God of wisdom, writing, and magic',
-                'mythology_story' => 'Thoth is the ancient Egyptian god of wisdom, writing, hieroglyphs, science, magic, art, and judgment. He is often depicted with the head of an ibis.',
+                'mythology_story' => 'Odomankoma is the ancient Nile Valley god of wisdom, writing, hieroglyphs, science, magic, art, and judgment. He is often depicted with the head of an ibis.',
                 'symbols' => 'Ibis, Moon, Writing palette',
                 'domains' => 'Wisdom, Writing, Magic, Moon',
                 'sacred_elements' => 'Papyrus, Ink, Moonlight',
