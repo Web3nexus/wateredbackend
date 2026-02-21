@@ -28,6 +28,13 @@ class Order extends Model implements HasMedia
         'order_level' => 'integer',
     ];
 
+    protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::disk('public')->url($value)) : null,
+        );
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

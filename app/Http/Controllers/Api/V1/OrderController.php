@@ -49,7 +49,7 @@ class OrderController extends Controller
             'cta_text' => $order->cta_text,
             'cta_link' => $order->cta_link,
             'action_type' => $order->action_type,
-            'image_url' => $order->getFirstMediaUrl('order_images') ?: null,
+            'image_url' => $order->image_url,
             'order_level' => $order->order_level,
             'is_active' => $order->is_active,
         ];
