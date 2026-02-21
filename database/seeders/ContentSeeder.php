@@ -54,7 +54,7 @@ class ContentSeeder extends Seeder
         ]);
 
         // Privacy Policy
-        DB::table('settings')->updateOrInsert(
+        DB::table('global_settings')->updateOrInsert(
             ['key' => 'privacy_policy'],
             [
                 'value' => '<h1>Privacy Policy</h1>
@@ -89,7 +89,7 @@ class ContentSeeder extends Seeder
         );
 
         // Terms of Service
-        DB::table('settings')->updateOrInsert(
+        DB::table('global_settings')->updateOrInsert(
             ['key' => 'terms_of_service'],
             [
                 'value' => '<h1>Terms of Service</h1>
@@ -124,7 +124,7 @@ class ContentSeeder extends Seeder
         );
 
         // User Guide
-        DB::table('settings')->updateOrInsert(
+        DB::table('global_settings')->updateOrInsert(
             ['key' => 'user_guide'],
             [
                 'value' => '<h1>User Guide</h1>
