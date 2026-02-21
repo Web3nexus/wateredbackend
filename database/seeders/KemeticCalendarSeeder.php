@@ -18,44 +18,40 @@ class KemeticCalendarSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $months = [
-            1 => ['name' => 'Odomankoma', 'deity' => 'Djehuti', 'meaning' => 'Beginning, Wisdom', 'season' => 'Akhet', 'ref' => 'July 19 - Aug 17'],
-            2 => ['name' => 'Yemoja', 'deity' => 'Hathor', 'meaning' => 'Love, Beauty', 'season' => 'Akhet', 'ref' => 'Aug 18 - Sept 16'],
-            3 => ['name' => 'Amadioha', 'deity' => 'Sekhmet', 'meaning' => 'Power, Healing', 'season' => 'Akhet', 'ref' => 'Sept 17 - Oct 16'],
-            4 => ['name' => 'Ovia', 'deity' => 'Ma’at', 'meaning' => 'Balance, Truth', 'season' => 'Akhet', 'ref' => 'Oct 17 - Nov 15'],
-            5 => ['name' => 'Osun', 'deity' => 'Geb', 'meaning' => 'Earth, Fertility', 'season' => 'Peret', 'ref' => 'Nov 16 - Dec 15'],
-            6 => ['name' => 'Etegbere', 'deity' => 'Nut', 'meaning' => 'Sky, Mystery', 'season' => 'Peret', 'ref' => 'Dec 16 - Jan 14'],
-            7 => ['name' => 'Rezi', 'deity' => 'Auset', 'meaning' => 'Magic, Motherhood', 'season' => 'Peret', 'ref' => 'Jan 15 - Feb 13'],
-            8 => ['name' => 'Tiurakh', 'deity' => 'Ausar', 'meaning' => 'Resurrection, Eternity', 'season' => 'Peret', 'ref' => 'Feb 14 - Mar 15'],
-            9 => ['name' => 'Sango', 'deity' => 'Heru', 'meaning' => 'Victory, Kingship', 'season' => 'Shemu', 'ref' => 'Mar 16 - Apr 14'],
-            10 => ['name' => 'Kibuka', 'deity' => 'Seth', 'meaning' => 'Chaos, Transformation', 'season' => 'Shemu', 'ref' => 'Apr 15 - May 14'],
-            11 => ['name' => 'Oya', 'deity' => 'Nebeth-Het', 'meaning' => 'Protection, Transition', 'season' => 'Shemu', 'ref' => 'May 15 - Jun 13'],
-            12 => ['name' => 'Inkosazana', 'deity' => 'Anpu', 'meaning' => 'Guidance, Afterlife', 'season' => 'Shemu', 'ref' => 'Jun 14 - Jul 13'],
-            13 => ['name' => 'Festival Days', 'deity' => 'Multiple', 'meaning' => 'Festival, Completion', 'season' => 'Festival', 'ref' => 'July 14 - July 18'],
+            1 => ['name' => 'January', 'custom' => 'Rezi', 'deity' => 'Auset', 'meaning' => 'Magic, Motherhood', 'season' => 'Peret'],
+            2 => ['name' => 'February', 'custom' => 'Tiurakh', 'deity' => 'Ausar', 'meaning' => 'Resurrection, Eternity', 'season' => 'Peret'],
+            3 => ['name' => 'March', 'custom' => 'Sango', 'deity' => 'Heru', 'meaning' => 'Victory, Kingship', 'season' => 'Shemu'],
+            4 => ['name' => 'April', 'custom' => 'Kibuka', 'deity' => 'Seth', 'meaning' => 'Chaos, Transformation', 'season' => 'Shemu'],
+            5 => ['name' => 'May', 'custom' => 'Oya', 'deity' => 'Nebeth-Het', 'meaning' => 'Protection, Transition', 'season' => 'Shemu'],
+            6 => ['name' => 'June', 'custom' => 'Inkosazana', 'deity' => 'Anpu', 'meaning' => 'Guidance, Afterlife', 'season' => 'Shemu'],
+            7 => ['name' => 'July', 'custom' => 'Odomankoma', 'deity' => 'Djehuti', 'meaning' => 'Beginning, Wisdom', 'season' => 'Akhet'],
+            8 => ['name' => 'August', 'custom' => 'Yemoja', 'deity' => 'Hathor', 'meaning' => 'Love, Beauty', 'season' => 'Akhet'],
+            9 => ['name' => 'September', 'custom' => 'Amadioha', 'deity' => 'Sekhmet', 'meaning' => 'Power, Healing', 'season' => 'Akhet'],
+            10 => ['name' => 'October', 'custom' => 'Ovia', 'deity' => 'Ma’at', 'meaning' => 'Balance, Truth', 'season' => 'Akhet'],
+            11 => ['name' => 'November', 'custom' => 'Osun', 'deity' => 'Geb', 'meaning' => 'Earth, Fertility', 'season' => 'Peret'],
+            12 => ['name' => 'December', 'custom' => 'Etegbere', 'deity' => 'Nut', 'meaning' => 'Sky, Mystery', 'season' => 'Peret'],
         ];
-
-        // Anchor date for calculation: July 19th
-        $anchor = Carbon::create(2025, 7, 19);
 
         foreach ($months as $num => $data) {
             $month = CalendarMonth::create([
                 'number' => $num,
                 'standard_name' => $data['name'],
+                'custom_name' => $data['custom'],
                 'season' => $data['season'],
-                'gregorian_reference' => $data['ref'],
+                'gregorian_reference' => $data['name'],
                 'deities' => $data['deity'] ?? null,
                 'meaning' => $data['meaning'] ?? null,
                 'year' => '6262',
             ]);
 
-            $daysInMonth = ($num === 13) ? 5 : 30;
+            $daysInMonth = Carbon::create(2025, $num, 1)->daysInMonth;
 
             for ($d = 1; $d <= $daysInMonth; $d++) {
                 CalendarDay::create([
                     'calendar_month_id' => $month->id,
                     'day_number' => $d,
-                    'gregorian_day' => $anchor->format('M d'),
+                    'gregorian_day' => Carbon::create(2025, $num, $d)->format('M d'),
                 ]);
-                $anchor->addDay();
             }
         }
     }
