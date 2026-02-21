@@ -107,10 +107,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AuthController::class, 'logout']);
 
         // Profile
-        Route::get('/orders', [\App\Http\Controllers\Api\V1\OrderController::class, 'index']);
         Route::get('/user', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
         Route::get('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
         Route::get('/orders', [\App\Http\Controllers\Api\V1\OrderController::class, 'index']);
+        Route::get('/orders/{order}', [\App\Http\Controllers\Api\V1\OrderController::class, 'show']);
+        Route::post('/orders/{order}/apply', [\App\Http\Controllers\Api\V1\OrderApplicationController::class, 'store']);
+        Route::get('/order-applications', [\App\Http\Controllers\Api\V1\OrderApplicationController::class, 'index']);
         Route::post('/profile/update', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);
         Route::post('/profile/photo', [\App\Http\Controllers\Api\V1\ProfileController::class, 'uploadPhoto']);
 

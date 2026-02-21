@@ -38,4 +38,14 @@ class Order extends Model implements HasMedia
         $this->addMediaCollection('order_images')
             ->singleFile();
     }
+
+    public function formFields()
+    {
+        return $this->hasMany(OrderFormField::class)->orderBy('sort_order');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(OrderApplication::class);
+    }
 }
