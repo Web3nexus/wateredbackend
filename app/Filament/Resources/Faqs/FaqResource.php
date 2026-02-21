@@ -10,9 +10,9 @@ class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
-    protected static ?string $navigationGroup = 'Content';
+    protected static \UnitEnum|string|null $navigationGroup = 'Content';
     protected static ?int $navigationSort = 5;
-    protected static ?string $navigationLabel = 'FAQs';
+    protected static \UnitEnum|string|null $navigationLabel = 'FAQs';
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
