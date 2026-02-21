@@ -53,11 +53,11 @@ class ContentSeeder extends Seeder
             ],
         ]);
 
-        // Privacy Policy
-        DB::table('global_settings')->updateOrInsert(
-            ['key' => 'privacy_policy'],
+        // Global Settings (Privacy Policy, Terms of Service, User Guide)
+        \App\Models\GlobalSetting::updateOrCreate(
+            ['id' => 1],
             [
-                'value' => '<h1>Privacy Policy</h1>
+                'privacy_policy' => '<h1>Privacy Policy</h1>
 <p>Last updated: ' . now()->format('F d, Y') . '</p>
 
 <h2>1. Information We Collect</h2>
@@ -83,16 +83,8 @@ class ContentSeeder extends Seeder
 
 <h2>6. Contact Us</h2>
 <p>If you have questions about this Privacy Policy, please contact us through the app.</p>',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
 
-        // Terms of Service
-        DB::table('global_settings')->updateOrInsert(
-            ['key' => 'terms_of_service'],
-            [
-                'value' => '<h1>Terms of Service</h1>
+                'terms_of_service' => '<h1>Terms of Service</h1>
 <p>Last updated: ' . now()->format('F d, Y') . '</p>
 
 <h2>1. Acceptance of Terms</h2>
@@ -117,53 +109,7 @@ class ContentSeeder extends Seeder
 <p>We reserve the right to terminate or suspend your account at our discretion.</p>
 
 <h2>8. Changes to Terms</h2>
-<p>We may modify these terms at any time. Continued use of the service constitutes acceptance of modified terms.</p>',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-
-        // User Guide
-        DB::table('global_settings')->updateOrInsert(
-            ['key' => 'user_guide'],
-            [
-                'value' => '<h1>User Guide</h1>
-
-<h2>Getting Started</h2>
-<p>Welcome to Watered! This guide will help you navigate our platform and make the most of your spiritual journey.</p>
-
-<h2>Dashboard</h2>
-<p>Your home screen shows:</p>
-<ul>
-<li><strong>Daily Wisdom</strong>: Receive daily spiritual guidance</li>
-<li><strong>Featured Teachings</strong>: Explore curated content</li>
-<li><strong>Quick Actions</strong>: Access Rituals, Incantations, Consultations, and Events</li>
-</ul>
-
-<h2>Library</h2>
-<p>Browse our extensive collection of:</p>
-<ul>
-<li><strong>Scriptures</strong>: Sacred texts organized by tradition (Igbo, Yoruba, Watered, etc.)</li>
-<li><strong>Audio Teachings</strong>: Listen to spiritual lessons</li>
-<li><strong>Video Content</strong>: Watch teachings in TikTok-style format</li>
-</ul>
-
-<h2>Consultations</h2>
-<p>Book one-on-one sessions with spiritual guides. Choose your consultation type and schedule a time that works for you.</p>
-
-<h2>Shop</h2>
-<p>Purchase spiritual items, books, and ritual supplies. Prices are automatically shown in your local currency.</p>
-
-<h2>Profile</h2>
-<p>Manage your account, view bookings, access Temple Discovery, and join the Community.</p>
-
-<h2>Premium Subscription</h2>
-<p>Unlock exclusive content, ad-free experience, and priority booking by subscribing to Watered Plus+.</p>
-
-<h2>Need Help?</h2>
-<p>Visit the FAQ section or contact support through the app.</p>',
-                'created_at' => now(),
-                'updated_at' => now(),
+<p>We may modify these terms at any time. Continued use of the service constitutes acceptance of modified terms.</p>'
             ]
         );
     }
