@@ -10,6 +10,10 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\KeyValue;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -20,6 +24,8 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Filament\Notifications\Notification;
 
 class OrderApplicationResource extends Resource
 {
@@ -33,26 +39,26 @@ class OrderApplicationResource extends Resource
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Section::make('Application Info')->schema([
-                    \Filament\Forms\Components\Select::make('order_id')
+                Section::make('Application Info')->schema([
+                    Select::make('order_id')
                         ->relationship('order', 'title')
                         ->disabled(),
-                    \Filament\Forms\Components\Select::make('user_id')
+                    Select::make('user_id')
                         ->relationship('user', 'name')
                         ->disabled(),
-                    \Filament\Forms\Components\Select::make('status')
+                    Select::make('status')
                         ->options([
                             'pending' => 'Pending',
                             'approved' => 'Approved',
                             'rejected' => 'Rejected',
                         ])
                         ->required(),
-                    \Filament\Forms\Components\Textarea::make('admin_notes')
+                    Textarea::make('admin_notes')
                         ->maxLength(65535)
                         ->columnSpanFull(),
                 ])->columns(2),
-                \Filament\Forms\Components\Section::make('Answers')->schema([
-                    \Filament\Forms\Components\KeyValue::make('answers')
+                Section::make('Answers')->schema([
+                    KeyValue::make('answers')
                         ->disabled()
                         ->columnSpanFull(),
                 ]),
@@ -97,7 +103,7 @@ class OrderApplicationResource extends Resource
                     ->color('success')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('admin_notes')
+                        Textarea::make('admin_notes')
                             ->label('Admin Notes (Optional, will be sent in email)'),
                     ])
                     ->action(function (OrderApplication $record, array $data): void {
@@ -109,10 +115,10 @@ class OrderApplicationResource extends Resource
                         try {
                             Mail::to($record->user->email)->send(new ApplicationApproved($record));
                         } catch (\Exception $e) {
-                            \Log::error('Failed to send approval email: ' . $e->getMessage());
+                            Log::error('Failed to send approval email: ' . $e->getMessage());
                         }
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Application Approved')
                             ->success()
                             ->send();
@@ -124,7 +130,7 @@ class OrderApplicationResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('admin_notes')
+                        Textarea::make('admin_notes')
                             ->label('Reason for Rejection (Optional, will be sent in email)'),
                     ])
                     ->action(function (OrderApplication $record, array $data): void {
@@ -136,10 +142,10 @@ class OrderApplicationResource extends Resource
                         try {
                             Mail::to($record->user->email)->send(new ApplicationRejected($record));
                         } catch (\Exception $e) {
-                            \Log::error('Failed to send rejection email: ' . $e->getMessage());
+                            Log::error('Failed to send rejection email: ' . $e->getMessage());
                         }
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Application Rejected')
                             ->danger()
                             ->send();
