@@ -4,17 +4,20 @@ namespace App\Filament\Resources\Faqs;
 
 use App\Models\Faq;
 use Filament\Resources\Resource;
-use App\Filament\Resources\Faqs\Pages;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use BackedEnum;
+use UnitEnum;
 
 class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-question-mark-circle';
-    protected static \UnitEnum|string|null $navigationGroup = 'Content';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static UnitEnum|string|null $navigationGroup = 'Content';
     protected static ?int $navigationSort = 5;
-    protected static \UnitEnum|string|null $navigationLabel = 'FAQs';
+    protected static ?string $navigationLabel = 'FAQs';
 
-    public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public static function form(Schema $schema): Schema
     {
         return $schema->components([
             \Filament\Schemas\Components\Section::make('FAQ Details')->schema([
@@ -40,7 +43,7 @@ class FaqResource extends Resource
         ]);
     }
 
-    public static function table(\Filament\Tables\Table $table): \Filament\Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
