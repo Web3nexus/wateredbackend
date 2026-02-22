@@ -32,3 +32,7 @@ Route::get('/events', [EventsListingController::class, 'index'])->name('events.i
 Route::get('/events/{event}', [EventsListingController::class, 'show'])->name('events.show');
 Route::post('/events/{event}/register', [EventsListingController::class, 'register'])->name('events.register');
 Route::get('/payment/callback', [LandingPageController::class, 'paymentCallback'])->name('payment.callback');
+
+Route::get('/privacy-policy', [LandingPageController::class, 'privacy'])->name('privacy');
+Route::get('/terms-of-service', [LandingPageController::class, 'terms'])->name('terms');
+Route::get('/contact-us', [LandingPageController::class, 'contact'])->name('contact');

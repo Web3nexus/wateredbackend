@@ -39,4 +39,22 @@ class LandingPageController extends Controller
             'status' => $request->query('status') === 'failed' ? 'failed' : 'success'
         ]);
     }
+
+    public function privacy()
+    {
+        $settings = GlobalSetting::first();
+        return view('privacy', compact('settings'));
+    }
+
+    public function terms()
+    {
+        $settings = GlobalSetting::first();
+        return view('terms', compact('settings'));
+    }
+
+    public function contact()
+    {
+        $settings = GlobalSetting::first();
+        return view('contact', compact('settings'));
+    }
 }
