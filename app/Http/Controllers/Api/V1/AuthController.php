@@ -205,20 +205,45 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $email = $request->email;
+        $user = User::where('email', $email)->first();
 
-        if ($status === Password::RESET_LINK_SENT) {
+        if (!$user) {
             return response()->json([
-                'message' => 'Password reset link sent to your email.',
-            ]);
+                'message' => 'Unable to send reset link. Please check your email address.',
+                'errors' => ['email' => ['We could not find a user with that email address.']]
+            ], 422);
         }
 
-        return response()->json([
-            'message' => 'Unable to send reset link. Please check your email address.',
-            'errors' => ['email' => ['We could not find a user with that email address.']]
-        ], 422);
+        try {
+            $firebaseService = new \App\Services\FirebaseService();
+            $oobCode = $firebaseService->generatePasswordResetCode($email);
+
+            if (!$oobCode) {
+                throw new \Exception("Could not generate reset code from Firebase.");
+            }
+
+            // Create our custom branded reset URL
+            $resetUrl = "https://mywatered.com/password/reset?mode=resetPassword&oobCode={$oobCode}";
+
+            // Send branded email
+            \Illuminate\Support\Facades\Mail::to($email)->send(
+                new \App\Mail\ResetPasswordMail($user->name, $resetUrl)
+            );
+
+            return response()->json([
+                'message' => 'Branded password reset link sent to your email.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Custom Password Reset Failure: " . $e->getMessage());
+
+            // Fallback to standard Laravel/Firebase flow if custom fails
+            // (Optional, but good for robustness)
+            return response()->json([
+                'message' => 'Failed to send branded reset link. Please try again later.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
