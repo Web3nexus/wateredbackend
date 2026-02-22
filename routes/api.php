@@ -79,6 +79,9 @@ Route::prefix('v1')->group(function () {
         // Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
         // Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
 
+        // Sacred Daily Rituals - NOT behind premium (these appear on the home screen for all users)
+        Route::get('/sacred-daily-rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'sacredDaily']);
+
         // Rituals & Deities & Holidays
         Route::middleware('premium')->group(function () {
             Route::get('/rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'index']);

@@ -23,6 +23,18 @@ class RitualController extends Controller
     }
 
     /**
+     * Sacred daily rituals - for the home screen widget (no premium required)
+     */
+    public function sacredDaily()
+    {
+        $rituals = Ritual::where('is_sacred_daily', true)
+            ->orderBy('time_of_day')
+            ->get();
+
+        return RitualResource::collection($rituals);
+    }
+
+    /**
      * Show ritual details
      */
     public function show(Ritual $ritual)
