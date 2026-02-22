@@ -99,6 +99,8 @@ class AuthController extends Controller
 
         Log::info("[REGISTER] Success for email: " . $user->email);
 
+        event(new Registered($user));
+
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
