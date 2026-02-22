@@ -7,6 +7,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 
 class IncantationForm
@@ -17,9 +18,9 @@ class IncantationForm
             ->components([
                 TextInput::make('title')
                     ->required(),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->columnSpanFull(),
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->columnSpanFull(),
                 Radio::make('audio_source_type')
                     ->label('Audio Source')
@@ -58,9 +59,9 @@ class IncantationForm
                 Toggle::make('is_paid')
                     ->required(),
                 TextInput::make('category'),
-                Textarea::make('spoken_text')
+                RichEditor::make('spoken_text')
                     ->columnSpanFull(),
-                Textarea::make('intended_outcome')
+                RichEditor::make('intended_outcome')
                     ->columnSpanFull(),
             ]);
     }

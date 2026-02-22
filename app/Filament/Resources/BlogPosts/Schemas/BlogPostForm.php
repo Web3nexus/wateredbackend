@@ -20,7 +20,7 @@ class BlogPostForm
                     ->required(),
                 TextInput::make('slug')
                     ->required(),
-                Textarea::make('summary')
+                RichEditor::make('summary')
                     ->columnSpanFull(),
                 RichEditor::make('content')
                     ->required()

@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Deities\Schemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 
 class DeityForm
@@ -16,7 +16,7 @@ class DeityForm
             ->components([
                 TextInput::make('name')
                     ->required(),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->columnSpanFull(),
                 FileUpload::make('image_url')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
@@ -30,13 +30,13 @@ class DeityForm
                     ->numeric()
                     ->default(999)
                     ->required(),
-                Textarea::make('mythology_story')
+                RichEditor::make('mythology_story')
                     ->columnSpanFull(),
-                Textarea::make('symbols')
+                RichEditor::make('symbols')
                     ->columnSpanFull(),
-                Textarea::make('domains')
+                RichEditor::make('domains')
                     ->columnSpanFull(),
-                Textarea::make('sacred_elements')
+                RichEditor::make('sacred_elements')
                     ->columnSpanFull(),
             ]);
     }

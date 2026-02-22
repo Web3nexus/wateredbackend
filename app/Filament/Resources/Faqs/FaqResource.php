@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Faqs;
 
 use App\Models\Faq;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -28,11 +29,11 @@ class FaqResource extends Resource
                     ->numeric()
                     ->default(0)
                     ->label('Sort Order'),
-                \Filament\Forms\Components\Textarea::make('question')
+                RichEditor::make('question')
                     ->required()
                     ->maxLength(1000)
                     ->columnSpanFull(),
-                \Filament\Forms\Components\Textarea::make('answer')
+                RichEditor::make('answer')
                     ->required()
                     ->maxLength(65535)
                     ->columnSpanFull(),

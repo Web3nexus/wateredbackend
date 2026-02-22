@@ -7,6 +7,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 
 class EventForm
@@ -27,7 +28,7 @@ class EventForm
                     ->searchable()
                     ->preload(),
                 TextInput::make('category'),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->columnSpanFull(),
                 DateTimePicker::make('start_time')
                     ->required(),

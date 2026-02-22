@@ -7,6 +7,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 
 class RitualForm
@@ -19,8 +21,17 @@ class RitualForm
                     ->required()
                     ->placeholder('e.g. Morning Water Ritual')
                     ->helperText('The title that will appear in the Sacred Schedule.'),
-                TextInput::make('category')
-                    ->placeholder('e.g. Cleansing, Ancestral')
+                Select::make('category')
+                    ->options([
+                        'cleansing' => 'Cleansing',
+                        'ancestral' => 'Ancestral',
+                        'protection' => 'Protection',
+                        'healing' => 'Healing',
+                        'prosperity' => 'Prosperity',
+                        'initiation' => 'Initiation',
+                        'general' => 'General',
+                    ])
+                    ->required()
                     ->helperText('Used for filtering and grouping.'),
                 Toggle::make('is_sacred_daily')
                     ->label('Is Sacred Daily?')
@@ -30,10 +41,10 @@ class RitualForm
                     ->required()
                     ->seconds(false)
                     ->helperText('What time does this ritual typically occur? (Used for the countdown)'),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->placeholder('A short summary...')
                     ->columnSpanFull(),
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->placeholder('The full ritual text or instructions...')
                     ->columnSpanFull(),
                 FileUpload::make('media_urls')
@@ -45,7 +56,7 @@ class RitualForm
                 TextInput::make('steps')
                     ->placeholder('["Step 1", "Step 2", ...]')
                     ->helperText('Enter steps as a JSON array string.'),
-                Textarea::make('symbolic_meaning')
+                RichEditor::make('symbolic_meaning')
                     ->placeholder('What does this ritual represent?')
                     ->columnSpanFull(),
             ]);

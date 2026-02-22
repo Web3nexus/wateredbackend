@@ -9,6 +9,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Resources\Resource;
@@ -57,7 +58,7 @@ class TraditionResource extends Resource
                             ->default(999)
                             ->required(),
 
-                        Textarea::make('description.en')
+                        RichEditor::make('description.en')
                             ->label('Description (English)')
                             ->maxLength(65535)
                             ->columnSpanFull(),
