@@ -442,7 +442,7 @@ class GlobalSettingForm
         return $component
             ->password()
             ->revealable()
-            ->alwaysDehydrated()
+            ->dehydrated()
             ->suffixAction(
                 Action::make('secureReveal')
                     ->icon('heroicon-m-lock-closed')

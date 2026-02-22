@@ -18,12 +18,12 @@ class PasswordResetController extends Controller
         $continueUrl = $request->query('continueUrl');
         $lang = $request->query('lang', 'en');
 
-        // We only care about resetPassword mode
-        if ($mode !== 'resetPassword' || !$oobCode) {
-            return redirect()->route('home');
-        }
+        // We will pass the validity status to the view instead of redirecting
+        // so the user can see their branded design even if they visit the link directly.
+        $isValid = ($mode === 'resetPassword' && !empty($oobCode));
 
         return view('auth.reset-password', [
+            'isValid' => $isValid,
             'oobCode' => $oobCode,
             'apiKey' => $apiKey,
             'continueUrl' => $continueUrl,

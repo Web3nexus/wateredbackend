@@ -163,24 +163,34 @@
         <img src="/storage/logo/WateredAppicon.png" alt="Watered Logo" class="logo"
             onerror="this.src='https://watered-8eb60.firebaseapp.com/favicon.ico'">
         <h1>Reset Password</h1>
-        <p id="instruction">Please enter your new password below.</p>
+        
+        @if($isValid)
+            <p id="instruction">Please enter your new password below.</p>
 
-        <div id="reset-form-container">
-            <div class="form-group">
-                <label for="password">New Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+            <div id="reset-form-container">
+                <div class="form-group">
+                    <label for="password">New Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="••••••••" required>
+                </div>
+                <button id="reset-button">SET NEW PASSWORD</button>
+                <div id="loading"></div>
             </div>
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" placeholder="••••••••" required>
+        @else
+            <div class="message error" style="display: block; margin-top: 24px;">
+                <strong>Invalid or Expired Link</strong><br>
+                This link is missing required security codes. Please use the link sent to your email or request a new one from the app.
             </div>
-            <button id="reset-button">SET NEW PASSWORD</button>
-            <div id="loading"></div>
-        </div>
+            <a href="/" style="display: inline-block; margin-top: 24px; color: var(--primary-color); text-decoration: none; font-weight: 600;">Go to Home</a>
+        @endif
 
         <div id="message" class="message"></div>
     </div>
 
+    @if($isValid)
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -256,6 +266,7 @@
             submitBtn.style.display = isLoading ? 'none' : 'block';
         }
     </script>
+    @endif
 </body>
 
 </html>
