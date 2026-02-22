@@ -36,3 +36,4 @@ Route::get('/payment/callback', [LandingPageController::class, 'paymentCallback'
 Route::get('/privacy-policy', [LandingPageController::class, 'privacy'])->name('privacy');
 Route::get('/terms-of-service', [LandingPageController::class, 'terms'])->name('terms');
 Route::get('/contact-us', [LandingPageController::class, 'contact'])->name('contact');
+Route::get('/account-deletion', [LandingPageController::class, 'deletion'])->name('deletion');

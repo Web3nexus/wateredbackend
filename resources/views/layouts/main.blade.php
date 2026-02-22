@@ -155,6 +155,8 @@
                                 Service</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-app-blue transition lowercase">Contact
                                 Us</a></li>
+                        <li><a href="{{ route('deletion') }}" class="hover:text-app-blue transition lowercase">Account
+                                Deletion</a></li>
                     </ul>
                 </div>
             </div>

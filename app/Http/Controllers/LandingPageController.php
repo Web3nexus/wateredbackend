@@ -57,4 +57,10 @@ class LandingPageController extends Controller
         $settings = GlobalSetting::first();
         return view('contact', compact('settings'));
     }
+
+    public function deletion()
+    {
+        $settings = GlobalSetting::first();
+        return view('deletion', compact('settings'));
+    }
 }

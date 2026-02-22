@@ -76,4 +76,28 @@ class ProfileController extends Controller
             'user' => $user->fresh(),
         ]);
     }
+
+    /**
+     * Delete the authenticated user's account and data.
+     */
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+
+        // Delete profile photo if exists
+        if ($user->profile_image) {
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            $disk = Storage::disk('public');
+            $oldPath = str_replace($disk->url(''), '', $user->profile_image);
+            $disk->delete($oldPath);
+        }
+
+        // Delete the user (Sanctum tokens will be deleted automatically due to cascade or manual delete)
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Account and associated data have been permanently deleted.'
+        ]);
+    }
 }

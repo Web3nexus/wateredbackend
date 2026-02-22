@@ -115,6 +115,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/order-applications', [\App\Http\Controllers\Api\V1\OrderApplicationController::class, 'index']);
         Route::post('/profile/update', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);
         Route::post('/profile/photo', [\App\Http\Controllers\Api\V1\ProfileController::class, 'uploadPhoto']);
+        Route::delete('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'destroy']);
 
         // Bookmarks
         Route::get('/bookmarks', [\App\Http\Controllers\Api\V1\BookmarkController::class, 'index']);
