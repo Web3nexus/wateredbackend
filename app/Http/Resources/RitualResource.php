@@ -21,7 +21,7 @@ class RitualResource extends JsonResource
             'content' => $this->content,
             'media_urls' => $this->media_urls ?? [],
             'category' => $this->category,
-            'steps' => $this->steps ?? [],
+            'steps' => is_array($this->steps) ? collect($this->steps)->pluck('step')->all() : [],
             'time_of_day' => $this->time_of_day,
             'symbolic_meaning' => $this->symbolic_meaning,
             'is_sacred_daily' => (bool) $this->is_sacred_daily,

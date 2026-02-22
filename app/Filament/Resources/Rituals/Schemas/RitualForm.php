@@ -9,6 +9,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Repeater;
 use Filament\Schemas\Schema;
 
 class RitualForm
@@ -53,9 +54,14 @@ class RitualForm
                     ->disk('public')
                     ->directory('rituals')
                     ->maxSize(102400), // 100MB
-                TextInput::make('steps')
-                    ->placeholder('["Step 1", "Step 2", ...]')
-                    ->helperText('Enter steps as a JSON array string.'),
+                Repeater::make('steps')
+                    ->schema([
+                        TextInput::make('step')
+                            ->required()
+                            ->placeholder('e.g. Wash your face with cold water')
+                    ])
+                    ->columnSpanFull()
+                    ->helperText('Add ritual steps one by one.'),
                 RichEditor::make('symbolic_meaning')
                     ->placeholder('What does this ritual represent?')
                     ->columnSpanFull(),
