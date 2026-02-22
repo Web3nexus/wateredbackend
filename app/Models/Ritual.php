@@ -20,11 +20,13 @@ class Ritual extends Model
         'steps',
         'time_of_day',
         'symbolic_meaning',
+        'is_sacred_daily',
     ];
 
     protected $casts = [
         'media_urls' => 'array',
         'steps' => 'array',
+        'is_sacred_daily' => 'boolean',
     ];
 
     /**

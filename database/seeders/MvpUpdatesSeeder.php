@@ -118,6 +118,7 @@ class MvpUpdatesSeeder extends Seeder
                 ]),
                 'time_of_day' => '05:00:00',
                 'symbolic_meaning' => 'Represents spiritual cleansing and the renewal of divine connection each morning.',
+                'is_sacred_daily' => true,
             ],
             [
                 'title' => 'Afternoon Libations',
@@ -133,6 +134,7 @@ class MvpUpdatesSeeder extends Seeder
                 ]),
                 'time_of_day' => '13:00:00',
                 'symbolic_meaning' => 'Maintains connection with ancestral spirits and honors their wisdom.',
+                'is_sacred_daily' => true,
             ],
             [
                 'title' => 'Night Water Cleansing',
@@ -148,6 +150,7 @@ class MvpUpdatesSeeder extends Seeder
                 ]),
                 'time_of_day' => '20:00:00',
                 'symbolic_meaning' => 'Releases negative energy and prepares the spirit for rest and renewal.',
+                'is_sacred_daily' => true,
             ],
             [
                 'title' => 'Ancestral Libation',
