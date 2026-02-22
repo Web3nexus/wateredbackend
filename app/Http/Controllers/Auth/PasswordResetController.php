@@ -13,15 +13,22 @@ class PasswordResetController extends Controller
     public function showResetForm(Request $request)
     {
         // Support both oobCode and oobcode, and mode/apiKey
-        $mode = $request->query('mode') ?? $request->query('mode');
-        $oobCode = $request->query('oobCode') ?? $request->query('oobcode');
-        $apiKey = $request->query('apiKey') ?? $request->query('apikey');
-        $continueUrl = $request->query('continueUrl') ?? $request->query('continueurl');
-        $lang = $request->query('lang', 'en');
+        $mode = $request->input('mode', $request->input('mode', 'resetPassword'));
+        $oobCode = $request->input('oobCode') ?? $request->input('oobcode');
+        $apiKey = $request->input('apiKey') ?? $request->input('apikey');
+        $continueUrl = $request->input('continueUrl') ?? $request->input('continueurl');
+        $lang = $request->input('lang', 'en');
 
-        // We will pass the validity status to the view instead of redirecting
-        // so the user can see their branded design even if they visit the link directly.
-        $isValid = ($mode === 'resetPassword' && !empty($oobCode));
+        // Log for debugging to see why it's failing
+        \Illuminate\Support\Facades\Log::info('Password Reset Page Accessed', [
+            'mode' => $mode,
+            'oobCode_present' => !empty($oobCode),
+            'apiKey_present' => !empty($apiKey),
+            'all_params' => $request->all(),
+        ]);
+
+        // Be more lenient - if oobCode is present, let the Firebase JS try to verify it
+        $isValid = !empty($oobCode);
 
         return view('auth.reset-password', [
             'isValid' => $isValid,

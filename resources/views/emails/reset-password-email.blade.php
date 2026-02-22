@@ -114,7 +114,7 @@
                     new one:</p>
 
                 <div class="button-wrapper">
-                    <a href="{{ $resetUrl }}" class="button">SET NEW PASSWORD</a>
+                    <a href="{!! $resetUrl !!}" class="button">SET NEW PASSWORD</a>
                 </div>
 
                 <p class="notice">If you didn't request this, you can safely ignore this email.</p>
