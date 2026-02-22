@@ -13,6 +13,9 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\RichEditor;
+use Filament\Actions\Action;
+use Illuminate\Support\Facades\Hash;
+use Filament\Notifications\Notification;
 
 class GlobalSettingForm
 {
@@ -239,32 +242,36 @@ class GlobalSettingForm
 
                                 Section::make('Stripe Payments')
                                     ->schema([
-                                        TextInput::make('stripe_public_key')
-                                            ->label('Stripe Publishable Key'),
-                                        TextInput::make('stripe_secret_key')
-                                            ->label('Stripe Secret Key')
-                                            ->password()
-                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('stripe_public_key')
+                                                ->label('Stripe Publishable Key')
+                                        ),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('stripe_secret_key')
+                                                ->label('Stripe Secret Key')
+                                        ),
                                     ])->columns(2),
-
                                 Section::make('Paystack Payments')
                                     ->schema([
-                                        TextInput::make('paystack_public_key')
-                                            ->label('Paystack Public Key'),
-                                        TextInput::make('paystack_secret_key')
-                                            ->label('Paystack Secret Key')
-                                            ->password()
-                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('paystack_public_key')
+                                                ->label('Paystack Public Key')
+                                        ),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('paystack_secret_key')
+                                                ->label('Paystack Secret Key')
+                                        ),
                                     ])->columns(2),
-
                                 Section::make('Flutterwave Payments')
                                     ->schema([
-                                        TextInput::make('flutterwave_public_key')
-                                            ->label('Flutterwave Public Key'),
-                                        TextInput::make('flutterwave_secret_key')
-                                            ->label('Flutterwave Secret Key')
-                                            ->password()
-                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('flutterwave_public_key')
+                                                ->label('Flutterwave Public Key')
+                                        ),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('flutterwave_secret_key')
+                                                ->label('Flutterwave Secret Key')
+                                        ),
                                     ])->columns(2),
 
                                 Section::make('Premium Subscription Pricing (Local/NGN)')
@@ -333,10 +340,10 @@ class GlobalSettingForm
                             ->schema([
                                 Section::make('Apple App Store')
                                     ->schema([
-                                        TextInput::make('apple_shared_secret')
-                                            ->label('App Store Shared Secret')
-                                            ->password()
-                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('apple_shared_secret')
+                                                ->label('App Store Shared Secret')
+                                        ),
                                     ]),
 
                                 Section::make('Google Play Store')
@@ -403,10 +410,10 @@ class GlobalSettingForm
                                             ->placeholder('2525'),
                                         TextInput::make('mail_username')
                                             ->label('SMTP Username'),
-                                        TextInput::make('mail_password')
-                                            ->label('SMTP Password')
-                                            ->password()
-                                            ->dehydrated(fn(?string $state) => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('mail_password')
+                                                ->label('SMTP Password')
+                                        ),
                                         Select::make('mail_encryption')
                                             ->label('Encryption')
                                             ->options([
@@ -428,5 +435,44 @@ class GlobalSettingForm
                             ]),
                     ]),
             ]);
+    }
+
+    protected static function addSecureRevealAction(TextInput $component): TextInput
+    {
+        return $component
+            ->password()
+            ->revealable()
+            ->alwaysDehydrated()
+            ->suffixAction(
+                Action::make('secureReveal')
+                    ->icon('heroicon-m-lock-closed')
+                    ->color('gray')
+                    ->tooltip('Reveal with Password')
+                    ->form([
+                        TextInput::make('verify_password')
+                            ->label('Admin Password')
+                            ->password()
+                            ->required()
+                    ])
+                    ->action(function (array $data, TextInput $component) {
+                        if (!Hash::check($data['verify_password'], auth()->user()->getAuthPassword())) {
+                            Notification::make()
+                                ->title('Incorrect password')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $state = $component->getState();
+
+                        Notification::make()
+                            ->title('Key Revealed')
+                            ->body("Value: {$state}")
+                            ->success()
+                            ->persistent()
+                            ->send();
+                    })
+            );
     }
 }
