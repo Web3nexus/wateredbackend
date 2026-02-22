@@ -6,6 +6,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class RitualForm
@@ -21,6 +22,10 @@ class RitualForm
                 TextInput::make('category')
                     ->placeholder('e.g. Cleansing, Ancestral')
                     ->helperText('Used for filtering and grouping.'),
+                Toggle::make('is_sacred_daily')
+                    ->label('Is Sacred Daily?')
+                    ->helperText('If enabled, this ritual will be permanent on the Home Screen and excluded from the general rituals list.')
+                    ->default(false),
                 TimePicker::make('time_of_day')
                     ->required()
                     ->seconds(false)

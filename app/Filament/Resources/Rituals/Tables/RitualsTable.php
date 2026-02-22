@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class RitualsTable
@@ -26,6 +27,8 @@ class RitualsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('category')
                     ->searchable(),
+                ToggleColumn::make('is_sacred_daily')
+                    ->label('Sacred Daily'),
                 TextColumn::make('time_of_day')
                     ->time()
                     ->sortable(),
