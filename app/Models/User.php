@@ -153,20 +153,43 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if the user has an active premium subscription.
-     * This is the source of truth that also ensures is_premium remains synced.
+     * 
+     * Priority:
+     *  1. Active subscription record → user is premium, sync is_premium = true
+     *  2. No subscription but is_premium is manually set to true → treat as admin override (keep it)
+     *  3. No subscription AND is_premium is false → not premium
+     * 
+     * This prevents admin-granted manual premium from being auto-revoked.
      */
     public function hasActivePremium(): bool
     {
         $activeSub = $this->subscription;
-        $isStillPremium = $activeSub !== null;
 
-        // Auto-sync the boolean if out of date
-        if ($this->is_premium !== $isStillPremium) {
-            $this->is_premium = $isStillPremium;
-            $this->save();
+        if ($activeSub !== null) {
+            // Active subscription found — ensure flag is synced
+            if (!$this->is_premium) {
+                $this->is_premium = true;
+                $this->save();
+            }
+            return true;
         }
 
-        return $isStillPremium;
+        // No active subscription. Check if premium was manually granted by admin.
+        // We only auto-revoke if a subscription existed before AND has now expired.
+        $hadExpiredSub = $this->subscriptions()
+            ->where('status', '!=', 'active')
+            ->orWhere('expires_at', '<=', now())
+            ->exists();
+
+        if ($hadExpiredSub && $this->is_premium) {
+            // Subscription expired — revoke the flag
+            $this->is_premium = false;
+            $this->save();
+            return false;
+        }
+
+        // No subscription history — is_premium flag is the source of truth (admin grant)
+        return (bool) $this->is_premium;
     }
 
     public function reminders(): \Illuminate\Database\Eloquent\Relations\HasMany
