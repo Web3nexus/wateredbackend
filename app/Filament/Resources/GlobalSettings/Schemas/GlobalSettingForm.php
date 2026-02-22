@@ -43,6 +43,16 @@ class GlobalSettingForm
                                             ->directory('branding'),
                                     ]),
 
+                                Section::make('App Colors (Branding)')
+                                    ->schema([
+                                        ColorPicker::make('primary_color')
+                                            ->label('Primary App Color')
+                                            ->default('#d4af37'),
+                                        ColorPicker::make('secondary_color')
+                                            ->label('Secondary App Color')
+                                            ->default('#0c1427'),
+                                    ])->columns(2),
+
                                 Section::make('Contact Information')
                                     ->schema([
                                         TextInput::make('contact_email')
@@ -146,15 +156,6 @@ class GlobalSettingForm
 
                         Tabs\Tab::make('App Configuration')
                             ->schema([
-                                Section::make('Branding')
-                                    ->schema([
-                                        ColorPicker::make('primary_color')
-                                            ->label('Primary App Color')
-                                            ->default('#d4af37'),
-                                        ColorPicker::make('secondary_color')
-                                            ->label('Secondary App Color')
-                                            ->default('#0c1427'),
-                                    ])->columns(2),
 
                                 Section::make('Localization')
                                     ->schema([
