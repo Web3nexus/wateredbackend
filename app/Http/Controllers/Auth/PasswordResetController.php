@@ -12,10 +12,11 @@ class PasswordResetController extends Controller
      */
     public function showResetForm(Request $request)
     {
-        $mode = $request->query('mode');
-        $oobCode = $request->query('oobCode');
-        $apiKey = $request->query('apiKey');
-        $continueUrl = $request->query('continueUrl');
+        // Support both oobCode and oobcode, and mode/apiKey
+        $mode = $request->query('mode') ?? $request->query('mode');
+        $oobCode = $request->query('oobCode') ?? $request->query('oobcode');
+        $apiKey = $request->query('apiKey') ?? $request->query('apikey');
+        $continueUrl = $request->query('continueUrl') ?? $request->query('continueurl');
         $lang = $request->query('lang', 'en');
 
         // We will pass the validity status to the view instead of redirecting
@@ -29,7 +30,7 @@ class PasswordResetController extends Controller
             'continueUrl' => $continueUrl,
             'lang' => $lang,
             'firebaseConfig' => [
-                'apiKey' => 'AIzaSyDinzQ9rUpwxd4SE0xp3Qgu_GZEwroBT7Y',
+                'apiKey' => $apiKey ?? 'AIzaSyDinzQ9rUpwxd4SE0xp3Qgu_GZEwroBT7Y',
                 'authDomain' => 'watered-c14bb.firebaseapp.com',
                 'projectId' => 'watered-c14bb',
                 'storageBucket' => 'watered-c14bb.firebasestorage.app',

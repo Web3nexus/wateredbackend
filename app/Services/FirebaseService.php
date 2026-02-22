@@ -20,8 +20,9 @@ class FirebaseService
             }
 
             $projectId = 'watered-c14bb';
+            $apiKey = 'AIzaSyDinzQ9rUpwxd4SE0xp3Qgu_GZEwroBT7Y';
             $response = Http::withToken($accessToken)
-                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:sendOobCode", [
+                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:sendOobCode?key={$apiKey}", [
                     'requestType' => 'PASSWORD_RESET',
                     'email' => $email,
                     'returnOobCode' => true,

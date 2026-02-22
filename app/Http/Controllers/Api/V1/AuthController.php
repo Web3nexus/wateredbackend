@@ -224,7 +224,8 @@ class AuthController extends Controller
             }
 
             // Create our custom branded reset URL
-            $resetUrl = "https://mywatered.com/password/reset?mode=resetPassword&oobCode={$oobCode}";
+            $apiKey = 'AIzaSyDinzQ9rUpwxd4SE0xp3Qgu_GZEwroBT7Y';
+            $resetUrl = "https://mywatered.com/password/reset?mode=resetPassword&oobCode={$oobCode}&apiKey={$apiKey}";
 
             // Send branded email
             \Illuminate\Support\Facades\Mail::to($email)->send(
