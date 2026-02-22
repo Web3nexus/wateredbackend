@@ -7,6 +7,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Schema;
 
@@ -58,7 +59,21 @@ class IncantationForm
                     ->helperText('Provide a direct link to the audio file.'),
                 Toggle::make('is_paid')
                     ->required(),
-                TextInput::make('category'),
+                Select::make('category')
+                    ->options([
+                        'Protection' => 'Protection',
+                        'Love' => 'Love',
+                        'Prosperity' => 'Prosperity',
+                        'Healing' => 'Healing',
+                        'Power' => 'Power',
+                        'Wisdom' => 'Wisdom',
+                        'Peace' => 'Peace',
+                        'Ancestral' => 'Ancestral',
+                        'Cleansing' => 'Cleansing',
+                    ])
+                    ->searchable()
+                    ->required()
+                    ->helperText('Used for filtering on the app.'),
                 RichEditor::make('spoken_text')
                     ->columnSpanFull(),
                 RichEditor::make('intended_outcome')
