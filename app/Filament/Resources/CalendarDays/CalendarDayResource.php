@@ -47,9 +47,38 @@ class CalendarDayResource extends Resource
                             ->label('Gregorian Reference')
                             ->content(fn($record) => $record?->gregorian_day),
 
+                        Placeholder::make('weekday')
+                            ->label('Day of Week')
+                            ->content(function ($record) {
+                                if (!$record)
+                                    return '-';
+                                try {
+                                    $year = $record->month?->year ?? date('Y');
+                                    $dateStr = $record->gregorian_day . ' ' . $year;
+                                    return \Carbon\Carbon::parse($dateStr)->format('l');
+                                } catch (\Exception $e) {
+                                    return 'Unknown';
+                                }
+                            }),
+
                         TextInput::make('custom_day_name')
-                            ->label('Special Name for this Day')
-                            ->placeholder('e.g. Day of the Great Awakening'),
+                            ->label('Specific Spiritual Name')
+                            ->placeholder(function ($record) {
+                                if (!$record)
+                                    return 'e.g. Day of Awakening';
+                                try {
+                                    $year = $record->month?->year ?? date('Y');
+                                    $dateStr = $record->gregorian_day . ' ' . $year;
+                                    $date = \Carbon\Carbon::parse($dateStr);
+                                    if ($date->isThursday())
+                                        return 'Ancestral Day (Automatic)';
+                                    if ($date->isSaturday())
+                                        return 'Day of the Gods (Automatic)';
+                                } catch (\Exception $e) {
+                                }
+                                return 'Regular Day (Automatic)';
+                            })
+                            ->helperText('Leave empty to use the automatic designation based on the day of the week.'),
 
                         TextInput::make('celebration_type')
                             ->label('Celebration Type')
@@ -86,9 +115,42 @@ class CalendarDayResource extends Resource
                 Tables\Columns\TextColumn::make('gregorian_day')
                     ->label('Gregorian Ref')
                     ->color('gray'),
+                Tables\Columns\TextColumn::make('weekday')
+                    ->label('Day of Week')
+                    ->getStateUsing(function ($record) {
+                        try {
+                            $year = $record->month?->year ?? date('Y');
+                            $dateStr = $record->gregorian_day . ' ' . $year;
+                            return \Carbon\Carbon::parse($dateStr)->format('l');
+                        } catch (\Exception $e) {
+                            return 'Unknown';
+                        }
+                    }),
                 Tables\Columns\TextColumn::make('custom_day_name')
-                    ->label('Name')
-                    ->placeholder('Regular Day')
+                    ->label('Spiritual Designation')
+                    ->getStateUsing(function ($record) {
+                        if ($record->custom_day_name) {
+                            return $record->custom_day_name;
+                        }
+
+                        try {
+                            $year = $record->month?->year ?? date('Y');
+                            $dateStr = $record->gregorian_day . ' ' . $year;
+                            $date = \Carbon\Carbon::parse($dateStr);
+
+                            if ($date->isThursday()) {
+                                return 'Ancestral Day';
+                            }
+
+                            if ($date->isSaturday()) {
+                                return 'Day of the Gods';
+                            }
+                        } catch (\Exception $e) {
+                            // Fallback
+                        }
+
+                        return 'Regular Day';
+                    })
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_sacred')
                     ->label('Sacred')
