@@ -16,10 +16,12 @@ class SubscriptionController extends Controller
      */
     public function index(Request $request)
     {
-        $subscription = $request->user()->subscription;
+        $user = $request->user();
+        $isPremium = $user->hasActivePremium();
+        $subscription = $user->subscription;
 
         return response()->json([
-            'is_premium' => $request->user()->is_premium,
+            'is_premium' => $isPremium,
             'subscription' => $subscription,
         ]);
     }
@@ -129,6 +131,10 @@ class SubscriptionController extends Controller
 
         if ($response->successful() && isset($data['data']['status']) && $data['data']['status'] === 'success') {
             // Success
+            // Determine duration based on plan_id in settings
+            $isYearly = $request->plan_id == $settings->premium_yearly_id;
+            $duration = $isYearly ? now()->addYear() : now()->addMonth();
+
             $user->subscriptions()->create([
                 'plan_id' => $request->plan_id,
                 'provider' => 'paystack',
@@ -137,7 +143,7 @@ class SubscriptionController extends Controller
                 'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents
                 'status' => 'active',
                 'starts_at' => now(),
-                'expires_at' => now()->addMonth(), // Assuming monthly for now
+                'expires_at' => $duration,
             ]);
 
             $user->is_premium = true;

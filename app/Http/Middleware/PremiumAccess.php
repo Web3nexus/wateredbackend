@@ -15,7 +15,7 @@ class PremiumAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->is_premium) {
+        if ($request->user() && !$request->user()->hasActivePremium()) {
             return response()->json([
                 'message' => 'Unlock this feature with Watered Plus+',
                 'error' => 'PREMIUM_REQUIRED'

@@ -144,7 +144,29 @@ class User extends Authenticatable implements MustVerifyEmail
     // Helper to get active subscription
     public function getSubscriptionAttribute()
     {
-        return $this->subscriptions()->where('status', 'active')->latest()->first();
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Check if the user has an active premium subscription.
+     * This is the source of truth that also ensures is_premium remains synced.
+     */
+    public function hasActivePremium(): bool
+    {
+        $activeSub = $this->subscription;
+        $isStillPremium = $activeSub !== null;
+
+        // Auto-sync the boolean if out of date
+        if ($this->is_premium !== $isStillPremium) {
+            $this->is_premium = $isStillPremium;
+            $this->save();
+        }
+
+        return $isStillPremium;
     }
 
     public function reminders(): \Illuminate\Database\Eloquent\Relations\HasMany
