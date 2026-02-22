@@ -14,8 +14,10 @@ class ProfileController extends Controller
      */
     public function show(Request $request)
     {
-        // The app's getUser() expects the User object directly, not wrapped
-        return response()->json($request->user()->fresh());
+        $user = $request->user()->fresh();
+        // Ensure is_premium reflects the actual active subscription state
+        $user->hasActivePremium();
+        return response()->json($user->fresh());
     }
 
     /**

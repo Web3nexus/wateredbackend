@@ -131,12 +131,14 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
+        // Ensure is_premium is synced from subscriptions
+        $freshUser->hasActivePremium();
 
         Log::info("[LOGIN] SUCCESS User {$user->id}.");
 
         // Return EXACTLY what AuthResponse.dart expects: user and token keys.
         return response()->json([
-            'user' => $freshUser,
+            'user' => $freshUser->fresh(),
             'token' => $token,
         ]);
     }
@@ -184,11 +186,14 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
+        $freshUser = $user->fresh();
+        // Ensure is_premium is synced from subscriptions
+        $freshUser->hasActivePremium();
 
         Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
 
         return response()->json([
-            'user' => $user->fresh(),
+            'user' => $freshUser->fresh(),
             'token' => $token,
         ]);
     }
