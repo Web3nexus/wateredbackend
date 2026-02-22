@@ -7,6 +7,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -301,18 +302,9 @@ class GlobalSettingForm
                                             ->label('Premium Page Subtitle')
                                             ->placeholder('e.g. Unlock the full depth of African spirituality.')
                                             ->default('Unlock the full depth of African spirituality.'),
-                                        Select::make('premium_features')
+                                        TagsInput::make('premium_features')
                                             ->label('Plan Features')
-                                            ->multiple()
                                             ->placeholder('Type a feature and press enter...')
-                                            ->options([]) // We use it as a tag input
-                                            ->searchable()
-                                            ->createOptionForm([
-                                                TextInput::make('feature')
-                                                    ->required()
-                                            ])
-                                            ->getSearchResultsUsing(fn(string $search): array => [$search => $search])
-                                            ->getOptionLabelUsing(fn($value): ?string => $value)
                                             ->helperText('Selected features will be displayed on the subscription plans.'),
                                     ])->columns(2),
 
