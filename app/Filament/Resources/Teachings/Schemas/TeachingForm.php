@@ -26,6 +26,9 @@ class TeachingForm
                     ->required()
                     ->columnSpanFull(),
                 FileUpload::make('featured_image')
+                    ->image()
+                    ->imageEditor()
+                    ->imageCropAspectRatio('16:9')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('blog-posts'),
