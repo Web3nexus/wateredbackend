@@ -20,16 +20,15 @@ class FirebaseService
             }
 
             $projectId = 'watered-c14bb';
-            $apiKey = 'AIzaSyDinzQ9rUpwxd4SE0xp3Qgu_GZEwroBT7Y';
             $response = Http::withToken($accessToken)
-                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:sendOobCode?key={$apiKey}", [
+                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:sendOobCode", [
                     'requestType' => 'PASSWORD_RESET',
                     'email' => $email,
                     'returnOobCode' => true,
                 ]);
 
             if ($response->failed()) {
-                Log::error("Firebase OOB Code generation failed: " . $response->body());
+                Log::error("Firebase OOB Code generation failed with status " . $response->status() . ": " . $response->body());
                 return null;
             }
 
