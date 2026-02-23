@@ -203,12 +203,19 @@ class AuthController extends Controller
      */
     public function forgotPassword(Request $request)
     {
+        Log::info('===== FORGOT PASSWORD REQUEST RECEIVED =====', [
+            'email' => $request->email,
+            'ip' => $request->ip(),
+            'method' => $request->method(),
+        ]);
+
         $request->validate(['email' => 'required|email']);
 
         $email = $request->email;
         $user = User::where('email', $email)->first();
 
         if (!$user) {
+            Log::warning('Forgot Password: User not found', ['email' => $email]);
             return response()->json([
                 'message' => 'Unable to send reset link. Please check your email address.',
                 'errors' => ['email' => ['We could not find a user with that email address.']]
