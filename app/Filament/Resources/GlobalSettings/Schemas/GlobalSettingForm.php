@@ -280,7 +280,7 @@ class GlobalSettingForm
                                         TextInput::make('premium_monthly_id')
                                             ->label('Monthly Product ID')
                                             ->placeholder('e.g. premium_monthly')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_price')
                                             ->label('Monthly Display Price')
                                             ->placeholder('e.g. ₦5,000')
@@ -294,7 +294,7 @@ class GlobalSettingForm
                                         TextInput::make('premium_yearly_id')
                                             ->label('Yearly Product ID')
                                             ->placeholder('e.g. premium_yearly')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_price')
                                             ->label('Yearly Display Price')
                                             ->placeholder('e.g. ₦50,000')
@@ -312,16 +312,38 @@ class GlobalSettingForm
                                             ->label('Premium Page Title')
                                             ->placeholder('e.g. WATERED PLUS+')
                                             ->default('WATERED PLUS+')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_subtitle')
                                             ->label('Premium Page Subtitle')
                                             ->placeholder('e.g. Unlock the full depth of African spirituality.')
                                             ->default('Unlock the full depth of African spirituality.')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TagsInput::make('premium_features')
                                             ->label('Plan Features')
-                                            ->placeholder('Type a feature and press enter...')
-                                            ->helperText('Selected features will be displayed on the subscription plans.'),
+                                            ->placeholder('Add a feature and press Enter...')
+                                            ->helperText('These features are shown on the subscription plans in the app. Edit or add your own.')
+                                            ->suggestions([
+                                                'Complete Sacred Library',
+                                                'Daily Audio Teachings',
+                                                'Community Access',
+                                                'Unlimited Rituals',
+                                                'Everything in Monthly',
+                                                '2 Months Free',
+                                                'Exclusive Yearly Content',
+                                                'Priority Support',
+                                                'Ad-Free Experience',
+                                                'Offline Access',
+                                                'Nima Sedani Access',
+                                                'Sacred Calendar',
+                                                'Daily Wisdom Verses',
+                                                'Direct Spiritual Guidance',
+                                            ])
+                                            ->default([
+                                                'Complete Sacred Library',
+                                                'Daily Audio Teachings',
+                                                'Community Access',
+                                                'Unlimited Rituals',
+                                            ]),
                                     ])->columns(2),
 
                                 Section::make('Premium Subscription Pricing (International/USD)')
@@ -330,22 +352,22 @@ class GlobalSettingForm
                                         TextInput::make('premium_monthly_price_usd')
                                             ->label('Monthly Display Price (USD)')
                                             ->placeholder('e.g. $9.99')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_amount_usd')
                                             ->label('Monthly Charge Amount (Cents)')
                                             ->numeric()
                                             ->placeholder('999')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
 
                                         TextInput::make('premium_yearly_price_usd')
                                             ->label('Yearly Display Price (USD)')
                                             ->placeholder('e.g. $99.99')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_amount_usd')
                                             ->label('Yearly Charge Amount (Cents)')
                                             ->numeric()
                                             ->placeholder('9999')
-                                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                     ])->columns(2),
                             ]),
 
