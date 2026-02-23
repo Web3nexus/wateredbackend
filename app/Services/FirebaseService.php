@@ -32,9 +32,10 @@ class FirebaseService
                 return null;
             }
 
+            Log::info("Firebase OOB Code generated successfully for: " . $email);
             return $response->json('oobCode');
         } catch (\Exception $e) {
-            Log::error("FirebaseService Error: " . $e->getMessage());
+            Log::error("FirebaseService Error in generatePasswordResetCode: " . $e->getMessage());
             return null;
         }
     }
@@ -45,13 +46,19 @@ class FirebaseService
      */
     protected function getAccessToken()
     {
+        Log::info("Attempting to get Firebase Access Token...");
         $serviceAccountFile = base_path('watered-c14bb-firebase-adminsdk-fbsvc-cf02191074.json');
         if (!file_exists($serviceAccountFile)) {
             Log::error("Firebase Service Account file not found at: " . $serviceAccountFile);
+            Log::error("Current base_path: " . base_path());
             return null;
         }
 
         $serviceAccount = json_decode(file_get_contents($serviceAccountFile), true);
+        if (!$serviceAccount) {
+            Log::error("Failed to decode Firebase Service Account JSON");
+            return null;
+        }
 
         $now = time();
         $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
@@ -67,7 +74,13 @@ class FirebaseService
         $base64UrlPayload = $this->base64UrlEncode($payload);
 
         $signature = '';
-        openssl_sign($base64UrlHeader . "." . $base64UrlPayload, $signature, $serviceAccount['private_key'], 'SHA256');
+        $privateKey = $serviceAccount['private_key'];
+
+        if (!openssl_sign($base64UrlHeader . "." . $base64UrlPayload, $signature, $privateKey, 'SHA256')) {
+            Log::error("Failed to sign JWT for Firebase: " . openssl_error_string());
+            return null;
+        }
+
         $base64UrlSignature = $this->base64UrlEncode($signature);
 
         $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
@@ -82,6 +95,7 @@ class FirebaseService
             return null;
         }
 
+        Log::info("Firebase Access Token successfully retrieved.");
         return $response->json('access_token');
     }
 

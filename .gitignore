@@ -10,6 +10,7 @@
 /.nova
 /.phpunit.cache
 /.vscode
+/watered-c14bb-firebase-adminsdk-fbsvc-cf02191074.json
 /.zed
 /auth.json
 /node_modules
