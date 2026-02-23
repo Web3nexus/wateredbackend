@@ -208,7 +208,8 @@ class GlobalSettingForm
                                         TextInput::make('currency_symbol')
                                             ->label('Currency Symbol')
                                             ->default('₦')
-                                            ->maxLength(10),
+                                            ->maxLength(10)
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         Select::make('currency_position')
                                             ->label('Currency Position')
                                             ->options([
@@ -278,25 +279,31 @@ class GlobalSettingForm
                                     ->schema([
                                         TextInput::make('premium_monthly_id')
                                             ->label('Monthly Product ID')
-                                            ->placeholder('e.g. premium_monthly'),
+                                            ->placeholder('e.g. premium_monthly')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_price')
                                             ->label('Monthly Display Price')
-                                            ->placeholder('e.g. ₦5,000'),
+                                            ->placeholder('e.g. ₦5,000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_amount')
                                             ->label('Monthly Charge Amount (Kobo)')
                                             ->numeric()
-                                            ->placeholder('500000'),
+                                            ->placeholder('500000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
 
                                         TextInput::make('premium_yearly_id')
                                             ->label('Yearly Product ID')
-                                            ->placeholder('e.g. premium_yearly'),
+                                            ->placeholder('e.g. premium_yearly')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_price')
                                             ->label('Yearly Display Price')
-                                            ->placeholder('e.g. ₦50,000'),
+                                            ->placeholder('e.g. ₦50,000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_amount')
                                             ->label('Yearly Charge Amount (Kobo)')
                                             ->numeric()
-                                            ->placeholder('5000000'),
+                                            ->placeholder('5000000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                     ])->columns(3),
 
                                 Section::make('Premium Plan Marketing Text')
@@ -304,11 +311,13 @@ class GlobalSettingForm
                                         TextInput::make('premium_title')
                                             ->label('Premium Page Title')
                                             ->placeholder('e.g. WATERED PLUS+')
-                                            ->default('WATERED PLUS+'),
+                                            ->default('WATERED PLUS+')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TextInput::make('premium_subtitle')
                                             ->label('Premium Page Subtitle')
                                             ->placeholder('e.g. Unlock the full depth of African spirituality.')
-                                            ->default('Unlock the full depth of African spirituality.'),
+                                            ->default('Unlock the full depth of African spirituality.')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TagsInput::make('premium_features')
                                             ->label('Plan Features')
                                             ->placeholder('Type a feature and press enter...')
@@ -320,19 +329,23 @@ class GlobalSettingForm
                                     ->schema([
                                         TextInput::make('premium_monthly_price_usd')
                                             ->label('Monthly Display Price (USD)')
-                                            ->placeholder('e.g. $9.99'),
+                                            ->placeholder('e.g. $9.99')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_amount_usd')
                                             ->label('Monthly Charge Amount (Cents)')
                                             ->numeric()
-                                            ->placeholder('999'),
+                                            ->placeholder('999')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
 
                                         TextInput::make('premium_yearly_price_usd')
                                             ->label('Yearly Display Price (USD)')
-                                            ->placeholder('e.g. $99.99'),
+                                            ->placeholder('e.g. $99.99')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_amount_usd')
                                             ->label('Yearly Charge Amount (Cents)')
                                             ->numeric()
-                                            ->placeholder('9999'),
+                                            ->placeholder('9999')
+                                            ->dehydrated(fn (?string $state): bool => filled($state)),
                                     ])->columns(2),
                             ]),
 
@@ -442,7 +455,8 @@ class GlobalSettingForm
         return $component
             ->password()
             ->revealable()
-            ->dehydrated()
+            ->dehydrated(fn(?string $state): bool => filled($state))
+            ->required(fn(string $operation): bool => $operation === 'create')
             ->suffixAction(
                 Action::make('secureReveal')
                     ->icon('heroicon-m-lock-closed')
