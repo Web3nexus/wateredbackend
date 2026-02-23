@@ -12,6 +12,9 @@ class LandingPageFeaturesSeeder extends Seeder
      */
     public function run(): void
     {
+        // First delete existing features to avoid duplicates if re-running
+        LandingPageFeature::truncate();
+
         $features = [
             [
                 'title' => 'Sacred Wisdom & Daily Teachings',
@@ -21,19 +24,23 @@ class LandingPageFeaturesSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'title' => 'Sacred Rituals & Community',
-                'description' => 'Join a vibrant family of seekers. Participate in guided rituals and connect with others on the same spiritual path wherever you are in the world.',
+                'title' => 'Divine Clarity & Guidance',
+                'description' => 'Navigate your spiritual path with personalized insights and expert support. Experience a clearer connection to your higher self and destiny.',
                 'image_position' => 'right',
                 'order' => 2,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Sacred Rituals & Community',
+                'description' => 'Join a vibrant family of seekers. Participate in guided rituals and connect with others on the same spiritual path wherever you are in the world.',
+                'image_position' => 'left',
+                'order' => 3,
                 'is_active' => true,
             ],
         ];
 
         foreach ($features as $feature) {
-            LandingPageFeature::updateOrCreate(
-                ['title' => $feature['title']],
-                $feature
-            );
+            LandingPageFeature::create($feature);
         }
     }
 }

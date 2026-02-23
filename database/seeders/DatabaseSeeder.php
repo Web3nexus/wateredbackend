@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             TempleSeeder::class,
             FeatureTwoSeeder::class,
             NimaSedaniContentSeeder::class,
+            LandingPageFeaturesSeeder::class,
+            TeachingsSeeder::class,
+            AnnouncementsSeeder::class,
         ]);
     }
 }
