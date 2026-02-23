@@ -71,6 +71,17 @@ class AuthController extends Controller
             $saved = $user->save();
             Log::info("[VERIFY] Database save() result for User {$id}: " . ($saved ? 'SUCCESS' : 'FAILURE'));
 
+            // Sync with Firebase if the user has a provider_id (UID)
+            if ($user->provider_id) {
+                try {
+                    Log::info("[VERIFY] Syncing verification to Firebase for UID: {$user->provider_id}");
+                    $firebaseService = new \App\Services\FirebaseService();
+                    $firebaseService->verifyUserByUid($user->provider_id);
+                } catch (\Exception $e) {
+                    Log::error("[VERIFY] Firebase sync failed: " . $e->getMessage());
+                }
+            }
+
             Log::info("[VERIFY] Triggering Verified event and Success Email for User {$id}");
             event(new Verified($user));
             $user->notify(new \App\Notifications\WelcomeNotification());
@@ -152,6 +163,8 @@ class AuthController extends Controller
 
     public function socialLogin(Request $request)
     {
+        Log::info("[SOCIAL_LOGIN] Attempting login/sync", $request->all());
+
         $request->validate([
             'email' => 'nullable|email',
             'name' => 'required|string',
@@ -165,8 +178,10 @@ class AuthController extends Controller
             ->first();
 
         if (!$user && $request->email) {
+            Log::info("[SOCIAL_LOGIN] User not found by provider, checking email: {$request->email}");
             $user = User::where('email', $request->email)->first();
             if ($user) {
+                Log::info("[SOCIAL_LOGIN] Matching email found, linking provider: {$request->provider}");
                 $user->update([
                     'provider' => $request->provider,
                     'provider_id' => $request->provider_id,
@@ -175,20 +190,33 @@ class AuthController extends Controller
         }
 
         if (!$user) {
+            Log::info("[SOCIAL_LOGIN] Creating new user for: {$request->email}");
             $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $email,
-                'password' => Hash::make(str()->random(24)),
-                'provider' => $request->provider,
-                'provider_id' => $request->provider_id,
-            ]);
+
+            try {
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $email,
+                    'password' => Hash::make(str()->random(24)),
+                    'provider' => $request->provider,
+                    'provider_id' => $request->provider_id,
+                ]);
+                Log::info("[SOCIAL_LOGIN] New user created: ID {$user->id}");
+            } catch (\Exception $e) {
+                Log::error("[SOCIAL_LOGIN] FAILED TO CREATE USER: " . $e->getMessage());
+                return response()->json(['message' => 'Failed to create account in backend.'], 500);
+            }
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
         $freshUser = $user->fresh();
-        // Ensure is_premium is synced from subscriptions
-        $freshUser->hasActivePremium();
+
+        try {
+            // Ensure is_premium is synced from subscriptions
+            $freshUser->hasActivePremium();
+        } catch (\Exception $e) {
+            Log::warning("[SOCIAL_LOGIN] Premium sync warning: " . $e->getMessage());
+        }
 
         Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
 

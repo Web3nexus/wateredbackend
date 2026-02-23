@@ -211,21 +211,21 @@
         @endforelse
     </section>
 
-    {{-- Blog Section --}}
-    <section id="blog" class="py-32 bg-parchment/[0.02] border-y border-parchment/10">
+    {{-- Teachings Section --}}
+    <section id="teachings" class="py-32 bg-parchment/[0.02] border-y border-parchment/10">
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                 <div class="max-w-2xl">
-                    <h2 class="text-5xl md:text-6xl text-parchment font-heading mb-4">Latest Insights</h2>
-                    <p class="text-lg text-parchment/60">Thoughts and teachings from our spiritual leaders and
-                        community explorers.</p>
+                    <h2 class="text-5xl md:text-6xl text-parchment font-heading mb-4">Lords Uzih's Teachings</h2>
+                    <p class="text-lg text-parchment/60">Thoughts and wisdom from our spiritual leaders and community
+                        explorers.</p>
                 </div>
-                <a href="#" class="text-app-blue font-bold hover:underline mb-2">View All Posts &rarr;</a>
+                <a href="#" class="text-app-blue font-bold hover:underline mb-2">View All Teachings &rarr;</a>
             </div>
 
-            @if($blogPosts->count() > 0)
+            @if($teachings->count() > 0)
                 <div class="grid md:grid-cols-3 gap-10">
-                    @foreach($blogPosts as $post)
+                    @foreach($teachings as $post)
                         <article class="group relative space-y-6">
                             <div
                                 class="relative aspect-video rounded-3xl overflow-hidden border border-parchment/10 shadow-lg mb-6">
@@ -258,7 +258,7 @@
                 </div>
             @else
                 <div class="text-center py-24 bg-parchment/5 rounded-3xl border border-dashed border-parchment/10">
-                    <p class="text-parchment/40">Our scribes are currently crafting new insights. Please check back
+                    <p class="text-parchment/40">Our scribes are currently crafting new teachings. Please check back
                         soon.</p>
                 </div>
             @endif

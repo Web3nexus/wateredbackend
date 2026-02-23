@@ -21,16 +21,26 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendEmailVerificationNotification()
     {
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(config('auth.verification.expire', 60)),
-            [
-                'id' => $this->getKey(),
-                'hash' => sha1($this->getEmailForVerification()),
-            ]
-        );
+        try {
+            $firebaseService = new \App\Services\FirebaseService();
+            $verificationUrl = $firebaseService->generateEmailVerificationLink($this->email);
 
-        $this->notify(new AppVerifyEmail($verificationUrl));
+            if (!$verificationUrl) {
+                // Fallback to Laravel signed route if Firebase fails
+                $verificationUrl = URL::temporarySignedRoute(
+                    'verification.verify',
+                    now()->addMinutes(config('auth.verification.expire', 60)),
+                    [
+                        'id' => $this->getKey(),
+                        'hash' => sha1($this->getEmailForVerification()),
+                    ]
+                );
+            }
+
+            $this->notify(new \App\Notifications\AppVerifyEmail($verificationUrl));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send verification email: " . $e->getMessage());
+        }
     }
 
     public function sendPasswordResetNotification($token)

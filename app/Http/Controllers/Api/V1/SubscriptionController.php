@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class SubscriptionController extends Controller
 {
@@ -93,17 +94,25 @@ class SubscriptionController extends Controller
             // Success
             $latestReceipt = collect($data['latest_receipt_info'] ?? [])->sortByDesc('expires_date_ms')->first();
 
+            if (!$latestReceipt) {
+                return response()->json(['message' => 'No active subscription found in receipt.'], 422);
+            }
+
+            // Check if it's actually active
+            $expiresAt = \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']);
+            if ($expiresAt->isPast()) {
+                return response()->json(['message' => 'Subscription found but it has expired.', 'expires_at' => $expiresAt], 422);
+            }
+
             $user->subscriptions()->updateOrCreate(
                 ['provider_subscription_id' => $latestReceipt['transaction_id']],
                 [
-                    'plan_id' => $request->plan_id,
+                    'plan_id' => $request->plan_id ?? $latestReceipt['product_id'],
                     'provider' => 'apple',
                     'platform' => 'ios',
                     'status' => 'active',
                     'starts_at' => now(),
-                    'expires_at' => isset($latestReceipt['expires_date_ms'])
-                        ? \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms'])
-                        : now()->addMonth(),
+                    'expires_at' => $expiresAt,
                 ]
             );
 
@@ -113,6 +122,7 @@ class SubscriptionController extends Controller
             return response()->json([
                 'message' => 'Apple subscription verified successfully',
                 'is_premium' => true,
+                'expires_at' => $expiresAt,
             ]);
         }
 
@@ -156,5 +166,72 @@ class SubscriptionController extends Controller
         }
 
         return response()->json(['message' => 'Paystack verification failed'], 422);
+    }
+
+    /**
+     * Sync Paystack subscription status (for restoration/missed webhooks)
+     */
+    public function sync(Request $request)
+    {
+        $user = $request->user();
+        if (!$user)
+            return response()->json(['message' => 'Unauthorized'], 401);
+
+        $settings = GlobalSetting::first();
+        $secretKey = $settings->paystack_secret_key;
+
+        // Fetch all transactions for this user/email from Paystack
+        $response = Http::withToken($secretKey)
+            ->get("https://api.paystack.co/transaction", [
+                'customer' => $user->email,
+                'status' => 'success'
+            ]);
+
+        $data = $response->json();
+
+        if ($response->successful() && isset($data['data']) && count($data['data']) > 0) {
+            $foundSubscription = false;
+
+            foreach ($data['data'] as $transaction) {
+                $metadata = $transaction['metadata'] ?? [];
+
+                // If it was a subscription payment (indicated by reference or custom metadata)
+                if (isset($metadata['plan_id']) || Str::startsWith($transaction['reference'], 'sub_')) {
+                    // Check if already in our DB
+                    $existing = Subscription::where('provider_subscription_id', $transaction['reference'])->first();
+
+                    if (!$existing) {
+                        $isYearly = ($metadata['plan_id'] ?? '') == $settings->premium_yearly_id;
+                        // For sync, we assume the transaction date as start
+                        $startsAt = \Carbon\Carbon::parse($transaction['paid_at']);
+                        $expiresAt = $isYearly ? $startsAt->copy()->addYear() : $startsAt->copy()->addMonth();
+
+                        if ($expiresAt->isFuture()) {
+                            $user->subscriptions()->create([
+                                'plan_id' => $metadata['plan_id'] ?? 'premium',
+                                'provider' => 'paystack',
+                                'platform' => 'android',
+                                'provider_subscription_id' => $transaction['reference'],
+                                'amount' => $transaction['amount'] / 100,
+                                'status' => 'active',
+                                'starts_at' => $startsAt,
+                                'expires_at' => $expiresAt,
+                            ]);
+                            $foundSubscription = true;
+                        }
+                    } else if ($existing->status === 'active' && $existing->expires_at->isFuture()) {
+                        $foundSubscription = true;
+                    }
+                }
+            }
+
+            if ($foundSubscription) {
+                $user->is_premium = true;
+                $user->save();
+                return response()->json(['message' => 'Premium access restored.', 'is_premium' => true]);
+            }
+        }
+
+        return response()->json(['message' => 'No active subscription found to restore.'], 404);
     }
 }

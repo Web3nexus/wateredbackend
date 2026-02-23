@@ -16,7 +16,7 @@ class InteractionController extends Controller
     public function toggleLike(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,audio',
+            'type' => 'required|string|in:audio',
             'id' => 'required|integer',
         ]);
 
@@ -47,7 +47,7 @@ class InteractionController extends Controller
     public function storeComment(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,audio',
+            'type' => 'required|string|in:audio',
             'id' => 'required|integer',
             'content' => 'required|string|max:1000',
         ]);
@@ -61,11 +61,6 @@ class InteractionController extends Controller
             'content' => $request->content,
         ];
 
-        // If it's a post, we still support the post_id column for legacy or compatibility
-        if ($request->type === 'post') {
-            $commentData['post_id'] = $request->id;
-        }
-
         $comment = $model->comments()->create($commentData);
 
         return response()->json($comment->load('user:id,name'), 201);
@@ -77,7 +72,7 @@ class InteractionController extends Controller
     public function indexComments(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:post,audio',
+            'type' => 'required|string|in:audio',
             'id' => 'required|integer',
         ]);
 
@@ -96,8 +91,6 @@ class InteractionController extends Controller
     protected function getModel(string $type, int $id)
     {
         switch ($type) {
-            case 'post':
-                return Post::find($id);
             case 'audio':
                 return Audio::find($id);
         }

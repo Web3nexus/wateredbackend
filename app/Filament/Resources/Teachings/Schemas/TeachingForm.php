@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\BlogPosts\Schemas;
+namespace App\Filament\Resources\Teachings\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -10,7 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
-class BlogPostForm
+class TeachingForm
 {
     public static function configure(Schema $schema): Schema
     {

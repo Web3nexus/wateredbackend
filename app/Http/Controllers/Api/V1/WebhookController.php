@@ -95,6 +95,9 @@ class WebhookController extends Controller
             case 'charge.success':
                 $this->handlePaystackChargeSuccess($data);
                 break;
+            case 'charge.failed':
+                $this->handlePaystackChargeFailed($data);
+                break;
             case 'subscription.create':
             case 'subscription.enable':
                 // Handled in verification or here
@@ -195,6 +198,52 @@ class WebhookController extends Controller
         if ($subscription) {
             $subscription->update(['status' => 'active']);
             $subscription->user->update(['is_premium' => true]);
+        }
+    }
+
+    protected function handlePaystackChargeFailed($data)
+    {
+        $reference = $data['reference'];
+        $metadata = $data['metadata'] ?? [];
+        $gatewayResponse = $data['gateway_response'] ?? 'Payment failed';
+
+        // 1. Handle Appointment Payment
+        if (isset($metadata['type']) && $metadata['type'] === 'appointment') {
+            $appointmentId = $metadata['appointment_id'] ?? null;
+            $appointment = Appointment::find($appointmentId);
+
+            if ($appointment) {
+                $appointment->update([
+                    'payment_status' => 'failed',
+                    'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}"
+                ]);
+                return;
+            }
+        }
+
+        // 2. Handle Event Payment
+        if (isset($metadata['type']) && $metadata['type'] === 'event') {
+            $eventId = $metadata['event_id'] ?? null;
+            $event = \App\Models\Event::find($eventId);
+
+            if ($event) {
+                $registration = $event->registrations()
+                    ->where(function ($q) use ($metadata) {
+                        if (isset($metadata['user_id'])) {
+                            $q->where('user_id', $metadata['user_id']);
+                        } else {
+                            $q->where('email', $metadata['email']);
+                        }
+                    })->first();
+
+                if ($registration) {
+                    $registration->update([
+                        'payment_status' => 'failed',
+                        'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}"
+                    ]);
+                }
+                return;
+            }
         }
     }
 

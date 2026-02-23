@@ -43,6 +43,40 @@ class FirebaseService
     }
 
     /**
+     * Generate an email verification link for a given email.
+     * Uses the Identity Toolkit API with a Service Account token.
+     */
+    public function generateEmailVerificationLink(string $email)
+    {
+        try {
+            Log::info("Attempting to generate Firebase verification link for: " . $email);
+            $accessToken = $this->getAccessToken();
+            if (!$accessToken) {
+                return null;
+            }
+
+            $projectId = 'watered-c14bb';
+            $response = Http::withToken($accessToken)
+                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:sendOobCode", [
+                    'requestType' => 'VERIFY_EMAIL',
+                    'email' => $email,
+                    'returnOobLink' => true,
+                ]);
+
+            if ($response->failed()) {
+                Log::error("Firebase Email Verification Link generation failed: " . $response->body());
+                return null;
+            }
+
+            Log::info("Firebase Verification Link generated successfully for: " . $email);
+            return $response->json('oobLink');
+        } catch (\Exception $e) {
+            Log::error("FirebaseService Error in generateEmailVerificationLink: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Generate an OAuth2 access token using the official google/auth library.
      */
     protected function getAccessToken()
@@ -72,6 +106,40 @@ class FirebaseService
         } catch (\Exception $e) {
             Log::error("Failed to fetch Firebase token: " . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Mark a user as verified in Firebase using their UID.
+     * Uses the Identity Toolkit API setAccountInfo.
+     */
+    public function verifyUserByUid(string $uid)
+    {
+        try {
+            Log::info("Attempting to verify user in Firebase for UID: {$uid}");
+            $accessToken = $this->getAccessToken();
+            if (!$accessToken) {
+                Log::error("Cannot verify user in Firebase: No access token.");
+                return false;
+            }
+
+            $projectId = 'watered-c14bb';
+            $response = Http::withToken($accessToken)
+                ->post("https://identitytoolkit.googleapis.com/v1/projects/{$projectId}/accounts:update", [
+                    'localId' => $uid,
+                    'emailVerified' => true,
+                ]);
+
+            if ($response->failed()) {
+                Log::error("Firebase User Verification failed for UID {$uid}: " . $response->body());
+                return false;
+            }
+
+            Log::info("Firebase User verified successfully in Firebase: UID {$uid}");
+            return true;
+        } catch (\Exception $e) {
+            Log::error("FirebaseService Error in verifyUserByUid: " . $e->getMessage());
+            return false;
         }
     }
 }

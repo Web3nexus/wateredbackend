@@ -76,9 +76,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/audio-categories', [\App\Http\Controllers\Api\V1\AudioController::class, 'categories']);
         Route::get('/audios/{audio}', [\App\Http\Controllers\Api\V1\AudioController::class, 'show']);
 
-        // Community (Disabled)
-        // Route::get('/community/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'index']);
-        // Route::get('/community/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'comments']);
+        // Announcements
+        Route::get('/announcements', [\App\Http\Controllers\Api\V1\AnnouncementController::class, 'index']);
+        Route::get('/announcements/{id}', [\App\Http\Controllers\Api\V1\AnnouncementController::class, 'show']);
+        Route::post('/announcements/{id}/read', [\App\Http\Controllers\Api\V1\AnnouncementController::class, 'markRead']);
 
         // Sacred Daily Rituals - NOT behind premium (these appear on the home screen for all users)
         Route::get('/sacred-daily-rituals', [\App\Http\Controllers\Api\V1\RitualController::class, 'sacredDaily']);
@@ -133,16 +134,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/appointments', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
         Route::post('/bookings', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']); // Legacy support
 
-        // Community Actions (Disabled)
-        /*
-        Route::prefix('community')->group(function () {
-            Route::post('/posts', [\App\Http\Controllers\Api\V1\PostController::class, 'store']);
-            Route::delete('/posts/{post}', [\App\Http\Controllers\Api\V1\CommunityController::class, 'destroy']);
-            Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\V1\CommunityController::class, 'storeComment']);
-            Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\V1\PostController::class, 'toggleLike']);
-            Route::post('/posts/{post}/share', [\App\Http\Controllers\Api\V1\PostController::class, 'share']);
-        });
-        */
 
         // Interactions
         Route::post('/interact/like', [\App\Http\Controllers\Api\V1\InteractionController::class, 'toggleLike']);
@@ -152,6 +143,7 @@ Route::prefix('v1')->group(function () {
         // Subscriptions
         Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
         Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
+        Route::post('/subscription/sync', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'sync']);
 
         // Reminders
         Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);
