@@ -27,8 +27,11 @@ class TeachingForm
                     ->columnSpanFull(),
                 FileUpload::make('featured_image')
                     ->image()
-                    ->imageEditor()
+                    ->imageResizeMode('cover')
                     ->imageCropAspectRatio('16:9')
+                    ->imageResizeTargetWidth('1280')
+                    ->imageResizeTargetHeight('720')
+                    ->imageEditor()
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('blog-posts'),
