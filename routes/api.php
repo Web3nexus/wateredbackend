@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
         // App Settings & Legal Documents (Now Protected)
         Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
         Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
+        Route::get('/payment-keys', [\App\Http\Controllers\Api\V1\SettingsController::class, 'paymentKeys']);
 
         // Traditions endpoints
         Route::get('/traditions', [\App\Http\Controllers\Api\V1\TraditionController::class, 'index']);
