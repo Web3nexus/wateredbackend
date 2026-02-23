@@ -40,7 +40,7 @@
                                         {{ $post->title }}
                                     </h3>
                                 </a>
-                                <p class="text-parchment/60 text-sm line-clamp-3 leading-relaxed">{{ $post->summary }}</p>
+                                <p class="text-parchment/60 text-sm line-clamp-3 leading-relaxed">{!! $post->summary !!}</p>
                             </div>
                             <a href="{{ route('teachings.show', $post->slug) }}"
                                 class="inline-block pt-2 text-app-blue font-semibold border-b border-transparent hover:border-app-blue transition">Explore

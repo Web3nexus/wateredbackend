@@ -16,7 +16,7 @@
                 <div class="w-24 h-px bg-app-blue/30 mx-auto mb-10"></div>
                 @if($teaching->summary)
                     <p class="text-xl text-parchment/60 leading-relaxed max-w-2xl mx-auto italic">
-                        "{{ $teaching->summary }}"
+                        "{!! $teaching->summary !!}"
                     </p>
                 @endif
             </header>
