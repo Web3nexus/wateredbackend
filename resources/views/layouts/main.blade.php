@@ -74,8 +74,8 @@
                     Appointment</a>
                 <a href="{{ route('events.index') }}"
                     class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Events</a>
-                <a href="{{ route('home') }}#blog"
-                    class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Blog</a>
+                <a href="{{ route('teachings.index') }}"
+                    class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Teachings</a>
                 <a href="{{ route('home') }}#download"
                     class="px-5 py-2.5 bg-app-blue text-white text-xs font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
                     Watered App</a>
@@ -105,8 +105,8 @@
                 Appointment</a>
             <a href="{{ route('events.index') }}"
                 class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Events</a>
-            <a href="{{ route('home') }}#blog" @click="mobileMenuOpen = false"
-                class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Blog</a>
+            <a href="{{ route('teachings.index') }}" @click="mobileMenuOpen = false"
+                class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Teachings</a>
             <a href="{{ route('home') }}#download" @click="mobileMenuOpen = false"
                 class="text-center px-5 py-3 bg-app-blue text-white text-sm font-bold rounded-full hover:bg-app-blue/90 transition shadow-lg shadow-app-blue/10 uppercase tracking-tighter">Get
                 Watered App</a>
@@ -141,7 +141,8 @@
                         <li><a href="{{ route('home') }}" class="hover:text-app-blue transition">Home</a></li>
                         <li><a href="{{ route('home') }}#features" class="hover:text-app-blue transition">Features</a>
                         </li>
-                        <li><a href="{{ route('home') }}#blog" class="hover:text-app-blue transition">Insights</a></li>
+                        <li><a href="{{ route('teachings.index') }}"
+                                class="hover:text-app-blue transition">Teachings</a></li>
                         <li><a href="{{ route('home') }}#download" class="hover:text-app-blue transition">Get the
                                 App</a></li>
                     </ul>
