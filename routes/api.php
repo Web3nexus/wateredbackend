@@ -144,6 +144,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
         Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
         Route::post('/subscription/sync', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'sync']);
+        Route::post('/subscription/trial', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'startTrial']);
 
         // Reminders
         Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);

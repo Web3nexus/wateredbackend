@@ -16,7 +16,7 @@ class AnnouncementController extends Controller
     {
         $user = $request->user();
 
-        $query = Announcement::where('is_published', true)
+        $query = Announcement::query()
             ->where(function ($q) {
                 $q->whereNull('scheduled_at')
                     ->orWhere('scheduled_at', '<=', now());

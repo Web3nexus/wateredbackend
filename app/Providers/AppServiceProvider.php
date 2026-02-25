@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         \App\Models\Comment::observe(\App\Observers\CommentObserver::class);
+        \App\Models\Announcement::observe(\App\Observers\AnnouncementObserver::class);
 
         // Apply Mail Settings from Database
         try {

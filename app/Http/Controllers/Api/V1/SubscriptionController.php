@@ -234,4 +234,39 @@ class SubscriptionController extends Controller
 
         return response()->json(['message' => 'No active subscription found to restore.'], 404);
     }
+
+    /**
+     * Start a 7-day free trial for the user.
+     */
+    public function startTrial(Request $request)
+    {
+        $user = $request->user();
+
+        // Check if user already has or had a trial
+        $hasTrial = $user->subscriptions()->where('provider', 'trial')->exists();
+
+        if ($hasTrial) {
+            return response()->json(['message' => 'You have already used your free trial.'], 422);
+        }
+
+        // Create a 7-day trial subscription
+        $user->subscriptions()->create([
+            'plan_id' => 'free_trial',
+            'provider' => 'trial',
+            'platform' => 'android', // Conceptually applies to Android since iOS uses native trials
+            'provider_subscription_id' => 'trial_' . Str::random(10),
+            'amount' => 0,
+            'status' => 'active',
+            'starts_at' => now(),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        $user->is_premium = true;
+        $user->save();
+
+        return response()->json([
+            'message' => '7-day free trial started successfully.',
+            'is_premium' => true,
+        ]);
+    }
 }
