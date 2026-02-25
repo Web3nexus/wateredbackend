@@ -43,5 +43,6 @@ Route::get('/terms-of-service', [LandingPageController::class, 'terms'])->name('
 Route::get('/contact-us', [LandingPageController::class, 'contact'])->name('contact');
 Route::get('/account-deletion', [LandingPageController::class, 'deletion'])->name('deletion');
 
-// Custom Firebase Password Reset
+// Custom Firebase Actions (Password Reset, Email Verification)
 Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::get('/auth/action', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('auth.action');

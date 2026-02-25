@@ -4,7 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Your Password | Watered</title>
+    <title>
+        @if($mode === 'verifyEmail') Verify Email
+        @elseif($mode === 'resetPassword') Reset Password
+        @elseif($mode === 'recoverEmail') Recover Email
+        @elseif($mode === 'verifyAndChangeEmail') Change Email
+        @else Account Action
+        @endif
+        | Watered
+    </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -162,110 +170,161 @@
     <div class="container">
         <img src="/storage/logo/WateredAppicon.png" alt="Watered Logo" class="logo"
             onerror="this.src='https://watered-8eb60.firebaseapp.com/favicon.ico'">
-        <h1>Reset Password</h1>
-        
-        @if($isValid)
-            <p id="instruction">Please enter your new password below.</p>
 
-            <div id="reset-form-container">
-                <div class="form-group">
-                    <label for="password">New Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+        <h1 id="page-title">
+            @if($mode === 'verifyEmail') Verify Email
+            @elseif($mode === 'resetPassword') Reset Password
+            @elseif($mode === 'recoverEmail') Recover Email
+            @elseif($mode === 'verifyAndChangeEmail') Change Email
+            @else Account Action
+            @endif
+        </h1>
+
+        @if($isValid)
+            <p id="instruction">
+                @if($mode === 'verifyEmail') Verifying your email...
+                @elseif($mode === 'resetPassword') Please enter your new password below.
+                @elseif($mode === 'recoverEmail') Recovering your email...
+                @elseif($mode === 'verifyAndChangeEmail') Updating your email...
+                @else Processing action...
+                @endif
+            </p>
+
+            @if($mode === 'resetPassword')
+                <div id="reset-form-container">
+                    <div class="form-group">
+                        <label for="password">New Password</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" placeholder="••••••••" required>
+                    </div>
+                    <button id="reset-button">SET NEW PASSWORD</button>
                 </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirm Password</label>
-                    <input type="password" id="confirm-password" placeholder="••••••••" required>
-                </div>
-                <button id="reset-button">SET NEW PASSWORD</button>
-                <div id="loading"></div>
-            </div>
+            @endif
+            <div id="loading"></div>
         @else
             <div class="message error" style="display: block; margin-top: 24px;">
                 <strong>Invalid or Expired Link</strong><br>
-                This link is missing required security codes. Please use the link sent to your email or request a new one from the app.
+                This link is missing required security codes. Please use the link sent to your email or request a new one
+                from the app.
             </div>
-            <a href="/" style="display: inline-block; margin-top: 24px; color: var(--primary-color); text-decoration: none; font-weight: 600;">Go to Home</a>
+            <a href="/"
+                style="display: inline-block; margin-top: 24px; color: var(--primary-color); text-decoration: none; font-weight: 600;">Go
+                to Home</a>
         @endif
 
         <div id="message" class="message"></div>
     </div>
 
     @if($isValid)
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        <!-- Firebase SDKs -->
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+            import { getAuth, applyActionCode, checkActionCode, confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const firebaseConfig = @json($firebaseConfig);
-        const oobCode = "{{ $oobCode }}";
+            const firebaseConfig = @json($firebaseConfig);
+            const oobCode = "{{ $oobCode }}";
+            const mode = "{{ $mode }}";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
 
-        const form = document.getElementById('reset-form-container');
-        const passwordInput = document.getElementById('password');
-        const confirmInput = document.getElementById('confirm-password');
-        const submitBtn = document.getElementById('reset-button');
-        const messageDiv = document.getElementById('message');
-        const loading = document.getElementById('loading');
-        const instruction = document.getElementById('instruction');
+            const form = document.getElementById('reset-form-container');
+            const submitBtn = document.getElementById('reset-button');
+            const messageDiv = document.getElementById('message');
+            const loading = document.getElementById('loading');
+            const instruction = document.getElementById('instruction');
 
-        // Verify the code first
-        verifyPasswordResetCode(auth, oobCode).then((email) => {
-            instruction.innerText = `Setting new password for ${email}`;
-        }).catch((error) => {
-            showError("Invalid or expired reset link. Please request a new one from the app.");
-            form.style.display = 'none';
-        });
+            if (mode === 'verifyEmail' || mode === 'verifyAndChangeEmail') {
+                setLoading(true);
+                applyActionCode(auth, oobCode).then(() => {
+                    showSuccess(mode === 'verifyEmail' ? "Your email address has been successfully verified! You can now launch the app or go back to login." : "Your email address has been successfully changed!");
+                    setLoading(false);
+                    instruction.innerText = "Success!";
+                }).catch((error) => {
+                    showError("Invalid or expired verification link. Please request a new link from the app.");
+                    setLoading(false);
+                });
+            } else if (mode === 'recoverEmail') {
+                setLoading(true);
+                checkActionCode(auth, oobCode).then((info) => {
+                    return applyActionCode(auth, oobCode).then(() => {
+                        showSuccess(`Your email address has been reverted to ${info.data.email}. You can now log in with your old email.`);
+                        setLoading(false);
+                        instruction.innerText = "Email Recovered!";
+                    });
+                }).catch((error) => {
+                    showError("Invalid or expired recovery link.");
+                    setLoading(false);
+                });
+            } else if (mode === 'resetPassword') {
+                const passwordInput = document.getElementById('password');
+                const confirmInput = document.getElementById('confirm-password');
 
-        submitBtn.addEventListener('click', async () => {
-            const password = passwordInput.value;
-            const confirmPassword = confirmInput.value;
+                // Verify the code first
+                verifyPasswordResetCode(auth, oobCode).then((email) => {
+                    instruction.innerText = `Setting new password for ${email}`;
+                }).catch((error) => {
+                    showError("Invalid or expired reset link. Please request a new one from the app.");
+                    if (form) form.style.display = 'none';
+                });
 
-            if (password.length < 6) {
-                showError("Password must be at least 6 characters.");
-                return;
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', async () => {
+                        const password = passwordInput.value;
+                        const confirmPassword = confirmInput.value;
+
+                        if (password.length < 6) {
+                            showError("Password must be at least 6 characters.");
+                            return;
+                        }
+
+                        if (password !== confirmPassword) {
+                            showError("Passwords do not match.");
+                            return;
+                        }
+
+                        hideMessage();
+                        setLoading(true);
+
+                        try {
+                            await confirmPasswordReset(auth, oobCode, password);
+                            showSuccess("Password updated successfully! You can now log in to the app.");
+                            if (form) form.style.display = 'none';
+                            setLoading(false);
+                        } catch (error) {
+                            showError("Failed to update password. Error: " + error.message);
+                            setLoading(false);
+                        }
+                    });
+                }
+            } else {
+                showError("Invalid or unsupported action mode.");
             }
 
-            if (password !== confirmPassword) {
-                showError("Passwords do not match.");
-                return;
+            function showError(msg) {
+                messageDiv.innerText = msg;
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
             }
 
-            hideMessage();
-            setLoading(true);
-
-            try {
-                await confirmPasswordReset(auth, oobCode, password);
-                showSuccess("Password updated successfully! You can now log in to the app.");
-                form.style.display = 'none';
-            } catch (error) {
-                showError("Failed to update password. Error: " + error.message);
-                setLoading(false);
+            function showSuccess(msg) {
+                messageDiv.innerText = msg;
+                messageDiv.className = 'message success';
+                messageDiv.style.display = 'block';
             }
-        });
 
-        function showError(msg) {
-            messageDiv.innerText = msg;
-            messageDiv.className = 'message error';
-            messageDiv.style.display = 'block';
-        }
+            function hideMessage() {
+                messageDiv.style.display = 'none';
+            }
 
-        function showSuccess(msg) {
-            messageDiv.innerText = msg;
-            messageDiv.className = 'message success';
-            messageDiv.style.display = 'block';
-        }
-
-        function hideMessage() {
-            messageDiv.style.display = 'none';
-        }
-
-        function setLoading(isLoading) {
-            loading.style.display = isLoading ? 'block' : 'none';
-            submitBtn.style.display = isLoading ? 'none' : 'block';
-        }
-    </script>
+            function setLoading(isLoading) {
+                if (loading) loading.style.display = isLoading ? 'block' : 'none';
+                if (submitBtn) submitBtn.style.display = isLoading ? 'none' : 'block';
+            }
+        </script>
     @endif
 </body>
 

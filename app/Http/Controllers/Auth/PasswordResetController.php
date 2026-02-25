@@ -32,6 +32,7 @@ class PasswordResetController extends Controller
 
         return view('auth.reset-password', [
             'isValid' => $isValid,
+            'mode' => $mode,
             'oobCode' => $oobCode,
             'apiKey' => $apiKey,
             'continueUrl' => $continueUrl,
