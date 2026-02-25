@@ -21,7 +21,10 @@ class AnnouncementController extends Controller
                 $q->whereNull('scheduled_at')
                     ->orWhere('scheduled_at', '<=', now());
             })
-            ->where('status', 'published');
+            ->where(function ($q) {
+                $q->where('status', 'published')
+                    ->orWhere('is_published', true);
+            });
 
         // Filter by target audience
         if (!$user || !$user->hasActivePremium()) {

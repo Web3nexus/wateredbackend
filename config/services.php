@@ -42,6 +42,8 @@ return [
 
     'fcm' => [
         'server_key' => env('FCM_SERVER_KEY'),
+        'project_id' => env('FCM_PROJECT_ID', 'watered-c14bb'),
+        'credentials_path' => env('FCM_CREDENTIALS_PATH', storage_path('app/firebase-auth.json')),
     ],
 
 ];

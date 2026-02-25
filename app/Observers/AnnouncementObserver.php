@@ -21,15 +21,20 @@ class AnnouncementObserver
      */
     public function updated(Announcement $announcement): void
     {
-        // Only trigger if status changed to published
-        if ($announcement->wasChanged('status') && $announcement->status === 'published') {
+        // Trigger if status changed to published OR is_published was toggled on
+        $statusChanged = $announcement->wasChanged('status') && $announcement->status === 'published';
+        $publishedToggled = $announcement->wasChanged('is_published') && $announcement->is_published;
+
+        if ($statusChanged || $publishedToggled) {
             $this->handlePushNotification($announcement);
         }
     }
 
     protected function handlePushNotification(Announcement $announcement): void
     {
-        if ($announcement->status === 'published' && $announcement->push_enabled) {
+        $isPublished = $announcement->status === 'published' || $announcement->is_published;
+
+        if ($isPublished && $announcement->push_enabled) {
             // Check if it's scheduled for the future
             if ($announcement->scheduled_at && $announcement->scheduled_at->isFuture()) {
                 // If there's a scheduler checking for these, it will be handled there.

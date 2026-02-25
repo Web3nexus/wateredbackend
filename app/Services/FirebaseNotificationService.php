@@ -31,34 +31,64 @@ class FirebaseNotificationService
      */
     public function sendToTokens(array $tokens, string $title, string $body, array $data = [])
     {
-        $serverKey = config('services.fcm.server_key');
+        $projectId = config('services.fcm.project_id');
+        $credentialsPath = config('services.fcm.credentials_path');
 
-        if (!$serverKey) {
-            Log::warning('FCM server key is not configured.');
+        if (!file_exists($credentialsPath)) {
+            Log::error("FCM credentials file not found at: $credentialsPath. Please upload the service account JSON and set FCM_CREDENTIALS_PATH in .env");
             return false;
         }
 
-        // Using Legacy API for simplicity as HTTP v1 requires OAuth2 tokens which are complex to generate without a package
-        // However, many older projects still use the server key method.
-        $response = Http::withHeaders([
-            'Authorization' => 'key=' . $serverKey,
-            'Content-Type' => 'application/json',
-        ])->post('https://fcm.googleapis.com/fcm/send', [
-                    'registration_ids' => $tokens,
-                    'notification' => [
-                        'title' => $title,
-                        'body' => $body,
-                        'sound' => 'default',
-                    ],
-                    'data' => $data,
-                    'priority' => 'high',
-                ]);
+        try {
+            // 1. Get OAuth2 Access Token using google/auth
+            $credentials = new \Google\Auth\Credentials\ServiceAccountCredentials(
+                'https://www.googleapis.com/auth/cloud-platform',
+                $credentialsPath
+            );
+            $token = $credentials->fetchAuthToken();
+            $accessToken = $token['access_token'];
 
-        if ($response->failed()) {
-            Log::error('FCM Notification failed: ' . $response->body());
+            // 2. Send to each token (HTTP v1 does not support broadcasting to multiple tokens in one request like Legacy)
+            // Note: For massive scale, you'd use multicast or background jobs for each token
+            foreach ($tokens as $registrationToken) {
+                $response = Http::withToken($accessToken)
+                    ->post("https://fcm.googleapis.com/v1/projects/$projectId/messages:send", [
+                        'message' => [
+                            'token' => $registrationToken,
+                            'notification' => [
+                                'title' => $title,
+                                'body' => $body,
+                            ],
+                            'data' => array_merge($data, [
+                                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            ]),
+                            'android' => [
+                                'priority' => 'high',
+                                'notification' => [
+                                    'channel_id' => 'watered_notifications',
+                                    'sound' => 'default',
+                                ],
+                            ],
+                            'apns' => [
+                                'payload' => [
+                                    'aps' => [
+                                        'sound' => 'default',
+                                        'badge' => 1,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ]);
+
+                if ($response->failed()) {
+                    Log::error("FCM HTTP v1 failed for token $registrationToken: " . $response->body());
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('FCM HTTP v1 Error: ' . $e->getMessage());
             return false;
         }
-
-        return $response->json();
     }
 }
