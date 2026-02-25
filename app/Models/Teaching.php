@@ -20,6 +20,8 @@ class Teaching extends Model
         'published_at',
     ];
 
+    protected $appends = ['featured_image_url'];
+
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
@@ -34,5 +36,18 @@ class Teaching extends Model
                 $post->slug = Str::slug($post->title);
             }
         });
+    }
+
+    protected function featuredImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                if (!$this->featured_image)
+                    return null;
+                if (str_starts_with($this->featured_image, 'http'))
+                    return $this->featured_image;
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image);
+            }
+        );
     }
 }

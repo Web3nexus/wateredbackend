@@ -28,7 +28,7 @@
                 </div>
                 <div class="md:col-span-2 relative">
                     <div
-                        class="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
+                        class="relative aspect-[3/4] md:aspect-[2/3] max-w-sm ml-auto rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
                         @if($settings?->hero_image)
                             <img src="{{ $settings->hero_image_url }}" alt="Watered App" class="w-full h-full object-cover">
                         @else
@@ -48,8 +48,8 @@
     <section id="features" class="space-y-32 py-32">
         @forelse($features->take(2) as $index => $feature)
             <div class="max-w-7xl mx-auto px-6">
-                <div class="grid md:grid-cols-2 gap-20 items-center">
-                    <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                <div class="grid md:grid-cols-5 gap-16 items-center">
+                    <div class="md:col-span-2 {{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
                         <div
                             class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
                             @if($feature->image)
@@ -65,7 +65,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="space-y-6">
+                    <div class="md:col-span-3 space-y-6">
                         <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
                         </h2>
                         <p class="text-lg text-parchment/70 leading-relaxed">{!! $feature->description !!}</p>
@@ -161,8 +161,8 @@
     <section class="space-y-32 py-32">
         @forelse($features->skip(2)->take(2) as $index => $feature)
             <div class="max-w-7xl mx-auto px-6">
-                <div class="grid md:grid-cols-2 gap-20 items-center">
-                    <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                <div class="grid md:grid-cols-5 gap-16 items-center">
+                    <div class="md:col-span-2 {{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
                         <div
                             class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
                             @if($feature->image)
@@ -178,7 +178,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="space-y-6">
+                    <div class="md:col-span-3 space-y-6">
                         <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
                         </h2>
                         <p class="text-lg text-parchment/70 leading-relaxed">{!! $feature->description !!}</p>
@@ -479,7 +479,7 @@
                         this.timeError = '';
                     },
                     formatNumber(num) { return new Intl.NumberFormat('en-NG').format(num); },
-                         async submitForm(e) {
+                                 async submitForm(e) {
                         const form = e.target; const msg = document.getElementById('appointmentMessage');
                         this.isSubmitting = true; msg.classList.add('hidden');
                         try {

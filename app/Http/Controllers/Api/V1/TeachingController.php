@@ -23,7 +23,7 @@ class TeachingController extends Controller
                 'title' => $teaching->title,
                 'slug' => $teaching->slug,
                 'summary' => $teaching->summary,
-                'featured_image' => $teaching->featured_image ? url($teaching->featured_image) : null,
+                'featured_image' => $teaching->featured_image_url,
                 'published_at' => $teaching->published_at,
             ];
         });
@@ -46,7 +46,7 @@ class TeachingController extends Controller
             'slug' => $teaching->slug,
             'summary' => $teaching->summary,
             'content' => $teaching->content,
-            'featured_image' => $teaching->featured_image ? url($teaching->featured_image) : null,
+            'featured_image' => $teaching->featured_image_url,
             'published_at' => $teaching->published_at,
         ]);
     }
