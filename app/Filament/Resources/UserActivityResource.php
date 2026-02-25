@@ -90,15 +90,51 @@ class UserActivityResource extends Resource
                             );
                     })
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('export_csv')
+                    ->label('Export All (CSV)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn() => static::exportCsv()),
+            ])
             ->actions([
                 DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export_selected_csv')
+                        ->label('Export Selected (CSV)')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(fn($records) => static::exportCsv($records)),
                 ]),
             ])
             ->defaultSort('visited_at', 'desc');
+    }
+
+    public static function exportCsv($records = null): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+
+            // Header
+            fputcsv($handle, ['User', 'Feature/Page', 'Duration (s)', 'Visited At']);
+
+            $query = $records ? collect($records) : UserActivity::with('user')->get();
+
+            foreach ($query as $activity) {
+                fputcsv($handle, [
+                    $activity->user->name ?? 'Unknown',
+                    $activity->page,
+                    $activity->duration_seconds,
+                    $activity->visited_at->format('Y-m-d H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user-activity-export-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 
     public static function getPages(): array

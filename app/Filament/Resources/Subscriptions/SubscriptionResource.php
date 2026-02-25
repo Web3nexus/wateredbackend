@@ -122,15 +122,55 @@ class SubscriptionResource extends Resource
                         'android' => 'Android',
                     ]),
             ])
-            ->recordActions([
+            ->headerActions([
+                \Filament\Tables\Actions\Action::make('export_csv')
+                    ->label('Export All (CSV)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn() => static::exportCsv()),
+            ])
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    \Filament\Tables\Actions\BulkAction::make('export_selected_csv')
+                        ->label('Export Selected (CSV)')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(fn($records) => static::exportCsv($records)),
                 ]),
             ]);
+    }
+
+    public static function exportCsv($records = null): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+
+            // Header
+            fputcsv($handle, ['Customer', 'Plan', 'Provider', 'Source', 'Amount', 'Status', 'Started At', 'Expires At']);
+
+            $query = $records ? collect($records) : Subscription::with('user')->get();
+
+            foreach ($query as $subscription) {
+                fputcsv($handle, [
+                    $subscription->user->name ?? 'Unknown',
+                    $subscription->plan_id,
+                    $subscription->provider,
+                    $subscription->platform,
+                    $subscription->amount,
+                    $subscription->status,
+                    $subscription->starts_at->format('Y-m-d H:i'),
+                    $subscription->expires_at ? $subscription->expires_at->format('Y-m-d H:i') : 'Never',
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="subscriptions-export-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 
     public static function getPages(): array

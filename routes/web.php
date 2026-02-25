@@ -46,3 +46,9 @@ Route::get('/account-deletion', [LandingPageController::class, 'deletion'])->nam
 // Custom Firebase Actions (Password Reset, Email Verification)
 Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('password.reset');
 Route::get('/auth/action', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('auth.action');
+
+// Admin Exports
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/exports/text-collections/{collection}', [\App\Http\Controllers\Admin\ExportController::class, 'exportTextCollection'])
+        ->name('admin.export.text-collection');
+});

@@ -5,8 +5,12 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Models\User;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UsersTable
 {
@@ -48,13 +52,51 @@ class UsersTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->headerActions([
+                Action::make('export_csv')
+                    ->label('Export All (CSV)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn() => static::exportCsv()),
+            ])
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('export_selected_csv')
+                        ->label('Export Selected (CSV)')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(fn($records) => static::exportCsv($records)),
                 ]),
             ]);
+    }
+
+    public static function exportCsv($records = null): StreamedResponse
+    {
+        return new StreamedResponse(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+
+            // Header
+            fputcsv($handle, ['Name', 'Email', 'Source', 'Premium', 'Email Verified', 'Created At']);
+
+            $query = $records ? collect($records) : User::all();
+
+            foreach ($query as $user) {
+                fputcsv($handle, [
+                    $user->name,
+                    $user->email,
+                    $user->provider,
+                    $user->is_premium ? 'Yes' : 'No',
+                    $user->email_verified_at ? $user->email_verified_at->format('Y-m-d H:i') : 'No',
+                    $user->created_at->format('Y-m-d H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="users-export-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 }

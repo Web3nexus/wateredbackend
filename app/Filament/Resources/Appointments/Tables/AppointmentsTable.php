@@ -5,8 +5,12 @@ namespace App\Filament\Resources\Appointments\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Models\Appointment;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AppointmentsTable
 {
@@ -64,13 +68,53 @@ class AppointmentsTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->headerActions([
+                Action::make('export_csv')
+                    ->label('Export All (CSV)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn() => static::exportCsv()),
+            ])
+            ->actions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('export_selected_csv')
+                        ->label('Export Selected (CSV)')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(fn($records) => static::exportCsv($records)),
                 ]),
             ]);
+    }
+
+    public static function exportCsv($records = null): StreamedResponse
+    {
+        return new StreamedResponse(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+
+            // Header
+            fputcsv($handle, ['Code', 'User/Guest', 'Type', 'Time', 'Status', 'Payment', 'Amount', 'Created At']);
+
+            $query = $records ? collect($records) : Appointment::with(['user', 'consultationType'])->get();
+
+            foreach ($query as $appointment) {
+                fputcsv($handle, [
+                    $appointment->appointment_code,
+                    $appointment->user ? $appointment->user->name : ($appointment->full_name ?? 'Guest'),
+                    $appointment->consultationType->name ?? 'N/A',
+                    $appointment->start_time ? $appointment->start_time->format('Y-m-d H:i') : 'N/A',
+                    $appointment->appointment_status,
+                    $appointment->payment_status,
+                    $appointment->amount,
+                    $appointment->created_at->format('Y-m-d H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="appointments-export-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 }

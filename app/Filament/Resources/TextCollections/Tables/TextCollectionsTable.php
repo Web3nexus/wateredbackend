@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TextCollections\Tables;
 
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Tables\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -35,6 +36,12 @@ class TextCollectionsTable
                     ->relationship('tradition', 'name'),
             ])
             ->recordActions([
+                Action::make('export_pdf')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->url(fn($record) => route('admin.export.text-collection', $record))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
