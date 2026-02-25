@@ -171,7 +171,14 @@ class AuthController extends Controller
             'provider' => 'required|string|in:google,apple,firebase_email',
             'provider_id' => 'required|string',
             'device_name' => 'required|string',
+            'email_verified' => 'nullable|boolean',
         ]);
+
+        $emailVerified = $request->email_verified ?? false;
+        // Auto-verify trusted providers
+        if (in_array($request->provider, ['google', 'apple'])) {
+            $emailVerified = true;
+        }
 
         $user = User::where('provider', $request->provider)
             ->where('provider_id', $request->provider_id)
@@ -189,6 +196,13 @@ class AuthController extends Controller
             }
         }
 
+        if ($user) {
+            // Sync verification status if not already verified
+            if ($emailVerified && !$user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
+        }
+
         if (!$user) {
             Log::info("[SOCIAL_LOGIN] Creating new user for: {$request->email}");
             $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
@@ -200,6 +214,7 @@ class AuthController extends Controller
                     'password' => Hash::make(str()->random(24)),
                     'provider' => $request->provider,
                     'provider_id' => $request->provider_id,
+                    'email_verified_at' => $emailVerified ? now() : null,
                 ]);
                 Log::info("[SOCIAL_LOGIN] New user created: ID {$user->id}");
             } catch (\Exception $e) {

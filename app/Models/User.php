@@ -107,6 +107,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'ritual_reminders',
         'event_updates',
         'community_activity',
+        'email_verified_at',
     ];
 
     protected function profileImage(): Attribute

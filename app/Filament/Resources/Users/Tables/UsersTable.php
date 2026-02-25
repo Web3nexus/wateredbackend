@@ -38,7 +38,10 @@ class UsersTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('email_verified_at')
-                    ->dateTime()
+                    ->label('Verified')
+                    ->badge()
+                    ->state(fn(User $record): string => $record->hasVerifiedEmail() ? 'Verified' : 'Unverified')
+                    ->color(fn(string $state): string => $state === 'Verified' ? 'success' : 'gray')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
