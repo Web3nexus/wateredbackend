@@ -313,4 +313,31 @@ class AuthController extends Controller
             'errors' => ['email' => ['Invalid token or email address.']]
         ], 422);
     }
+
+    /**
+     * Called by the Flutter app after Firebase confirms the user's email is verified.
+     * Simply marks the user as verified in our backend database.
+     */
+    public function markEmailVerified(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email already verified.',
+                'user' => $user->fresh(),
+            ]);
+        }
+
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+
+        Log::info("[VERIFY] User {$user->id} email marked as verified via Firebase sync.");
+
+        return response()->json([
+            'message' => 'Email verified successfully.',
+            'user' => $user->fresh(),
+        ]);
+    }
 }
+

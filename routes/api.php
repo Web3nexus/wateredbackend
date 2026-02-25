@@ -14,6 +14,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/social-login', [\App\Http\Controllers\Api\V1\AuthController::class, 'socialLogin']);
     Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\V1\AuthController::class, 'verify'])
         ->name('verification.verify');
+    Route::post('/verify-email', [\App\Http\Controllers\Api\V1\AuthController::class, 'markEmailVerified'])
+        ->middleware('auth:sanctum');
 
     // Password Reset Routes (Public)
     Route::post('/forgot-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'forgotPassword'])
