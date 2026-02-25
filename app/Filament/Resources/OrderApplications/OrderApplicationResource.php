@@ -42,26 +42,39 @@ class OrderApplicationResource extends Resource
                 Section::make('Application Info')->schema([
                     Select::make('order_id')
                         ->relationship('order', 'title')
-                        ->disabled(),
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->disabled(fn(string $operation): bool => $operation !== 'create'),
                     Select::make('user_id')
                         ->relationship('user', 'name')
-                        ->disabled(),
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->disabled(fn(string $operation): bool => $operation !== 'create'),
                     Select::make('status')
                         ->options([
                             'pending' => 'Pending',
                             'approved' => 'Approved',
                             'rejected' => 'Rejected',
                         ])
+                        ->default('pending')
                         ->required(),
                     Textarea::make('admin_notes')
+                        ->label('Admin Internal Notes')
+                        ->helperText('Notes for internal use, or to be sent in approval/rejection emails.')
                         ->maxLength(65535)
                         ->columnSpanFull(),
                 ])->columns(2),
-                Section::make('Answers')->schema([
-                    KeyValue::make('answers')
-                        ->disabled()
-                        ->columnSpanFull(),
-                ]),
+                Section::make('Answers')
+                    ->description('Responses provided by the user for this specific order type.')
+                    ->schema([
+                        KeyValue::make('answers')
+                            ->label('User Responses')
+                            ->helperText('This holds the specific data fields submitted by the user.')
+                            ->disabled(fn(string $operation): bool => $operation !== 'create')
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
