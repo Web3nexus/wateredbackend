@@ -53,6 +53,8 @@ class GlobalSetting extends Model
         'premium_yearly_price',
         'premium_monthly_amount',
         'premium_yearly_amount',
+        'paystack_monthly_plan_code',
+        'paystack_yearly_plan_code',
         'premium_monthly_price_usd',
         'premium_yearly_price_usd',
         'premium_monthly_amount_usd',

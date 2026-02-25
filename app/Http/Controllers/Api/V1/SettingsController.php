@@ -92,6 +92,8 @@ class SettingsController extends Controller
         ])->only([
                     'paystack_public_key',
                     'paystack_secret_key',
+                    'paystack_monthly_plan_code',
+                    'paystack_yearly_plan_code',
                     'stripe_public_key',
                     'flutterwave_public_key',
                 ]);

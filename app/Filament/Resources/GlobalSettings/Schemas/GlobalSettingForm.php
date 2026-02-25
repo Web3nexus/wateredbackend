@@ -277,6 +277,10 @@ class GlobalSettingForm
 
                                 Section::make('Premium Subscription Pricing (Local/NGN)')
                                     ->schema([
+                                        TextInput::make('paystack_monthly_plan_code')
+                                            ->label('Paystack Monthly Plan Code')
+                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_id')
                                             ->label('Monthly Product ID')
                                             ->placeholder('e.g. premium_monthly')
@@ -291,6 +295,10 @@ class GlobalSettingForm
                                             ->placeholder('500000')
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
 
+                                        TextInput::make('paystack_yearly_plan_code')
+                                            ->label('Paystack Yearly Plan Code')
+                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_id')
                                             ->label('Yearly Product ID')
                                             ->placeholder('e.g. premium_yearly')
