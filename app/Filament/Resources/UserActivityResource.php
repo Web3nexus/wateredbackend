@@ -91,7 +91,7 @@ class UserActivityResource extends Resource
                     })
             ])
             ->headerActions([
-                Tables\Actions\Action::make('export_csv')
+                \Filament\Actions\Action::make('export_csv')
                     ->label('Export All (CSV)')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn() => static::exportCsv()),
@@ -102,7 +102,7 @@ class UserActivityResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('export_selected_csv')
+                    \Filament\Actions\BulkAction::make('export_selected_csv')
                         ->label('Export Selected (CSV)')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(fn($records) => static::exportCsv($records)),

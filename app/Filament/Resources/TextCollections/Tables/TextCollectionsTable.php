@@ -4,7 +4,7 @@ namespace App\Filament\Resources\TextCollections\Tables;
 
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
