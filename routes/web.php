@@ -48,7 +48,7 @@ Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetControlle
 Route::get('/auth/action', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('auth.action');
 
 // Admin Exports
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:admin'])->group(function () {
     Route::get('/admin/exports/text-collections/{collection}', [\App\Http\Controllers\Admin\ExportController::class, 'exportTextCollection'])
         ->name('admin.export.text-collection');
 });
