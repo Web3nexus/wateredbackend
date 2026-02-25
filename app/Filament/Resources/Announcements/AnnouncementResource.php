@@ -21,9 +21,9 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    // protected static UnitEnum|string|null $navigationGroup = 'Communications';
+    protected static UnitEnum|string|null $navigationGroup = 'Community';
 
-    // protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSpeakerphone;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSpeakerWave;
 
     protected static ?string $navigationLabel = 'Announcements';
 

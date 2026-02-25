@@ -57,6 +57,8 @@ Route::prefix('v1')->group(function () {
         // Search & Wisdom
         Route::get('/search', [\App\Http\Controllers\Api\V1\SearchController::class, 'search']);
         Route::get('/daily-wisdom', [\App\Http\Controllers\Api\V1\DailyWisdomController::class, 'index']);
+        Route::get('/teachings', [\App\Http\Controllers\Api\V1\TeachingController::class, 'index']);
+        Route::get('/teachings/{teaching}', [\App\Http\Controllers\Api\V1\TeachingController::class, 'show']);
 
         // Collections endpoints
         Route::get('/text-collections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
