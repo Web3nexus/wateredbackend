@@ -13,8 +13,7 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Schemas\Components\Actions;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Hash;
 use Filament\Notifications\Notification;
@@ -472,8 +471,8 @@ class GlobalSettingForm
                                         \Filament\Forms\Components\Placeholder::make('sync_info')
                                             ->label('Current Version')
                                             ->content(fn($record) => "Config Version: " . ($record->app_config_version ?? 1)),
-                                        \Filament\Forms\Components\Actions::make([
-                                            FormAction::make('sync_app')
+                                        Actions::make([
+                                            Action::make('sync_app')
                                                 ->label('Sync App Configuration')
                                                 ->icon('heroicon-m-arrow-path')
                                                 ->color('success')
