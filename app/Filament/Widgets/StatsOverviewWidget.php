@@ -43,7 +43,7 @@ class StatsOverviewWidget extends BaseWidget
         $appointmentEarnings = 0;
         if (Schema::hasTable('appointments') && Schema::hasColumn('appointments', 'amount')) {
             $appointmentEarnings = DB::table('appointments')
-                ->whereIn('payment_status', ['paid', 'completed', 'success'])
+                ->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
                 ->sum('amount');
         }
 
