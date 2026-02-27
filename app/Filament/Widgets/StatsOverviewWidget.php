@@ -65,6 +65,11 @@ class StatsOverviewWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
 
+            Stat::make('Subscription Revenue', $currency . number_format($subEarnings, 2))
+                ->description('From active plans')
+                ->descriptionIcon('heroicon-m-credit-card')
+                ->color('warning'),
+
             Stat::make('Event Revenue', $currency . number_format($eventEarnings, 2))
                 ->description('From registrations')
                 ->descriptionIcon('heroicon-m-calendar-days')
