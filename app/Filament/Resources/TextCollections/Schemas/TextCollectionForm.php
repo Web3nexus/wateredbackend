@@ -35,7 +35,6 @@ class TextCollectionForm
 
                 Section::make('Classification (Optional)')
                     ->description('Optionally link this book to a spiritual path or topic. Leave blank for standalone texts like Nima Sedani.')
-                    ->visible(fn($record) => $record === null || !str_contains(strtolower($record->name ?? ''), 'nima sedani'))
                     ->schema([
                         Select::make('tradition_id')
                             ->label('Spiritual Path')

@@ -80,6 +80,16 @@ class GlobalSetting extends Model
         'premium_title',
         'premium_subtitle',
         'premium_features',
+        'is_rituals_enabled',
+        'is_teachings_enabled',
+        'is_audios_enabled',
+        'is_nima_sedani_enabled',
+        'is_community_enabled',
+        'is_rituals_premium_only',
+        'is_teachings_premium_only',
+        'is_audios_premium_only',
+        'is_nima_sedani_premium_only',
+        'app_config_version',
     ];
 
     protected $hidden = [
@@ -99,6 +109,16 @@ class GlobalSetting extends Model
         'is_ads_enabled' => 'boolean',
         'ads_screens' => 'json',
         'premium_features' => 'json',
+        'is_rituals_enabled' => 'boolean',
+        'is_teachings_enabled' => 'boolean',
+        'is_audios_enabled' => 'boolean',
+        'is_nima_sedani_enabled' => 'boolean',
+        'is_community_enabled' => 'boolean',
+        'is_rituals_premium_only' => 'boolean',
+        'is_teachings_premium_only' => 'boolean',
+        'is_audios_premium_only' => 'boolean',
+        'is_nima_sedani_premium_only' => 'boolean',
+        'app_config_version' => 'integer',
     ];
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {

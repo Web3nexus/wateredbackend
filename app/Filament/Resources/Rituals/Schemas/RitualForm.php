@@ -42,6 +42,10 @@ class RitualForm
                     ->label('Is Premium?')
                     ->helperText('If enabled, only users with a premium subscription can access this.')
                     ->default(false),
+                Toggle::make('is_active')
+                    ->label('Active')
+                    ->helperText('If disabled, this ritual will be hidden from the app.')
+                    ->default(true),
                 TimePicker::make('time_of_day')
                     ->required()
                     ->seconds(false)

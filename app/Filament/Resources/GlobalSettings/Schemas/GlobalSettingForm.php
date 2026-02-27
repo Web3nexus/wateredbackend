@@ -13,6 +13,8 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Hash;
 use Filament\Notifications\Notification;
@@ -431,6 +433,60 @@ class GlobalSettingForm
                                         RichEditor::make('terms_of_service')
                                             ->label('Terms of Service Content')
                                             ->columnSpanFull(),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Feature Management')
+                            ->schema([
+                                Section::make('Module Access')
+                                    ->description('Enable or disable major features of the mobile app.')
+                                    ->schema([
+                                        Toggle::make('is_rituals_enabled')
+                                            ->label('Enable Rituals'),
+                                        Toggle::make('is_teachings_enabled')
+                                            ->label('Enable Teachings (Blog)'),
+                                        Toggle::make('is_audios_enabled')
+                                            ->label('Enable Audio Teachings'),
+                                        Toggle::make('is_nima_sedani_enabled')
+                                            ->label('Enable Nima Sedani'),
+                                        Toggle::make('is_community_enabled')
+                                            ->label('Enable Community'),
+                                    ])->columns(2),
+
+                                Section::make('Premium Overrides')
+                                    ->description('Force entire modules to be premium-only, regardless of individual item settings.')
+                                    ->schema([
+                                        Toggle::make('is_rituals_premium_only')
+                                            ->label('Rituals: Premium Only'),
+                                        Toggle::make('is_teachings_premium_only')
+                                            ->label('Teachings: Premium Only'),
+                                        Toggle::make('is_audios_premium_only')
+                                            ->label('Audios: Premium Only'),
+                                        Toggle::make('is_nima_sedani_premium_only')
+                                            ->label('Nima Sedani: Premium Only'),
+                                    ])->columns(2),
+
+                                Section::make('App Sync')
+                                    ->description('Refresh the mobile app configuration. Use this after making changes to module access or pricing.')
+                                    ->schema([
+                                        \Filament\Forms\Components\Placeholder::make('sync_info')
+                                            ->label('Current Version')
+                                            ->content(fn($record) => "Config Version: " . ($record->app_config_version ?? 1)),
+                                        \Filament\Forms\Components\Actions::make([
+                                            FormAction::make('sync_app')
+                                                ->label('Sync App Configuration')
+                                                ->icon('heroicon-m-arrow-path')
+                                                ->color('success')
+                                                ->requiresConfirmation()
+                                                ->action(function ($record) {
+                                                    $record->increment('app_config_version');
+                                                    Notification::make()
+                                                        ->title('App Config Synced')
+                                                        ->body('Configuration version incremented to ' . $record->app_config_version)
+                                                        ->success()
+                                                        ->send();
+                                                }),
+                                        ]),
                                     ]),
                             ]),
 

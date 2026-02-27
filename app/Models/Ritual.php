@@ -22,6 +22,7 @@ class Ritual extends Model
         'symbolic_meaning',
         'is_sacred_daily',
         'is_premium',
+        'is_active',
         'tradition_id',
     ];
 
@@ -33,6 +34,7 @@ class Ritual extends Model
     protected $casts = [
         'is_sacred_daily' => 'boolean',
         'is_premium' => 'boolean',
+        'is_active' => 'boolean',
         'steps' => 'array',
         'media_urls' => 'array',
     ];
