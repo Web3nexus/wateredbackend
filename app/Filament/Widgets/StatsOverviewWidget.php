@@ -23,30 +23,21 @@ class StatsOverviewWidget extends BaseWidget
         // Total Subscribed Users
         $subscribedUsers = User::where('is_premium', true)->count();
 
-        // Subscription Earnings
-        $subEarnings = 0;
-        if (Schema::hasTable('subscriptions') && Schema::hasColumn('subscriptions', 'amount')) {
-            $subEarnings = DB::table('subscriptions')
-                ->where('status', 'active')
-                ->where('plan_id', '!=', 'free_trial')
-                ->sum('amount');
-        }
+        // Subscription Earnings (Active, non-trial)
+        $subEarnings = DB::table('subscriptions')
+            ->where('status', 'active')
+            ->where('plan_id', '!=', 'free_trial')
+            ->sum('amount') ?? 0;
 
-        // Event Earnings
-        $eventEarnings = 0;
-        if (Schema::hasTable('event_registrations') && Schema::hasColumn('event_registrations', 'amount')) {
-            $eventEarnings = DB::table('event_registrations')
-                ->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked'])
-                ->sum('amount');
-        }
+        // Event Earnings (Paid/Completed/Confirmed)
+        $eventEarnings = DB::table('event_registrations')
+            ->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked'])
+            ->sum('amount') ?? 0;
 
-        // Appointment Earnings
-        $appointmentEarnings = 0;
-        if (Schema::hasTable('appointments') && Schema::hasColumn('appointments', 'amount')) {
-            $appointmentEarnings = DB::table('appointments')
-                ->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
-                ->sum('amount');
-        }
+        // Appointment Earnings (Paid/Completed/Confirmed/Booked)
+        $appointmentEarnings = DB::table('appointments')
+            ->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
+            ->sum('amount') ?? 0;
 
         $totalEarnings = $subEarnings + $eventEarnings + $appointmentEarnings;
 
