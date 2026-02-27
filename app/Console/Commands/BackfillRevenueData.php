@@ -26,10 +26,18 @@ class BackfillRevenueData extends Command
         $this->info('Backfilling Subscriptions...');
         $subscriptions = \App\Models\Subscription::where('amount', '<=', 0)->orWhereNull('amount')->get();
         foreach ($subscriptions as $sub) {
+            if ($sub->plan_id === 'free_trial') {
+                $sub->update(['amount' => 0]);
+                $this->line("Set Free Trial Subscription {$sub->id} amount to 0");
+                continue;
+            }
             $amount = str_contains($sub->plan_id, 'yearly') ? $yearlyPrice : $monthlyPrice;
             $sub->update(['amount' => $amount]);
             $this->line("Updated Subscription {$sub->id} ({$sub->plan_id}) with amount {$amount}");
         }
+
+        // Fix existing free trials that might have been incorrectly backfilled
+        \App\Models\Subscription::where('plan_id', 'free_trial')->update(['amount' => 0]);
 
         // Backfill Appointments
         $this->info('Backfilling Appointments...');

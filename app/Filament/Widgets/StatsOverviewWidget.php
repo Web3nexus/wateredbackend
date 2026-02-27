@@ -28,6 +28,7 @@ class StatsOverviewWidget extends BaseWidget
         if (Schema::hasTable('subscriptions') && Schema::hasColumn('subscriptions', 'amount')) {
             $subEarnings = DB::table('subscriptions')
                 ->where('status', 'active')
+                ->where('plan_id', '!=', 'free_trial')
                 ->sum('amount');
         }
 

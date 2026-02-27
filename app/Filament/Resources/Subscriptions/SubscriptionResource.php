@@ -88,7 +88,7 @@ class SubscriptionResource extends Resource
                         default => ucfirst($state),
                     }),
                 TextColumn::make('amount')
-                    ->money('USD')
+                    ->money(fn() => \App\Models\GlobalSetting::first()->system_currency ?? 'NGN')
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
