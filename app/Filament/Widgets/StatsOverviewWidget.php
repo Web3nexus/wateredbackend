@@ -29,15 +29,21 @@ class StatsOverviewWidget extends BaseWidget
             ->where('plan_id', '!=', 'free_trial')
             ->sum('amount') ?? 0;
 
-        // Event Earnings (Paid/Completed/Confirmed)
+        // Event Earnings (Paid/Completed/Confirmed/Registered)
         $eventEarnings = DB::table('event_registrations')
-            ->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked'])
+            ->where(function (\Illuminate\Database\Query\Builder $query) {
+                $query->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked', 'registered'])
+                    ->orWhere('status', 'registered');
+            })
             ->sum('amount') ?? 0;
 
         // Appointment Earnings (Paid/Completed/Confirmed/Booked)
         $appointmentTable = Schema::hasTable('appointments') ? 'appointments' : 'bookings';
         $appointmentEarnings = DB::table($appointmentTable)
-            ->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
+            ->where(function (\Illuminate\Database\Query\Builder $query) {
+                $query->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
+                    ->orWhereIn('appointment_status', ['confirmed', 'paid', 'completed']);
+            })
             ->sum('amount') ?? 0;
 
         $totalEarnings = $subEarnings + $eventEarnings + $appointmentEarnings;

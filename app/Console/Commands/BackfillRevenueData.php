@@ -44,12 +44,15 @@ class BackfillRevenueData extends Command
         // Backfill Appointments
         $this->info('Backfilling Appointments...');
         $appointmentTable = Schema::hasTable('appointments') ? 'appointments' : 'bookings';
-        $appointments = DB::table($appointmentTable)->where('amount', '<=', 0)->orWhereNull('amount')->get();
+        $appointments = DB::table($appointmentTable)->where(function ($q) {
+            $q->where('amount', '<=', 0)->orWhereNull('amount');
+        })->get();
+
         foreach ($appointments as $appointment) {
             $consultationType = DB::table('consultation_types')->where('id', $appointment->consultation_type_id)->first();
             if ($consultationType && $consultationType->price > 0) {
                 DB::table($appointmentTable)->where('id', $appointment->id)->update(['amount' => $consultationType->price]);
-                $this->line("Updated Appointment {$appointment->id} with amount {$consultationType->price}");
+                $this->line("Updated Appointment #{$appointment->id} with amount {$consultationType->price} (from Type: {$consultationType->name})");
             }
         }
 

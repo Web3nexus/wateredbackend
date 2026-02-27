@@ -34,10 +34,12 @@ return new class extends Migration {
                 er.full_name as customer_name,
                 er.email as customer_email,
                 er.amount,
-                er.payment_status,
+                COALESCE(er.payment_status, er.status) as payment_status,
                 er.created_at
             FROM event_registrations er
             LEFT JOIN events e ON er.event_id = e.id
+            WHERE er.payment_status IN ('completed', 'paid', 'success', 'confirmed', 'booked', 'registered')
+               OR er.status = 'registered'
 
             UNION ALL
 
@@ -50,11 +52,16 @@ return new class extends Migration {
                 COALESCE(u.name, a.full_name) as customer_name,
                 COALESCE(u.email, a.email) as customer_email,
                 a.amount,
-                a.payment_status,
+                CASE 
+                    WHEN a.payment_status IN ('paid', 'completed', 'success', 'confirmed', 'booked') THEN a.payment_status
+                    ELSE a.appointment_status
+                END as payment_status,
                 a.created_at
             FROM appointments a
             LEFT JOIN users u ON a.user_id = u.id
             LEFT JOIN consultation_types ct ON a.consultation_type_id = ct.id
+            WHERE a.payment_status IN ('paid', 'completed', 'success', 'confirmed', 'booked')
+               OR a.appointment_status IN ('confirmed', 'paid', 'completed')
         ");
     }
 
