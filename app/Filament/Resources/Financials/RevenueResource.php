@@ -93,11 +93,38 @@ class RevenueResource extends Resource
                     }),
             ])
             ->headerActions([
-                Action::make('export_csv')
-                    ->label('Export (CSV)')
+                Action::make('export_all')
+                    ->label('Export All (CSV)')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn($livewire) => static::exportCsv($livewire->getFilteredTableQuery())),
+
+                Action::make('export_subscriptions')
+                    ->label('Export Subscriptions')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('warning')
+                    ->action(fn() => static::exportCsv(\App\Models\RevenueTransaction::where('source_type', 'Subscription'))),
+
+                Action::make('export_events')
+                    ->label('Export Events')
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('primary')
+                    ->action(fn() => static::exportCsv(\App\Models\RevenueTransaction::where('source_type', 'Event'))),
+
+                Action::make('export_appointments')
+                    ->label('Export Appointments')
+                    ->icon('heroicon-o-calendar')
+                    ->color('info')
+                    ->action(fn() => static::exportCsv(\App\Models\RevenueTransaction::where('source_type', 'Appointment'))),
             ]);
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\SubscriptionRevenueChart::class,
+            \App\Filament\Widgets\EventRevenueChart::class,
+            \App\Filament\Widgets\AppointmentRevenueChart::class,
+        ];
     }
 
     public static function exportCsv($query): \Symfony\Component\HttpFoundation\StreamedResponse

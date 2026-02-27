@@ -35,7 +35,7 @@ class StatsOverviewWidget extends BaseWidget
         $eventEarnings = 0;
         if (Schema::hasTable('event_registrations') && Schema::hasColumn('event_registrations', 'amount')) {
             $eventEarnings = DB::table('event_registrations')
-                ->where('payment_status', 'completed')
+                ->whereIn('payment_status', ['completed', 'paid', 'success'])
                 ->sum('amount');
         }
 
@@ -43,7 +43,7 @@ class StatsOverviewWidget extends BaseWidget
         $appointmentEarnings = 0;
         if (Schema::hasTable('appointments') && Schema::hasColumn('appointments', 'amount')) {
             $appointmentEarnings = DB::table('appointments')
-                ->where('payment_status', 'paid')
+                ->whereIn('payment_status', ['paid', 'completed', 'success'])
                 ->sum('amount');
         }
 

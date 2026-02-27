@@ -12,7 +12,9 @@ class ListRevenueTransactions extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            // Potentially add revenue-specific widgets here later
+            \App\Filament\Widgets\SubscriptionRevenueChart::class,
+            \App\Filament\Widgets\EventRevenueChart::class,
+            \App\Filament\Widgets\AppointmentRevenueChart::class,
         ];
     }
 }

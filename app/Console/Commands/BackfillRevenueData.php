@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\EventRegistration;
 use App\Models\Event;
 use App\Models\ConsultationType;
+use App\Models\Subscription;
 
 class BackfillRevenueData extends Command
 {
@@ -17,9 +18,22 @@ class BackfillRevenueData extends Command
     {
         $this->info('Starting revenue backfill...');
 
+        $settings = \App\Models\GlobalSetting::first();
+        $monthlyPrice = $settings->premium_monthly_amount ?? 5000;
+        $yearlyPrice = $settings->premium_yearly_amount ?? 50000;
+
+        // Backfill Subscriptions
+        $this->info('Backfilling Subscriptions...');
+        $subscriptions = \App\Models\Subscription::where('amount', '<=', 0)->orWhereNull('amount')->get();
+        foreach ($subscriptions as $sub) {
+            $amount = str_contains($sub->plan_id, 'yearly') ? $yearlyPrice : $monthlyPrice;
+            $sub->update(['amount' => $amount]);
+            $this->line("Updated Subscription {$sub->id} ({$sub->plan_id}) with amount {$amount}");
+        }
+
         // Backfill Appointments
         $this->info('Backfilling Appointments...');
-        $appointments = Appointment::where('amount', '<=', 0)->get();
+        $appointments = Appointment::where('amount', '<=', 0)->orWhereNull('amount')->get();
         foreach ($appointments as $appointment) {
             if ($appointment->consultationType && $appointment->consultationType->price > 0) {
                 $appointment->update(['amount' => $appointment->consultationType->price]);
