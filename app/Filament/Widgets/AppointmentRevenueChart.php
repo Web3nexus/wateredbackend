@@ -13,6 +13,11 @@ class AppointmentRevenueChart extends ChartWidget
     protected ?string $heading = 'Appointment Revenue';
     protected static ?int $sort = 4;
 
+    public static function canView(): bool
+    {
+        return !request()->routeIs('filament.securegate.pages.dashboard');
+    }
+
     protected function getData(): array
     {
         $data = Trend::model(Appointment::class)

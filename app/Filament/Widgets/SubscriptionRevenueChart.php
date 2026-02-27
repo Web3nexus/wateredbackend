@@ -13,6 +13,11 @@ class SubscriptionRevenueChart extends ChartWidget
     protected ?string $heading = 'Subscription Revenue';
     protected static ?int $sort = 2;
 
+    public static function canView(): bool
+    {
+        return !request()->routeIs('filament.securegate.pages.dashboard');
+    }
+
     protected function getData(): array
     {
         $data = Trend::model(Subscription::class)

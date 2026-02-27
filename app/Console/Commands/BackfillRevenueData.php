@@ -8,6 +8,8 @@ use App\Models\EventRegistration;
 use App\Models\Event;
 use App\Models\ConsultationType;
 use App\Models\Subscription;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class BackfillRevenueData extends Command
 {
@@ -41,11 +43,13 @@ class BackfillRevenueData extends Command
 
         // Backfill Appointments
         $this->info('Backfilling Appointments...');
-        $appointments = Appointment::where('amount', '<=', 0)->orWhereNull('amount')->get();
+        $appointmentTable = Schema::hasTable('appointments') ? 'appointments' : 'bookings';
+        $appointments = DB::table($appointmentTable)->where('amount', '<=', 0)->orWhereNull('amount')->get();
         foreach ($appointments as $appointment) {
-            if ($appointment->consultationType && $appointment->consultationType->price > 0) {
-                $appointment->update(['amount' => $appointment->consultationType->price]);
-                $this->line("Updated Appointment {$appointment->appointment_code} with amount {$appointment->consultationType->price}");
+            $consultationType = DB::table('consultation_types')->where('id', $appointment->consultation_type_id)->first();
+            if ($consultationType && $consultationType->price > 0) {
+                DB::table($appointmentTable)->where('id', $appointment->id)->update(['amount' => $consultationType->price]);
+                $this->line("Updated Appointment {$appointment->id} with amount {$consultationType->price}");
             }
         }
 
