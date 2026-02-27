@@ -43,6 +43,7 @@ class BackfillRevenueData extends Command
 
         // Backfill Appointments
         $this->info('Backfilling Appointments...');
+        // Manual check for table because Appointment model constructor hotfix might skip console
         $appointmentTable = Schema::hasTable('appointments') ? 'appointments' : 'bookings';
         $appointments = DB::table($appointmentTable)->where(function ($q) {
             $q->where('amount', '<=', 0)->orWhereNull('amount');
@@ -52,7 +53,7 @@ class BackfillRevenueData extends Command
             $consultationType = DB::table('consultation_types')->where('id', $appointment->consultation_type_id)->first();
             if ($consultationType && $consultationType->price > 0) {
                 DB::table($appointmentTable)->where('id', $appointment->id)->update(['amount' => $consultationType->price]);
-                $this->line("Updated Appointment #{$appointment->id} with amount {$consultationType->price} (from Type: {$consultationType->name})");
+                $this->line("Updated Appointment #{$appointment->id} with amount {$consultationType->price} (from Type: " . ($consultationType->name ?? 'N/A') . ")");
             }
         }
 

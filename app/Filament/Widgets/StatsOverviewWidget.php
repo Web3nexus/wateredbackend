@@ -30,19 +30,27 @@ class StatsOverviewWidget extends BaseWidget
             ->sum('amount') ?? 0;
 
         // Event Earnings (Paid/Completed/Confirmed/Registered)
-        $eventEarnings = DB::table('event_registrations')
-            ->where(function (\Illuminate\Database\Query\Builder $query) {
-                $query->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked', 'registered'])
-                    ->orWhere('status', 'registered');
+        $eventEarnings = DB::table((new \App\Models\EventRegistration)->getTable())
+            ->where(function ($query) {
+                $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked', 'registered'])
+                    ->orWhereIn(DB::raw('LOWER(status)'), ['registered', 'confirmed', 'paid'])
+                    ->orWhere('amount', '>', 0);
             })
             ->sum('amount') ?? 0;
 
-        // Appointment Earnings (Paid/Completed/Confirmed/Booked)
-        $appointmentTable = Schema::hasTable('appointments') ? 'appointments' : 'bookings';
+        // Appointment Earnings (Greedy logic: Include anything that isn't explicitly failed/cancelled)
+        $appointmentTable = (new \App\Models\Appointment)->getTable();
         $appointmentEarnings = DB::table($appointmentTable)
-            ->where(function (\Illuminate\Database\Query\Builder $query) {
-                $query->whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
-                    ->orWhereIn('appointment_status', ['confirmed', 'paid', 'completed']);
+            ->where(function ($query) {
+                // Successful indicators
+                $query->whereIn(DB::raw('LOWER(payment_status)'), ['paid', 'completed', 'success', 'confirmed', 'booked'])
+                    ->orWhereIn(DB::raw('LOWER(appointment_status)'), ['confirmed', 'paid', 'completed', 'booked'])
+                    // Fallback: If amount > 0 and not cancelled/failed
+                    ->orWhere(function ($q) {
+                    $q->where('amount', '>', 0)
+                        ->whereNotIn(DB::raw('LOWER(payment_status)'), ['failed', 'cancelled'])
+                        ->whereNotIn(DB::raw('LOWER(appointment_status)'), ['cancelled']);
+                });
             })
             ->sum('amount') ?? 0;
 
