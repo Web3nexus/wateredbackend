@@ -35,7 +35,7 @@ class StatsOverviewWidget extends BaseWidget
         $eventEarnings = 0;
         if (Schema::hasTable('event_registrations') && Schema::hasColumn('event_registrations', 'amount')) {
             $eventEarnings = DB::table('event_registrations')
-                ->whereIn('payment_status', ['completed', 'paid', 'success'])
+                ->whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked'])
                 ->sum('amount');
         }
 
