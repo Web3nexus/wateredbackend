@@ -16,10 +16,12 @@ class TextCollection extends Model
         'category_id',
         'order',
         'is_active',
+        'is_premium',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_premium' => 'boolean',
     ];
 
     public function tradition(): BelongsTo

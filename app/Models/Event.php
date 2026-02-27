@@ -62,7 +62,7 @@ class Event extends Model
             return $path;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+        return \Illuminate\Support\Facades\Storage::url($path);
     }
 
     public function tradition(): \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -37,6 +37,9 @@ class TeachingForm
                     ->directory('blog-posts'),
                 Toggle::make('is_published')
                     ->required(),
+                Toggle::make('is_premium')
+                    ->label('Is Premium?')
+                    ->default(false),
                 DateTimePicker::make('published_at'),
             ]);
     }

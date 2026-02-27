@@ -109,6 +109,9 @@ class AudioForm
                         Toggle::make('is_featured')
                             ->label('Featured Content')
                             ->default(false),
+                        Toggle::make('is_premium')
+                            ->label('Premium Content')
+                            ->default(false),
                     ]),
             ]);
     }

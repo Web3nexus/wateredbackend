@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class AudiosTable
@@ -31,6 +32,8 @@ class AudiosTable
                 IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
+                ToggleColumn::make('is_premium')
+                    ->label('Premium'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

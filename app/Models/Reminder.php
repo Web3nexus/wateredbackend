@@ -41,7 +41,7 @@ class Reminder extends Model
                     return $this->sound_path;
                 }
 
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->sound_path);
+                return \Illuminate\Support\Facades\Storage::url($this->sound_path);
             },
         );
     }

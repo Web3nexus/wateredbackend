@@ -21,12 +21,14 @@ class Ritual extends Model
         'time_of_day',
         'symbolic_meaning',
         'is_sacred_daily',
+        'is_premium',
     ];
 
     protected $casts = [
         'media_urls' => 'array',
         'steps' => 'array',
         'is_sacred_daily' => 'boolean',
+        'is_premium' => 'boolean',
     ];
 
     /**
@@ -43,7 +45,7 @@ class Ritual extends Model
                 return array_map(function ($url) {
                     if (str_starts_with($url, 'http'))
                         return $url;
-                    return Storage::disk('public')->url($url);
+                    return Storage::url($url);
                 }, $urls);
             },
         );

@@ -18,6 +18,7 @@ class Teaching extends Model
         'featured_image',
         'is_published',
         'published_at',
+        'is_premium',
     ];
 
     protected $appends = ['featured_image_url'];
@@ -25,6 +26,7 @@ class Teaching extends Model
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
+        'is_premium' => 'boolean',
     ];
 
     protected static function boot()
@@ -46,7 +48,7 @@ class Teaching extends Model
                     return null;
                 if (str_starts_with($this->featured_image, 'http'))
                     return $this->featured_image;
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image);
+                return \Illuminate\Support\Facades\Storage::url($this->featured_image);
             }
         );
     }

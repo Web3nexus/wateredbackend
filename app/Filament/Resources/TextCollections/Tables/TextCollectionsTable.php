@@ -9,6 +9,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class TextCollectionsTable
@@ -30,6 +31,8 @@ class TextCollectionsTable
                 IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
+                ToggleColumn::make('is_premium')
+                    ->label('Premium'),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('tradition_id')

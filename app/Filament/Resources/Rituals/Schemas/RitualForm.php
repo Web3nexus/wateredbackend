@@ -38,6 +38,10 @@ class RitualForm
                     ->label('Is Sacred Daily?')
                     ->helperText('If enabled, this ritual will be permanent on the Home Screen and excluded from the general rituals list.')
                     ->default(false),
+                Toggle::make('is_premium')
+                    ->label('Is Premium?')
+                    ->helperText('If enabled, only users with a premium subscription can access this.')
+                    ->default(false),
                 TimePicker::make('time_of_day')
                     ->required()
                     ->seconds(false)

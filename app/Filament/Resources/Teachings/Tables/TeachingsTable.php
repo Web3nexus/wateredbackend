@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class TeachingsTable
@@ -23,6 +24,8 @@ class TeachingsTable
                 ImageColumn::make('featured_image'),
                 IconColumn::make('is_published')
                     ->boolean(),
+                ToggleColumn::make('is_premium')
+                    ->label('Premium'),
                 TextColumn::make('published_at')
                     ->dateTime()
                     ->sortable(),

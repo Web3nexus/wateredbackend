@@ -45,7 +45,7 @@ class Incantation extends Model
                     return $value;
                 }
 
-                return Storage::disk('public')->url($value);
+                return Storage::url($value);
             },
         );
     }

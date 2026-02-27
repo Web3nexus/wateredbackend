@@ -29,6 +29,8 @@ class RitualsTable
                     ->searchable(),
                 ToggleColumn::make('is_sacred_daily')
                     ->label('Sacred Daily'),
+                ToggleColumn::make('is_premium')
+                    ->label('Premium'),
                 TextColumn::make('time_of_day')
                     ->time()
                     ->sortable(),

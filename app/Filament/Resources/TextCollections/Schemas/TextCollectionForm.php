@@ -53,6 +53,9 @@ class TextCollectionForm
                         Toggle::make('is_active')
                             ->label('Visible on App')
                             ->default(true),
+                        Toggle::make('is_premium')
+                            ->label('Is Premium?')
+                            ->default(false),
                     ]),
 
                 Section::make('Chapters & Verses')

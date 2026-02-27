@@ -27,12 +27,14 @@ class Audio extends Model
         'category_id',
         'is_active',
         'is_featured',
+        'is_premium',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'is_premium' => 'boolean',
     ];
 
     protected $appends = [
@@ -62,7 +64,7 @@ class Audio extends Model
                     return $value;
                 }
 
-                $url = Storage::disk('public')->url($value);
+                $url = Storage::url($value);
                 \Illuminate\Support\Facades\Log::info('Audio Model - Generated Storage URL: ' . $url);
                 return $url;
             },
@@ -81,7 +83,7 @@ class Audio extends Model
                     return $value;
                 }
 
-                return Storage::disk('public')->url($value);
+                return Storage::url($value);
             },
         );
     }

@@ -134,7 +134,7 @@ class GlobalSetting extends Model
                     return asset('images/lord-uzih-hero.png');
                 if (filter_var($this->hero_image, FILTER_VALIDATE_URL))
                     return $this->hero_image;
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->hero_image);
+                return \Illuminate\Support\Facades\Storage::url($this->hero_image);
             }
         );
     }
@@ -147,7 +147,7 @@ class GlobalSetting extends Model
                     return asset('images/acceptance-ritual.png');
                 if (filter_var($this->rituals_image, FILTER_VALIDATE_URL))
                     return $this->rituals_image;
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->rituals_image);
+                return \Illuminate\Support\Facades\Storage::url($this->rituals_image);
             }
         );
     }
