@@ -13,22 +13,41 @@ class StatsOverviewWidget extends BaseWidget
 {
     protected function getStats(): array
     {
+        // Get Currency Symbol
+        $settings = \App\Models\GlobalSetting::first();
+        $currency = $settings->currency_symbol ?? '$';
+
         // Total Users
         $totalUsers = User::count();
 
-        // Total Subscribed Users (assuming isPremium field or subscription relationship)
+        // Total Subscribed Users
         $subscribedUsers = User::where('is_premium', true)->count();
 
-        // Total Earnings (from subscriptions)
-        $totalEarnings = 0;
-        if (Schema::hasColumn('subscriptions', 'amount')) {
-            $totalEarnings = DB::table('subscriptions')
+        // Subscription Earnings
+        $subEarnings = 0;
+        if (Schema::hasTable('subscriptions') && Schema::hasColumn('subscriptions', 'amount')) {
+            $subEarnings = DB::table('subscriptions')
                 ->where('status', 'active')
                 ->sum('amount');
         }
 
-        // Total Products
-        $totalProducts = Product::count();
+        // Event Earnings
+        $eventEarnings = 0;
+        if (Schema::hasTable('event_registrations') && Schema::hasColumn('event_registrations', 'amount')) {
+            $eventEarnings = DB::table('event_registrations')
+                ->where('payment_status', 'completed')
+                ->sum('amount');
+        }
+
+        // Appointment Earnings
+        $appointmentEarnings = 0;
+        if (Schema::hasTable('appointments') && Schema::hasColumn('appointments', 'amount')) {
+            $appointmentEarnings = DB::table('appointments')
+                ->where('payment_status', 'paid')
+                ->sum('amount');
+        }
+
+        $totalEarnings = $subEarnings + $eventEarnings + $appointmentEarnings;
 
         return [
             Stat::make('Total Users', number_format($totalUsers))
@@ -41,15 +60,20 @@ class StatsOverviewWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-star')
                 ->color('warning'),
 
-            Stat::make('Total Earnings', '$' . number_format($totalEarnings, 2))
-                ->description('From subscriptions')
-                ->descriptionIcon('heroicon-m-currency-dollar')
+            Stat::make('Total Revenue', $currency . number_format($totalEarnings, 2))
+                ->description('All payment sources')
+                ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
 
-            Stat::make('Total Products', number_format($totalProducts))
-                ->description('Available in shop')
-                ->descriptionIcon('heroicon-m-shopping-bag')
+            Stat::make('Event Revenue', $currency . number_format($eventEarnings, 2))
+                ->description('From registrations')
+                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('primary'),
+
+            Stat::make('Appointment Revenue', $currency . number_format($appointmentEarnings, 2))
+                ->description('From consultations')
+                ->descriptionIcon('heroicon-m-calendar')
+                ->color('info'),
         ];
     }
 }
