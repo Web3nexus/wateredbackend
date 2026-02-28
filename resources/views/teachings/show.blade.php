@@ -24,7 +24,7 @@
             {{-- Featured Image --}}
             @if($teaching->featured_image)
                 <div
-                    class="mb-20 rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl relative group aspect-video lg:aspect-[21/9]">
+                    class="mb-20 rounded-[2rem] overflow-hidden border border-parchment/10 shadow-2xl relative group aspect-video max-w-3xl mx-auto">
                     <img src="{{ asset('storage/' . $teaching->featured_image) }}" alt="{{ $teaching->title }}"
                         class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-sea-deep/40 to-transparent opacity-60"></div>

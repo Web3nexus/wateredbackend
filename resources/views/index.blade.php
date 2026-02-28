@@ -28,7 +28,7 @@
                 </div>
                 <div class="md:col-span-2 relative">
                     <div
-                        class="relative aspect-[3/4] md:aspect-[2/3] max-w-sm ml-auto rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
+                        class="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden border border-parchment/10 shadow-3xl bg-parchment/5">
                         @if($settings?->hero_image)
                             <img src="{{ $settings->hero_image_url }}" alt="Watered App" class="w-full h-full object-cover">
                         @else
@@ -48,8 +48,8 @@
     <section id="features" class="space-y-32 py-32">
         @forelse($features->take(2) as $index => $feature)
             <div class="max-w-7xl mx-auto px-6">
-                <div class="grid md:grid-cols-5 gap-16 items-center">
-                    <div class="md:col-span-2 {{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                <div class="grid md:grid-cols-2 gap-20 items-center">
+                    <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
                         <div
                             class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
                             @if($feature->image)
@@ -65,7 +65,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="md:col-span-3 space-y-6">
+                    <div class="space-y-6">
                         <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
                         </h2>
                         <p class="text-lg text-parchment/70 leading-relaxed">{!! $feature->description !!}</p>
@@ -161,8 +161,8 @@
     <section class="space-y-32 py-32">
         @forelse($features->skip(2)->take(2) as $index => $feature)
             <div class="max-w-7xl mx-auto px-6">
-                <div class="grid md:grid-cols-5 gap-16 items-center">
-                    <div class="md:col-span-2 {{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
+                <div class="grid md:grid-cols-2 gap-20 items-center">
+                    <div class="{{ $feature->image_position === 'right' ? 'md:order-2' : '' }}">
                         <div
                             class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl bg-parchment/5">
                             @if($feature->image)
@@ -178,7 +178,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="md:col-span-3 space-y-6">
+                    <div class="space-y-6">
                         <h2 class="text-4xl md:text-5xl text-parchment font-heading leading-tight">{{ $feature->title }}
                         </h2>
                         <p class="text-lg text-parchment/70 leading-relaxed">{!! $feature->description !!}</p>
@@ -468,20 +468,20 @@
         function bookingSystem() {
             return {
                 allTypes: [], filteredTypes: [], selectedCategory: '', selectedSubType: '', templeVisitTypeId: '', startTime: '', timeError: '', isSubmitting: false, fp: null,
-                async init() { 
-                    try { 
-                        const response = await fetch('/api/v1/consultation-types'); 
-                        const result = await response.json(); 
-                        this.allTypes = result.data || []; 
-                        this.initFlatpickr(); 
-                    } catch (error) { 
-                        console.error('Failed to fetch types:', error); 
-                    } 
+                async init() {
+                    try {
+                        const response = await fetch('/api/v1/consultation-types');
+                        const result = await response.json();
+                        this.allTypes = result.data || [];
+                        this.initFlatpickr();
+                    } catch (error) {
+                        console.error('Failed to fetch types:', error);
+                    }
                 },
                 initFlatpickr() {
                     this.fp = flatpickr("#start_time_picker", {
                         enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", disable: [(date) => {
-                            if (!this.selectedCategory) return true; 
+                            if (!this.selectedCategory) return true;
                             if (this.selectedCategory === 'lord_uzih') {
                                 // Only Tue(2), Wed(3), Fri(5)
                                 return ![2, 3, 5].includes(date.getDay());
@@ -497,66 +497,66 @@
                         }
                     });
                 },
-                updateSubTypes() { 
-                    this.filteredTypes = this.allTypes.filter(t => t.category === this.selectedCategory); 
-                    if (this.selectedCategory === 'temple_visit' && this.filteredTypes.length > 0) { 
-                        this.templeVisitTypeId = this.filteredTypes[0].id; 
-                    } else { 
-                        this.templeVisitTypeId = ''; 
-                    } 
-                    this.selectedSubType = ''; 
-                    this.startTime = ''; 
-                    if (this.fp) this.fp.clear(); 
-                    this.validateTime(); 
+                updateSubTypes() {
+                    this.filteredTypes = this.allTypes.filter(t => t.category === this.selectedCategory);
+                    if (this.selectedCategory === 'temple_visit' && this.filteredTypes.length > 0) {
+                        this.templeVisitTypeId = this.filteredTypes[0].id;
+                    } else {
+                        this.templeVisitTypeId = '';
+                    }
+                    this.selectedSubType = '';
+                    this.startTime = '';
+                    if (this.fp) this.fp.clear();
+                    this.validateTime();
                 },
-                validateTime() { 
-                    if(!this.startTime || !this.selectedCategory) { this.timeError = ''; return; }
+                validateTime() {
+                    if (!this.startTime || !this.selectedCategory) { this.timeError = ''; return; }
                     const date = new Date(this.startTime); const day = date.getDay(); // 0-6 (Sun-Sat)                 
-                    const hour = date.getHours();                 
-                    const minutes = date.getMinutes();                 
+                    const hour = date.getHours();
+                    const minutes = date.getMinutes();
                     const timeInt = hour * 100 + minutes;
 
-                    if (this.selectedCategory === 'temple_visit') {                     
+                    if (this.selectedCategory === 'temple_visit') {
                         // Mon-Wed, Fri, Sun: 10:00 AM – 4:00 PM (1000 - 1600)                     
                         // Thu, Sat: 7:00 AM – 6:00 PM (0700 - 1800)                     
-                        if ([1, 2, 3, 5, 0].includes(day)) {                         
-                            if (timeInt < 1000 || timeInt > 1600) {                             
-                                this.timeError = 'Temple visits are only available 10:00 AM - 4:00 PM on this day.';                             
-                                return;                         
-                            }                     
-                        } else if ([4, 6].includes(day)) {                         
-                            if (timeInt < 700 || timeInt > 1800) {                             
-                                this.timeError = 'Temple visits are only available 7:00 AM - 6:00 PM on this day.';                             
-                                return;                         
-                            }                     
-                        }                 
-                    } else if (this.selectedCategory === 'lord_uzih') {                     
+                        if ([1, 2, 3, 5, 0].includes(day)) {
+                            if (timeInt < 1000 || timeInt > 1600) {
+                                this.timeError = 'Temple visits are only available 10:00 AM - 4:00 PM on this day.';
+                                return;
+                            }
+                        } else if ([4, 6].includes(day)) {
+                            if (timeInt < 700 || timeInt > 1800) {
+                                this.timeError = 'Temple visits are only available 7:00 AM - 6:00 PM on this day.';
+                                return;
+                            }
+                        }
+                    } else if (this.selectedCategory === 'lord_uzih') {
                         // Tue, Wed, Fri: 10:00 AM – 4:00 PM                     
-                        if (![2, 3, 5].includes(day)) {                         
-                            this.timeError = 'Consultations with Lord Uzih are only available on Tuesday, Wednesday, and Friday.';                         
-                            return;                     
-                        }                     
-                        if (timeInt < 1000 || timeInt > 1600) {                         
-                            this.timeError = 'Consultations with Lord Uzih are only available 10:00 AM - 4:00 PM.';                         
-                            return;                     
-                        }                 
+                        if (![2, 3, 5].includes(day)) {
+                            this.timeError = 'Consultations with Lord Uzih are only available on Tuesday, Wednesday, and Friday.';
+                            return;
+                        }
+                        if (timeInt < 1000 || timeInt > 1600) {
+                            this.timeError = 'Consultations with Lord Uzih are only available 10:00 AM - 4:00 PM.';
+                            return;
+                        }
                     }
                     this.timeError = '';
                 },
-                    formatNumber(num) { return new Intl.NumberFormat('en-NG').format(num); },
-                                 async submitForm(e) {
-                        const form = e.target; const msg = document.getElementById('appointmentMessage');
-                        this.isSubmitting = true; msg.classList.add('hidden');
-                        try {
-                            const formData = new FormData(form); const response = await fetch('/api/v1/appointments/guest', { method: 'POST', headers: { 'Accept': 'application/json', }, body: formData });
-                            const result = await response.json();
-                            if (response.ok) {
-                                msg.innerText = 'Success! Redirecting...'; msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20'); msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
-                                if (result.payment_url) { window.location.href = result.payment_url; } else { msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code; form.reset(); this.selectedCategory = ''; this.isSubmitting = false; }
-                            } else { throw new Error(result.message || 'Failed to create appointment'); }
-                        } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
-                    }
+                formatNumber(num) { return new Intl.NumberFormat('en-NG').format(num); },
+                async submitForm(e) {
+                    const form = e.target; const msg = document.getElementById('appointmentMessage');
+                    this.isSubmitting = true; msg.classList.add('hidden');
+                    try {
+                        const formData = new FormData(form); const response = await fetch('/api/v1/appointments/guest', { method: 'POST', headers: { 'Accept': 'application/json', }, body: formData });
+                        const result = await response.json();
+                        if (response.ok) {
+                            msg.innerText = 'Success! Redirecting...'; msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20'); msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
+                            if (result.payment_url) { window.location.href = result.payment_url; } else { msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code; form.reset(); this.selectedCategory = ''; this.isSubmitting = false; }
+                        } else { throw new Error(result.message || 'Failed to create appointment'); }
+                    } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
                 }
             }
+        }
     </script>
 @endsection
