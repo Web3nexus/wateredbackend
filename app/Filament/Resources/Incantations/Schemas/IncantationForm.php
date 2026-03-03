@@ -43,7 +43,6 @@ class IncantationForm
                     ->directory('incantations')
                     ->maxSize(51200) // 50MB
                     ->visible(fn($get) => $get('audio_source_type') === 'upload')
-                    ->required(fn($get) => $get('audio_source_type') === 'upload')
                     ->dehydrateStateUsing(function ($state, $get) {
                         if ($get('audio_source_type') === 'link') {
                             return $get('external_audio_url');
@@ -54,7 +53,6 @@ class IncantationForm
                     ->label('External Audio Link')
                     ->placeholder('https://example.com/audio.mp3')
                     ->visible(fn($get) => $get('audio_source_type') === 'link')
-                    ->required(fn($get) => $get('audio_source_type') === 'link')
                     ->dehydrated(false)
                     ->helperText('Provide a direct link to the audio file.'),
                 Toggle::make('is_paid')
