@@ -59,4 +59,30 @@ class EditGlobalSetting extends EditRecord
             DeleteAction::make(),
         ];
     }
+    protected function afterSave(): void
+    {
+        $record = $this->record;
+
+        // If Rituals are set to Premium Only, update all rituals to be premium
+        if ($record->is_rituals_premium_only) {
+            \App\Models\Ritual::query()->update(['is_premium' => true]);
+
+            \Filament\Notifications\Notification::make()
+                ->title('Rituals Updated')
+                ->body('All rituals have been set to premium.')
+                ->success()
+                ->send();
+        }
+
+        // If Incantations are set to Premium Only, update all incantations to be premium
+        if ($record->is_incantations_premium_only) {
+            \App\Models\Incantation::query()->update(['is_paid' => true]);
+
+            \Filament\Notifications\Notification::make()
+                ->title('Incantations Updated')
+                ->body('All incantations have been set to premium.')
+                ->success()
+                ->send();
+        }
+    }
 }

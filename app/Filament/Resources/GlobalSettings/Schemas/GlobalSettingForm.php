@@ -442,6 +442,8 @@ class GlobalSettingForm
                                     ->schema([
                                         Toggle::make('is_rituals_enabled')
                                             ->label('Enable Rituals'),
+                                        Toggle::make('is_incantations_enabled')
+                                            ->label('Enable Incantations'),
                                         Toggle::make('is_teachings_enabled')
                                             ->label('Enable Teachings (Blog)'),
                                         Toggle::make('is_audios_enabled')
@@ -450,13 +452,15 @@ class GlobalSettingForm
                                             ->label('Enable Nima Sedani'),
                                         Toggle::make('is_community_enabled')
                                             ->label('Enable Community'),
-                                    ])->columns(2),
+                                    ])->columns(3),
 
                                 Section::make('Premium Overrides')
                                     ->description('Force entire modules to be premium-only, regardless of individual item settings.')
                                     ->schema([
                                         Toggle::make('is_rituals_premium_only')
-                                            ->label('Rituals: Premium Only'),
+                                            ->label('Rituals: Premium Only (Confirmed)'),
+                                        Toggle::make('is_incantations_premium_only')
+                                            ->label('Incantations: Premium Only (Confirmed)'),
                                         Toggle::make('is_teachings_premium_only')
                                             ->label('Teachings: Premium Only'),
                                         Toggle::make('is_audios_premium_only')
