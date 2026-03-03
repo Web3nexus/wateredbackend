@@ -28,7 +28,10 @@ class CalendarDayForm
                     ->label('Spiritual Significance')
                     ->rows(3)
                     ->columnSpanFull(),
-                TagsInput::make('associated_deities'),
+                TagsInput::make('associated_deities')
+                    ->label('Associated Spirits / Orishas'),
+                TextInput::make('celebration_type')
+                    ->label('Celebration / Festival Name'),
                 TagsInput::make('activities')
                     ->label('Required Activities')
                     ->placeholder('Add activity'),

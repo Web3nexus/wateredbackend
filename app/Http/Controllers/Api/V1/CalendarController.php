@@ -51,7 +51,6 @@ class CalendarController extends Controller
 
     /**
      * Get today's calendar day based on Gregorian date
-     * Implementation assumes Kemetic Year starts July 19th
      */
     public function getToday()
     {
@@ -68,7 +67,7 @@ class CalendarController extends Controller
 
         return response()->json([
             'gregorian_date' => $today->toDateString(),
-            'kemetic_date' => [
+            'sacred_date' => [
                 'month_number' => $month?->number ?? 0,
                 'day_number' => $day?->day_number ?? 0,
                 'month_name' => $month?->standard_name ?? 'Unknown',

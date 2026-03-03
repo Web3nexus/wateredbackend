@@ -26,6 +26,7 @@ class RitualResource extends JsonResource
             'symbolic_meaning' => $this->symbolic_meaning,
             'is_sacred_daily' => (bool) $this->is_sacred_daily,
             'tradition_id' => $this->tradition_id,
+            'is_premium' => (bool) ($this->is_premium ?? false),
             'is_active' => (bool) ($this->is_active ?? true),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

@@ -41,7 +41,7 @@ class CalendarMonthResource extends Resource
                             ->content(fn($record) => $record?->standard_name),
 
                         Placeholder::make('season')
-                            ->label('Season (Akhet/Peret/Shemu)')
+                            ->label('Season / Cycle')
                             ->content(fn($record) => $record?->season),
 
                         Placeholder::make('gregorian_reference')
