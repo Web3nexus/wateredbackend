@@ -17,6 +17,7 @@ class Incantation extends Model
         'content',
         'audio_url',
         'is_paid',
+        'is_premium',
         'category',
         'spoken_text',
         'intended_outcome',
@@ -24,6 +25,7 @@ class Incantation extends Model
 
     protected $casts = [
         'is_paid' => 'boolean',
+        'is_premium' => 'boolean',
     ];
 
     protected $appends = [

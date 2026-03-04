@@ -25,6 +25,7 @@ class TeachingController extends Controller
                 'summary' => $teaching->summary,
                 'featured_image' => $teaching->featured_image_url,
                 'published_at' => $teaching->published_at,
+                'is_premium' => (bool) $teaching->is_premium,
             ];
         });
 
@@ -48,6 +49,7 @@ class TeachingController extends Controller
             'content' => $teaching->content,
             'featured_image' => $teaching->featured_image_url,
             'published_at' => $teaching->published_at,
+            'is_premium' => (bool) $teaching->is_premium,
         ]);
     }
 }

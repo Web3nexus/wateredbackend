@@ -32,28 +32,27 @@ class PremiumAccess
 
         // Rituals
         if (str_contains($path, 'rituals')) {
-            if ($globalSettings->is_rituals_premium_only) {
-                return $this->deny();
+            $ritual = $request->route()->parameter('ritual');
+
+            // If it's a detail request (ritual parameter exists)
+            if ($ritual instanceof \App\Models\Ritual) {
+                return $ritual->is_premium ? $this->deny() : $next($request);
             }
 
-            // Check individual ritual if it's a detail request
-            $ritual = $request->route()->parameter('ritual');
-            if ($ritual instanceof \App\Models\Ritual && $ritual->is_premium) {
-                return $this->deny();
-            }
+            // For the index listing, ALWAYS allow it so users can see the content.
+            // Individual record access is blocked above if premium.
+            return $next($request);
         }
 
         // Incantations
         if (str_contains($path, 'incantations')) {
-            if ($globalSettings->is_incantations_premium_only) {
-                return $this->deny();
+            $incantation = $request->route()->parameter('incantation');
+
+            if ($incantation instanceof \App\Models\Incantation) {
+                return ($incantation->is_premium || $incantation->is_paid) ? $this->deny() : $next($request);
             }
 
-            // Check individual incantation if it's a detail request
-            $incantation = $request->route()->parameter('incantation');
-            if ($incantation instanceof \App\Models\Incantation && $incantation->is_paid) {
-                return $this->deny();
-            }
+            return $next($request);
         }
 
         return $next($request);

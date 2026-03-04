@@ -21,6 +21,7 @@ class IncantationResource extends JsonResource
             'content' => $this->content,
             'audio_url' => $this->full_audio_url,
             'is_paid' => (bool) $this->is_paid,
+            'is_premium' => (bool) ($this->is_premium ?? $this->is_paid),
             'category' => $this->category,
             'spoken_text' => $this->spoken_text,
             'intended_outcome' => $this->intended_outcome,

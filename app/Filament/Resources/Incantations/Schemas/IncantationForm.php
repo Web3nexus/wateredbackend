@@ -56,7 +56,11 @@ class IncantationForm
                     ->dehydrated(false)
                     ->helperText('Provide a direct link to the audio file.'),
                 Toggle::make('is_paid')
+                    ->label('Is Paid?')
                     ->required(),
+                Toggle::make('is_premium')
+                    ->label('Is Premium?')
+                    ->default(false),
                 Select::make('category')
                     ->options([
                         'Protection' => 'Protection',
