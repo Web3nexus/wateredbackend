@@ -55,18 +55,6 @@ class IncantationForm
                     ->visible(fn($get) => $get('audio_source_type') === 'link')
                     ->dehydrated(false)
                     ->helperText('Provide a direct link to the audio file.'),
-                Toggle::make('is_paid')
-                    ->label('Is Paid?')
-                    ->helperText('Legacy field - kept in sync with Premium.')
-                    ->live()
-                    ->afterStateUpdated(fn($state, $set) => $set('is_premium', $state))
-                    ->required(),
-                Toggle::make('is_premium')
-                    ->label('Is Premium?')
-                    ->helperText('Controls locking on the app.')
-                    ->live()
-                    ->afterStateUpdated(fn($state, $set) => $set('is_paid', $state))
-                    ->default(false),
                 Select::make('category')
                     ->options([
                         'Protection' => 'Protection',

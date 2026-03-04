@@ -16,21 +16,28 @@ class Incantation extends Model
         'description',
         'content',
         'audio_url',
-        'is_paid',
-        'is_premium',
         'category',
         'spoken_text',
         'intended_outcome',
     ];
 
     protected $casts = [
-        'is_paid' => 'boolean',
-        'is_premium' => 'boolean',
     ];
 
     protected $appends = [
         'full_audio_url',
+        'is_premium',
     ];
+
+    /**
+     * Incantations are premium by default.
+     */
+    protected function isPremium(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => true,
+        );
+    }
 
     /**
      * Get the audio URL.

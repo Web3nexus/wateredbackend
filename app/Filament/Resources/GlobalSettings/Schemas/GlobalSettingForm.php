@@ -459,8 +459,7 @@ class GlobalSettingForm
                                     ->schema([
                                         Toggle::make('is_rituals_premium_only')
                                             ->label('Rituals: Premium Only (Confirmed)'),
-                                        Toggle::make('is_incantations_premium_only')
-                                            ->label('Incantations: Premium Only (Confirmed)'),
+
                                         Toggle::make('is_teachings_premium_only')
                                             ->label('Teachings: Premium Only'),
                                         Toggle::make('is_audios_premium_only')

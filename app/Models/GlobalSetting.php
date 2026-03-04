@@ -90,7 +90,6 @@ class GlobalSetting extends Model
         'is_audios_premium_only',
         'is_nima_sedani_premium_only',
         'is_incantations_enabled',
-        'is_incantations_premium_only',
         'app_config_version',
     ];
 
@@ -121,7 +120,6 @@ class GlobalSetting extends Model
         'is_audios_premium_only' => 'boolean',
         'is_nima_sedani_premium_only' => 'boolean',
         'is_incantations_enabled' => 'boolean',
-        'is_incantations_premium_only' => 'boolean',
         'app_config_version' => 'integer',
     ];
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute

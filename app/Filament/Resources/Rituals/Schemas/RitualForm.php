@@ -40,7 +40,7 @@ class RitualForm
                     ->default(false),
                 Toggle::make('is_premium')
                     ->label('Is Premium?')
-                    ->helperText('If enabled, only users with a premium subscription can access this.')
+                    ->helperText('Enable this if this ritual should be locked for free users (and open for Watered Plus+).')
                     ->default(false),
                 Toggle::make('is_active')
                     ->label('Active')

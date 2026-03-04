@@ -20,11 +20,7 @@ class IncantationsTable
                     ->searchable(),
                 TextColumn::make('audio_url')
                     ->searchable(),
-                IconColumn::make('is_paid')
-                    ->boolean()
-                    ->label('Paid'),
-                ToggleColumn::make('is_premium')
-                    ->label('Premium'),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
