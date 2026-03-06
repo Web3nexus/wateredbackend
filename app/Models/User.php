@@ -174,33 +174,22 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasActivePremium(): bool
     {
+        // 1. If currently marked as premium (admin override), trust it
+        if ($this->is_premium) {
+            return true;
+        }
+
         $activeSub = $this->subscription;
 
         if ($activeSub !== null) {
             // Active subscription found — ensure flag is synced
-            if (!$this->is_premium) {
-                $this->is_premium = true;
-                $this->save();
-            }
+            $this->is_premium = true;
+            $this->save();
             return true;
         }
 
-        // No active subscription. Check if premium was manually granted by admin.
-        // We only auto-revoke if a subscription existed before AND has now expired.
-        $hadExpiredSub = $this->subscriptions()
-            ->where('status', '!=', 'active')
-            ->orWhere('expires_at', '<=', now())
-            ->exists();
-
-        if ($hadExpiredSub && $this->is_premium) {
-            // Subscription expired — revoke the flag
-            $this->is_premium = false;
-            $this->save();
-            return false;
-        }
-
-        // No subscription history — is_premium flag is the source of truth (admin grant)
-        return (bool) $this->is_premium;
+        // 3. No active subscription and flag is false
+        return false;
     }
 
     public function reminders(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -47,9 +47,14 @@ class PremiumAccess
             return $next($request);
         }
 
-        // Incantations - Always Premium
+        // Incantations - Item level gating
         if (str_contains($path, 'incantations')) {
-            return $this->deny();
+            $incantation = $request->route()->parameter('incantation');
+            // If it's a detail request (incantation parameter exists)
+            if ($incantation instanceof \App\Models\Incantation) {
+                return $this->deny();
+            }
+            return $next($request);
         }
 
         return $next($request);

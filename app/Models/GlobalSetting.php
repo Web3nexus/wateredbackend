@@ -89,6 +89,7 @@ class GlobalSetting extends Model
         'is_teachings_premium_only',
         'is_audios_premium_only',
         'is_nima_sedani_premium_only',
+        'is_incantations_premium_only',
         'is_incantations_enabled',
         'app_config_version',
     ];
@@ -119,6 +120,7 @@ class GlobalSetting extends Model
         'is_teachings_premium_only' => 'boolean',
         'is_audios_premium_only' => 'boolean',
         'is_nima_sedani_premium_only' => 'boolean',
+        'is_incantations_premium_only' => 'boolean',
         'is_incantations_enabled' => 'boolean',
         'app_config_version' => 'integer',
     ];

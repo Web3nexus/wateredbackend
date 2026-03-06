@@ -29,6 +29,8 @@ class AudioResource extends JsonResource
             'author' => $this->author,
             'published_at' => $this->published_at?->toIso8601String(),
             'tradition_id' => $this->tradition_id,
+            'is_premium' => (bool) $this->is_premium,
+            'is_paid' => (bool) $this->is_premium, // Alias for legacy app support
             'is_active' => (bool) $this->is_active,
             'is_featured' => (bool) $this->is_featured,
             'category' => $this->contentCategory?->name,
