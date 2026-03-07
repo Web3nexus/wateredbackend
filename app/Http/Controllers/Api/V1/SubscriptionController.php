@@ -234,6 +234,4 @@ class SubscriptionController extends Controller
 
         return response()->json(['message' => 'No active subscription found to restore.'], 404);
     }
-
-    }
 }
