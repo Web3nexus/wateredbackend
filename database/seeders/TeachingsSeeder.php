@@ -37,8 +37,9 @@ class TeachingsSeeder extends Seeder
         ];
 
         foreach ($teachings as $teaching) {
+            $teaching['slug'] = \Illuminate\Support\Str::slug($teaching['title']);
             Teaching::updateOrCreate(
-                ['title' => $teaching['title']],
+            ['slug' => $teaching['slug']],
                 $teaching
             );
         }
