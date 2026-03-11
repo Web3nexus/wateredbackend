@@ -32,60 +32,53 @@ class StatsOverviewWidget extends BaseWidget
         // Event Earnings (Paid/Completed/Confirmed/Registered)
         $eventEarnings = DB::table((new \App\Models\EventRegistration)->getTable())
             ->where(function ($query) {
-                $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked', 'registered'])
-                    ->orWhereIn(DB::raw('LOWER(status)'), ['registered', 'confirmed', 'paid'])
-                    ->orWhere('amount', '>', 0);
-            })
+            $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked'])
+                ->orWhereIn(DB::raw('LOWER(status)'), ['confirmed', 'paid']);
+        })
             ->sum('amount') ?? 0;
 
-        // Appointment Earnings (Greedy logic: Include anything that isn't explicitly failed/cancelled)
+        // Appointment Earnings
         $appointmentTable = (new \App\Models\Appointment)->getTable();
         $appointmentEarnings = DB::table($appointmentTable)
             ->where(function ($query) {
-                // Successful indicators
-                $query->whereIn(DB::raw('LOWER(payment_status)'), ['paid', 'completed', 'success', 'confirmed', 'booked'])
-                    ->orWhereIn(DB::raw('LOWER(appointment_status)'), ['confirmed', 'paid', 'completed', 'booked'])
-                    // Fallback: If amount > 0 and not cancelled/failed
-                    ->orWhere(function ($q) {
-                    $q->where('amount', '>', 0)
-                        ->whereNotIn(DB::raw('LOWER(payment_status)'), ['failed', 'cancelled'])
-                        ->whereNotIn(DB::raw('LOWER(appointment_status)'), ['cancelled']);
-                });
-            })
+            // Successful indicators
+            $query->whereIn(DB::raw('LOWER(payment_status)'), ['paid', 'completed', 'success', 'confirmed', 'booked'])
+                ->orWhereIn(DB::raw('LOWER(appointment_status)'), ['confirmed', 'paid', 'completed', 'booked']);
+        })
             ->sum('amount') ?? 0;
 
         $totalEarnings = $subEarnings + $eventEarnings + $appointmentEarnings;
 
         return [
             Stat::make('Total Users', number_format($totalUsers))
-                ->description('Registered users')
-                ->descriptionIcon('heroicon-m-users')
-                ->color('success'),
+            ->description('Registered users')
+            ->descriptionIcon('heroicon-m-users')
+            ->color('success'),
 
             Stat::make('Subscribed Users', number_format($subscribedUsers))
-                ->description('Premium members')
-                ->descriptionIcon('heroicon-m-star')
-                ->color('warning'),
+            ->description('Premium members')
+            ->descriptionIcon('heroicon-m-star')
+            ->color('warning'),
 
             Stat::make('Total Revenue', $currency . number_format($totalEarnings, 2))
-                ->description('All payment sources')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('success'),
+            ->description('All payment sources')
+            ->descriptionIcon('heroicon-m-banknotes')
+            ->color('success'),
 
             Stat::make('Subscription Revenue', $currency . number_format($subEarnings, 2))
-                ->description('From active plans')
-                ->descriptionIcon('heroicon-m-credit-card')
-                ->color('warning'),
+            ->description('From active plans')
+            ->descriptionIcon('heroicon-m-credit-card')
+            ->color('warning'),
 
             Stat::make('Event Revenue', $currency . number_format($eventEarnings, 2))
-                ->description('From registrations')
-                ->descriptionIcon('heroicon-m-calendar-days')
-                ->color('primary'),
+            ->description('From registrations')
+            ->descriptionIcon('heroicon-m-calendar-days')
+            ->color('primary'),
 
             Stat::make('Appointment Revenue', $currency . number_format($appointmentEarnings, 2))
-                ->description('From consultations')
-                ->descriptionIcon('heroicon-m-calendar')
-                ->color('info'),
+            ->description('From consultations')
+            ->descriptionIcon('heroicon-m-calendar')
+            ->color('info'),
         ];
     }
 }

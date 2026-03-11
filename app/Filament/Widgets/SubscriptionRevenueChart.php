@@ -20,7 +20,7 @@ class SubscriptionRevenueChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Trend::model(Subscription::class)
+        $data = Trend::query(Subscription::where('status', 'active'))
             ->between(
                 start: now()->startOfYear(),
                 end: now()->endOfYear(),

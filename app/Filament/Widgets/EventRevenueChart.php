@@ -20,7 +20,10 @@ class EventRevenueChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Trend::model(EventRegistration::class)
+        $data = Trend::query(
+            EventRegistration::whereIn('payment_status', ['completed', 'paid', 'success', 'confirmed', 'booked'])
+                ->orWhereIn('status', ['confirmed', 'paid'])
+        )
             ->between(
                 start: now()->startOfYear(),
                 end: now()->endOfYear(),

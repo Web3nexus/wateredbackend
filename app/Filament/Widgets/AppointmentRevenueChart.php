@@ -20,7 +20,10 @@ class AppointmentRevenueChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Trend::model(Appointment::class)
+        $data = Trend::query(
+            Appointment::whereIn('payment_status', ['paid', 'completed', 'success', 'confirmed', 'booked'])
+                ->orWhereIn('appointment_status', ['confirmed', 'paid', 'completed', 'booked'])
+        )
             ->between(
                 start: now()->startOfYear(),
                 end: now()->endOfYear(),
