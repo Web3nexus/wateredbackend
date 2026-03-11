@@ -16,16 +16,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            KemeticCalendarSeeder::class,
-            DailyWisdomSeeder::class,
-            EmailTemplateSeeder::class,
-            InformationalSeeder::class,
-            TempleSeeder::class,
-            FeatureTwoSeeder::class,
-            NimaSedaniContentSeeder::class,
-            LandingPageFeaturesSeeder::class,
-            TeachingsSeeder::class,
-            AnnouncementsSeeder::class,
+            KemeticCalendarSeeder::class ,
+            EmailTemplateSeeder::class ,
+            InformationalSeeder::class ,
+            TempleSeeder::class ,
+            FeatureTwoSeeder::class ,
+            NimaSedaniContentSeeder::class ,
+            LandingPageFeaturesSeeder::class ,
+            TeachingsSeeder::class ,
+            AnnouncementsSeeder::class ,
         ]);
     }
 }
