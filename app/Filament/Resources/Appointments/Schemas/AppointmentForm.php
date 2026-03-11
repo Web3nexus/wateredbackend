@@ -14,40 +14,55 @@ class AppointmentForm
     {
         return $schema
             ->components([
-                TextInput::make('appointment_code')
-                    ->disabled()
-                    ->dehydrated(false),
-                Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->placeholder('Select User (Optional for Guests)'),
-                TextInput::make('full_name')
-                    ->placeholder('Guest Full Name'),
-                TextInput::make('email')
-                    ->email()
-                    ->placeholder('Guest Email'),
-                TextInput::make('phone')
-                    ->tel()
-                    ->placeholder('Guest Phone'),
-                Select::make('consultation_type_id')
-                    ->relationship('consultationType', 'name')
-                    ->required(),
-                TextInput::make('service_type')
-                    ->placeholder('Custom Service Type'),
-                DateTimePicker::make('start_time')
-                    ->required(),
-                TextInput::make('appointment_status')
-                    ->required()
-                    ->default('pending'),
-                TextInput::make('amount')
-                    ->numeric()
-                    ->prefix('₦')
-                    ->default(0),
-                TextInput::make('payment_status')
-                    ->default('pending'),
-                TextInput::make('payment_reference'),
-                Textarea::make('notes')
-                    ->columnSpanFull(),
-            ]);
+            TextInput::make('appointment_code')
+            ->disabled()
+            ->dehydrated(false),
+            Select::make('user_id')
+            ->relationship('user', 'name')
+            ->searchable()
+            ->placeholder('Select User (Optional for Guests)'),
+            TextInput::make('full_name')
+            ->placeholder('Guest Full Name'),
+            TextInput::make('email')
+            ->email()
+            ->placeholder('Guest Email'),
+            TextInput::make('phone')
+            ->tel()
+            ->placeholder('Guest Phone'),
+            Select::make('consultation_type_id')
+            ->relationship('consultationType', 'name')
+            ->required(),
+            TextInput::make('service_type')
+            ->placeholder('Custom Service Type'),
+            DateTimePicker::make('start_time')
+            ->required(),
+            Select::make('appointment_status')
+            ->options([
+                'pending' => 'Pending',
+                'confirmed' => 'Confirmed',
+                'completed' => 'Completed',
+                'cancelled' => 'Cancelled',
+                'booked' => 'Booked',
+            ])
+            ->required()
+            ->default('pending'),
+            TextInput::make('amount')
+            ->numeric()
+            ->prefix('₦')
+            ->default(0),
+            Select::make('payment_status')
+            ->options([
+                'pending' => 'Pending',
+                'paid' => 'Paid',
+                'failed' => 'Failed',
+                'success' => 'Success',
+                'successful' => 'Successful',
+                'completed' => 'Completed',
+            ])
+            ->default('pending'),
+            TextInput::make('payment_reference'),
+            Textarea::make('notes')
+            ->columnSpanFull(),
+        ]);
     }
 }

@@ -32,8 +32,8 @@ class StatsOverviewWidget extends BaseWidget
         // Event Earnings (Paid/Completed/Confirmed/Registered)
         $eventEarnings = DB::table((new \App\Models\EventRegistration)->getTable())
             ->where(function ($query) {
-            $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked'])
-                ->orWhereIn(DB::raw('LOWER(status)'), ['confirmed', 'paid']);
+            $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked', 'successful'])
+                ->orWhereIn(DB::raw('LOWER(status)'), ['confirmed', 'paid', 'successful']);
         })
             ->sum('amount') ?? 0;
 
@@ -42,8 +42,8 @@ class StatsOverviewWidget extends BaseWidget
         $appointmentEarnings = DB::table($appointmentTable)
             ->where(function ($query) {
             // Successful indicators
-            $query->whereIn(DB::raw('LOWER(payment_status)'), ['paid', 'completed', 'success', 'confirmed', 'booked'])
-                ->orWhereIn(DB::raw('LOWER(appointment_status)'), ['confirmed', 'paid', 'completed', 'booked']);
+            $query->whereIn(DB::raw('LOWER(payment_status)'), ['paid', 'completed', 'success', 'confirmed', 'booked', 'successful'])
+                ->orWhereIn(DB::raw('LOWER(appointment_status)'), ['confirmed', 'paid', 'completed', 'booked', 'successful']);
         })
             ->sum('amount') ?? 0;
 
