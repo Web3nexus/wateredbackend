@@ -80,9 +80,19 @@ class WebhookController extends Controller
         $settings = GlobalSetting::first();
         $paystackSecret = $settings->paystack_secret_key;
 
-        $signature = $request->header('x-paystack-signature');
-        if (!$signature || $signature !== hash_hmac('sha512', $request->getContent(), $paystackSecret)) {
-            Log::error('Invalid Paystack Signature');
+        if (!$signature) {
+            Log::error('Paystack Webhook: Missing signature header');
+            return response()->json(['message' => 'Missing signature'], 400);
+        }
+
+        if (!$paystackSecret) {
+            Log::error('Paystack Webhook: Missing Secret Key in Global Settings');
+            return response()->json(['message' => 'Internal configuration error'], 500);
+        }
+
+        $computedSignature = hash_hmac('sha512', $request->getContent(), $paystackSecret);
+        if ($signature !== $computedSignature) {
+            Log::error('Paystack Webhook: Invalid Signature');
             return response()->json(['message' => 'Invalid signature'], 400);
         }
 
@@ -123,7 +133,7 @@ class WebhookController extends Controller
             if ($appointment) {
                 // Verify amount (Naira to Kobo) and Currency
                 $paidAmount = $data['amount'] / 100;
-                $expectedAmount = (float) $appointment->amount;
+                $expectedAmount = (float)$appointment->amount;
                 $paidCurrency = $data['currency'] ?? 'NGN';
 
                 if ($paidAmount < $expectedAmount || $paidCurrency !== 'NGN') {
@@ -141,7 +151,8 @@ class WebhookController extends Controller
                 // Send Confirmation Email to User
                 try {
                     Mail::to($appointment->email)->send(new UserAppointmentConfirmationMail($appointment));
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     Log::error('Failed to send user appointment confirmation: ' . $e->getMessage());
                 }
 
@@ -158,12 +169,13 @@ class WebhookController extends Controller
                 // Check if registration already exists (e.g. from a failed attempt or double webhook)
                 $registration = $event->registrations()
                     ->where(function ($q) use ($metadata) {
-                        if (isset($metadata['user_id'])) {
-                            $q->where('user_id', $metadata['user_id']);
-                        } else {
-                            $q->where('email', $metadata['email']);
-                        }
-                    })->first();
+                    if (isset($metadata['user_id'])) {
+                        $q->where('user_id', $metadata['user_id']);
+                    }
+                    else {
+                        $q->where('email', $metadata['email']);
+                    }
+                })->first();
 
                 if ($registration) {
                     $registration->update([
@@ -173,7 +185,8 @@ class WebhookController extends Controller
                         'payment_method' => $data['channel'],
                         'status' => 'registered',
                     ]);
-                } else {
+                }
+                else {
                     $event->registrations()->create([
                         'user_id' => $metadata['user_id'] ?? null,
                         'full_name' => $metadata['full_name'] ?? null,
@@ -229,12 +242,13 @@ class WebhookController extends Controller
             if ($event) {
                 $registration = $event->registrations()
                     ->where(function ($q) use ($metadata) {
-                        if (isset($metadata['user_id'])) {
-                            $q->where('user_id', $metadata['user_id']);
-                        } else {
-                            $q->where('email', $metadata['email']);
-                        }
-                    })->first();
+                    if (isset($metadata['user_id'])) {
+                        $q->where('user_id', $metadata['user_id']);
+                    }
+                    else {
+                        $q->where('email', $metadata['email']);
+                    }
+                })->first();
 
                 if ($registration) {
                     $registration->update([

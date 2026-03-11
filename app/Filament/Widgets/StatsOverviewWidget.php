@@ -33,7 +33,7 @@ class StatsOverviewWidget extends BaseWidget
         $eventEarnings = DB::table((new \App\Models\EventRegistration)->getTable())
             ->where(function ($query) {
             $query->whereIn(DB::raw('LOWER(payment_status)'), ['completed', 'paid', 'success', 'confirmed', 'booked', 'successful'])
-                ->orWhereIn(DB::raw('LOWER(status)'), ['confirmed', 'paid', 'successful']);
+                ->orWhereIn(DB::raw('LOWER(status)'), ['confirmed', 'paid', 'successful', 'registered']);
         })
             ->sum('amount') ?? 0;
 
