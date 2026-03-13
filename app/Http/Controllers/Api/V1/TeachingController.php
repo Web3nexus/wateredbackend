@@ -26,6 +26,7 @@ class TeachingController extends Controller
                 'featured_image' => $teaching->featured_image_url,
                 'published_at' => $teaching->published_at,
                 'is_premium' => (bool) $teaching->is_premium,
+                'is_bookmarked' => (bool) $teaching->isBookmarkedBy(request()->user()),
             ];
         });
 
@@ -50,6 +51,7 @@ class TeachingController extends Controller
             'featured_image' => $teaching->featured_image_url,
             'published_at' => $teaching->published_at,
             'is_premium' => (bool) $teaching->is_premium,
+            'is_bookmarked' => (bool) $teaching->isBookmarkedBy(request()->user()),
         ]);
     }
 }

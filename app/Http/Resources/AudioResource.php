@@ -35,6 +35,7 @@ class AudioResource extends JsonResource
             'is_featured' => (bool) $this->is_featured,
             'category' => $this->contentCategory?->name,
             'is_liked' => (bool) $this->isLikedBy($request->user()),
+            'is_bookmarked' => (bool) $this->isBookmarkedBy($request->user()),
             'likes_count' => (int) $this->likes_count,
             'comments_count' => (int) $this->comments_count,
             'created_at' => $this->created_at?->toIso8601String(),

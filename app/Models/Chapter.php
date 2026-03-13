@@ -30,4 +30,14 @@ class Chapter extends Model
     {
         return $this->hasMany(Entry::class)->orderBy('number');
     }
+
+    public function isBookmarkedBy(?User $user): bool
+    {
+        if (!$user)
+            return false;
+        return $user->bookmarks()
+            ->where('bookmarkable_id', $this->id)
+            ->where('bookmarkable_type', get_class($this))
+            ->exists();
+    }
 }

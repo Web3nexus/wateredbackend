@@ -16,6 +16,7 @@ class ChapterResource extends JsonResource
             'description' => $this->description,
             'collection_id' => $this->collection_id,
             'order' => $this->order,
+            'is_bookmarked' => (bool) $this->isBookmarkedBy($request->user()),
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

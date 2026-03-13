@@ -110,6 +110,16 @@ class Audio extends Model
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 
+    public function isBookmarkedBy(?User $user): bool
+    {
+        if (!$user)
+            return false;
+        return $user->bookmarks()
+            ->where('bookmarkable_id', $this->id)
+            ->where('bookmarkable_type', get_class($this))
+            ->exists();
+    }
+
     /**
      * Scope a query to search by title, description or author.
      */

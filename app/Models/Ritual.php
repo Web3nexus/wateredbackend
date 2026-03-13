@@ -96,4 +96,14 @@ class Ritual extends Model
             set: fn($value) => is_array($value) ? json_encode($value) : $value,
         );
     }
+
+    public function isBookmarkedBy(?User $user): bool
+    {
+        if (!$user)
+            return false;
+        return $user->bookmarks()
+            ->where('bookmarkable_id', $this->id)
+            ->where('bookmarkable_type', get_class($this))
+            ->exists();
+    }
 }

@@ -202,6 +202,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserActivity::class);
     }
 
+    public function bookmarks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
