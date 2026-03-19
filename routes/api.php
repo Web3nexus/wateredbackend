@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/products', [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
         Route::get('/products/{product}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
         Route::post('/checkout', [\App\Http\Controllers\Api\V1\ProductController::class, 'checkout']);
+        Route::post('/checkout/verify', [\App\Http\Controllers\Api\V1\ProductController::class, 'verifyCheckout']);
 
         // Temple endpoints
         Route::get('/temples', [\App\Http\Controllers\Api\V1\TempleController::class, 'index']);
@@ -165,6 +166,10 @@ Route::prefix('v1')->group(function () {
         // User Activity Tracking
         Route::post('/activity/track', [\App\Http\Controllers\Api\V1\ActivityController::class, 'store']);
         Route::get('/activity/history', [\App\Http\Controllers\Api\V1\ActivityController::class, 'index']);
+
+        // User Stats & Dashboard
+        Route::get('/user/dashboard-stats', [\App\Http\Controllers\Api\V1\UserStatController::class, 'index']);
+        Route::post('/user/dashboard-stats/track-time', [\App\Http\Controllers\Api\V1\UserStatController::class, 'trackTime']);
 
         // Event Registration and Reminders
         Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);

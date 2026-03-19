@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Models\ShopOrder;
+use App\Models\ShopOrderItem;
+use App\Models\GlobalSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
@@ -32,16 +36,80 @@ class ProductController extends Controller
 
     public function checkout(Request $request)
     {
-        // Simple dummy checkout for now
         $request->validate([
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Logic to create Order would go here.
-        // For Feature 7 scope, we acknowledge receipt.
+        $user = $request->user();
+        $totalKobo = 0;
+        
+        $reference = 'sho_' . time() . '_' . uniqid();
 
-        return response()->json(['message' => 'Order received successfully.']);
+        $order = ShopOrder::create([
+            'user_id' => $user->id,
+            'reference' => $reference,
+            'amount_kobo' => 0, // Will calculate below
+        ]);
+
+        foreach ($request->items as $itemReq) {
+            $product = Product::find($itemReq['product_id']);
+            $quantity = $itemReq['quantity'];
+            $price = $product->price ?? 0;
+            
+            ShopOrderItem::create([
+                'shop_order_id' => $order->id,
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+                'unit_price_kobo' => $price,
+            ]);
+            
+            $totalKobo += ($price * $quantity);
+        }
+
+        $order->update(['amount_kobo' => $totalKobo]);
+
+        return response()->json([
+            'message' => 'Order initiated successfully.',
+            'reference' => $reference,
+            'amount_kobo' => $totalKobo,
+            'currency' => 'NGN',
+        ]);
+    }
+
+    public function verifyCheckout(Request $request)
+    {
+        $request->validate([
+            'reference' => 'required|string',
+        ]);
+
+        $order = ShopOrder::where('reference', $request->reference)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        if ($order->status === 'paid') {
+            return response()->json(['message' => 'Payment already verified', 'order' => $order]);
+        }
+
+        $settings = GlobalSetting::first();
+        $secretKey = config('services.paystack.secret_key') ?? $settings?->paystack_secret_key;
+
+        if (!$secretKey) {
+            return response()->json(['message' => 'Payment verification unavailable'], 500);
+        }
+
+        $response = Http::withToken($secretKey)
+            ->get("https://api.paystack.co/transaction/verify/{$request->reference}");
+
+        if ($response->successful()) {
+            $data = $response->json('data');
+            if ($data['status'] === 'success') {
+                $order->update(['status' => 'paid']);
+                return response()->json(['message' => 'Payment successful', 'order' => $order]);
+            }
+        }
+
+        return response()->json(['message' => 'Payment verification failed'], 400);
     }
 }
