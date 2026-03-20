@@ -28,7 +28,6 @@ class Incantation extends Model
 
     protected $appends = [
         'full_audio_url',
-        'is_premium',
     ];
 
 
