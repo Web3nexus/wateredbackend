@@ -20,6 +20,8 @@ class IncantationsTable
                     ->searchable(),
                 TextColumn::make('audio_url')
                     ->searchable(),
+                ToggleColumn::make('is_premium')
+                    ->label('Is Premium?'),
 
                 TextColumn::make('created_at')
                     ->dateTime()

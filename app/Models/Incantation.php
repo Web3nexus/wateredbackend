@@ -19,9 +19,11 @@ class Incantation extends Model
         'category',
         'spoken_text',
         'intended_outcome',
+        'is_premium',
     ];
 
     protected $casts = [
+        'is_premium' => 'boolean',
     ];
 
     protected $appends = [
@@ -29,15 +31,6 @@ class Incantation extends Model
         'is_premium',
     ];
 
-    /**
-     * Incantations are premium by default.
-     */
-    protected function isPremium(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => true,
-        );
-    }
 
     /**
      * Get the audio URL.

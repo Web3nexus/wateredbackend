@@ -19,6 +19,10 @@ class IncantationForm
             ->components([
                 TextInput::make('title')
                     ->required(),
+                Toggle::make('is_premium')
+                    ->label('Is Premium?')
+                    ->helperText('Enable this if this incantation should be locked for free users (and open for Watered Plus+).')
+                    ->default(true),
                 RichEditor::make('description')
                     ->columnSpanFull(),
                 RichEditor::make('content')
