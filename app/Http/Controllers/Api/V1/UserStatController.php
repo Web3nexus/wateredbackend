@@ -91,7 +91,7 @@ class UserStatController extends Controller
 
         $lastActive = Carbon::parse($stat->last_active_date);
 
-        if ($lastActive->isSubDay()) {
+        if ($lastActive->isYesterday()) {
             $stat->daily_streak += 1;
             $stat->last_active_date = $today;
             $stat->save();

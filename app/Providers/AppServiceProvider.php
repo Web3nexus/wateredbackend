@@ -29,9 +29,11 @@ class AppServiceProvider extends ServiceProvider
         // Apply Mail Settings from Database
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('global_settings')) {
-                $settings = \App\Models\GlobalSetting::first();
+                $settings = \Illuminate\Support\Facades\Cache::remember('global_settings', 3600, function () {
+                    return \App\Models\GlobalSetting::first();
+                });
+
                 if ($settings) {
-                    \Illuminate\Support\Facades\Log::debug('Applying Mail Settings from Database: ' . $settings->mail_mailer);
                     config([
                         'mail.mailers.smtp.host' => $settings->mail_host ?? config('mail.mailers.smtp.host'),
                         'mail.mailers.smtp.port' => $settings->mail_port ?? config('mail.mailers.smtp.port'),
