@@ -139,33 +139,47 @@ class SubscriptionController extends Controller
 
         $data = $response->json();
 
-        if ($response->successful() && isset($data['data']['status']) && $data['data']['status'] === 'success') {
-            // Success
-            // Determine duration based on plan_id in settings
-            $isYearly = $request->plan_id == $settings->premium_yearly_id;
-            $duration = $isYearly ? now()->addYear() : now()->addMonth();
+        if ($response->successful() && isset($data['data']['status'])) {
+            $status = $data['data']['status'];
 
-            $user->subscriptions()->create([
-                'plan_id' => $request->plan_id,
-                'provider' => 'paystack',
-                'platform' => 'android',
-                'provider_subscription_id' => $reference,
-                'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents
-                'status' => 'active',
-                'starts_at' => now(),
-                'expires_at' => $duration,
-            ]);
+            if ($status === 'success') {
+                // Success
+                // Determine duration based on plan_id in settings
+                $isYearly = $request->plan_id == $settings->premium_yearly_id;
+                $duration = $isYearly ? now()->addYear() : now()->addMonth();
 
-            $user->is_premium = true;
-            $user->save();
+                $user->subscriptions()->updateOrCreate(
+                    ['provider_subscription_id' => $reference],
+                    [
+                        'plan_id' => $request->plan_id,
+                        'provider' => 'paystack',
+                        'platform' => 'android',
+                        'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'expires_at' => $duration,
+                    ]
+                );
 
-            return response()->json([
-                'message' => 'Paystack payment verified successfully',
-                'is_premium' => true,
-            ]);
+                $user->is_premium = true;
+                $user->save();
+
+                return response()->json([
+                    'message' => 'Paystack payment verified successfully',
+                    'is_premium' => true,
+                ]);
+            }
+
+            if (in_array($status, ['pending', 'processing', 'ongoing'])) {
+                return response()->json([
+                    'message' => 'Payment is still processing. Please wait a moment or check back later.',
+                    'status' => $status,
+                    'is_premium' => false,
+                ], 200); // Return 200 so the app can show the message gracefully
+            }
         }
 
-        return response()->json(['message' => 'Paystack verification failed'], 422);
+        return response()->json(['message' => 'Paystack verification failed: ' . ($data['data']['gateway_response'] ?? 'Unknown error')], 422);
     }
 
     /**

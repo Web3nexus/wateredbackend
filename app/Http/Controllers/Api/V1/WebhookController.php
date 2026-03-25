@@ -80,6 +80,7 @@ class WebhookController extends Controller
         $settings = GlobalSetting::first();
         $paystackSecret = $settings->paystack_secret_key;
 
+        $signature = $request->header('x-paystack-signature');
         if (!$signature) {
             Log::error('Paystack Webhook: Missing signature header');
             return response()->json(['message' => 'Missing signature'], 400);
@@ -207,6 +208,27 @@ class WebhookController extends Controller
 
         // 3. Handle Subscription Payment (Default behavior)
         $subscription = Subscription::where('provider_subscription_id', $reference)->first();
+
+        if (!$subscription && isset($metadata['user_id']) && isset($metadata['plan_id'])) {
+            // Create subscription if it doesn't exist (e.g. from a transfer payment)
+            $user = User::find($metadata['user_id']);
+            if ($user) {
+                $settings = GlobalSetting::first();
+                $isYearly = $metadata['plan_id'] == $settings->premium_yearly_id;
+                $duration = $isYearly ? now()->addYear() : now()->addMonth();
+
+                $subscription = $user->subscriptions()->create([
+                    'plan_id' => $metadata['plan_id'],
+                    'provider' => 'paystack',
+                    'platform' => $metadata['platform'] ?? 'android',
+                    'provider_subscription_id' => $reference,
+                    'amount' => $data['amount'] / 100,
+                    'status' => 'active',
+                    'starts_at' => now(),
+                    'expires_at' => $duration,
+                ]);
+            }
+        }
 
         if ($subscription) {
             $subscription->update(['status' => 'active']);
