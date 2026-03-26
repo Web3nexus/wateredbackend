@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UserStat;
 use App\Models\ShopOrder;
 use App\Models\Bookmark;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,50 @@ class UserStatController extends Controller
             'orders_count' => $ordersCount,
             'saved_items_count' => $savedCount,
             'leaderboard_rank' => $rank,
+        ]);
+    }
+
+    public function leaderboard(Request $request)
+    {
+        $currentUser = $request->user();
+
+        // Get top 50 users ordered by composite score
+        $topStats = UserStat::with('user:id,name,profile_photo_path')
+            ->orderByDesc('amount_spent_kobo')
+            ->orderByDesc('time_spent_minutes')
+            ->orderByDesc('daily_streak')
+            ->limit(50)
+            ->get();
+
+        $entries = $topStats->map(function ($stat, $index) use ($currentUser) {
+            return [
+                'rank'             => $index + 1,
+                'user_id'         => $stat->user_id,
+                'name'            => $stat->user?->name ?? 'Initiate',
+                'avatar'          => $stat->user?->profile_photo_path,
+                'daily_streak'    => $stat->daily_streak ?? 0,
+                'time_spent_minutes' => $stat->time_spent_minutes ?? 0,
+                'amount_spent_kobo'  => $stat->amount_spent_kobo ?? 0,
+                'is_current_user' => $stat->user_id === $currentUser->id,
+            ];
+        });
+
+        // Compute current user's global rank (in case they're outside top 50)
+        $myStat = UserStat::firstOrCreate(
+            ['user_id' => $currentUser->id],
+            ['daily_streak' => 0, 'time_spent_minutes' => 0, 'amount_spent_kobo' => 0]
+        );
+        $myGlobalRank = UserStat::where('amount_spent_kobo', '>', $myStat->amount_spent_kobo)
+            ->orWhere(function ($q) use ($myStat) {
+                $q->where('amount_spent_kobo', '=', $myStat->amount_spent_kobo)
+                  ->where('time_spent_minutes', '>', $myStat->time_spent_minutes);
+            })
+            ->count() + 1;
+
+        return response()->json([
+            'entries'         => $entries,
+            'my_global_rank'  => $myGlobalRank,
+            'total_users'     => UserStat::count(),
         ]);
     }
 

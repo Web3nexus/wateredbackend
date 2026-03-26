@@ -108,6 +108,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/month/{month}', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getMonth']);
             Route::get('/special-days', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getSpecialDays']);
             Route::get('/today', [\App\Http\Controllers\Api\V1\CalendarController::class, 'getToday']);
+            Route::post('/celebrate', [\App\Http\Controllers\Api\V1\CalendarController::class, 'storeCelebration']);
         });
 
         Route::post('/email/resend', [\App\Http\Controllers\Api\V1\AuthController::class, 'resend'])
@@ -170,6 +171,7 @@ Route::prefix('v1')->group(function () {
         // User Stats & Dashboard
         Route::get('/user/dashboard-stats', [\App\Http\Controllers\Api\V1\UserStatController::class, 'index']);
         Route::post('/user/dashboard-stats/track-time', [\App\Http\Controllers\Api\V1\UserStatController::class, 'trackTime']);
+        Route::get('/user/leaderboard', [\App\Http\Controllers\Api\V1\UserStatController::class, 'leaderboard']);
 
         // Event Registration and Reminders
         Route::post('/events/{event}/register', [\App\Http\Controllers\Api\V1\EventController::class, 'register']);
