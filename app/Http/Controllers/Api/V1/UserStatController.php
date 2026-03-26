@@ -34,13 +34,27 @@ class UserStatController extends Controller
             $stat->update(['amount_spent_kobo' => $totalSpent]);
         }
 
-        // Calculate Leaderboard Rank (1-indexed based on amount_spent and time_spent)
-        $rank = UserStat::where('amount_spent_kobo', '>', $stat->amount_spent_kobo)
-            ->orWhere(function ($query) use ($stat) {
-                $query->where('amount_spent_kobo', '=', $stat->amount_spent_kobo)
-                      ->where('time_spent_minutes', '>', $stat->time_spent_minutes);
-            })
-            ->count() + 1;
+        // Rank = count of users who strictly outrank this user + 1
+        // Tie-breaking hierarchy: amount_spent > time_spent > daily_streak > user_id (ASC = older = better)
+        $rank = UserStat::where(function ($q) use ($stat) {
+            $q->where('amount_spent_kobo', '>', $stat->amount_spent_kobo)
+              ->orWhere(function ($q2) use ($stat) {
+                  $q2->where('amount_spent_kobo', '=', $stat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '>', $stat->time_spent_minutes);
+              })
+              ->orWhere(function ($q2) use ($stat) {
+                  $q2->where('amount_spent_kobo', '=', $stat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '=', $stat->time_spent_minutes)
+                     ->where('daily_streak', '>', $stat->daily_streak);
+              })
+              ->orWhere(function ($q2) use ($stat) {
+                  // Final tie-breaker: earlier user_id = earlier member = higher rank
+                  $q2->where('amount_spent_kobo', '=', $stat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '=', $stat->time_spent_minutes)
+                     ->where('daily_streak', '=', $stat->daily_streak)
+                     ->where('user_id', '<', $stat->user_id);
+              });
+        })->count() + 1;
 
         return response()->json([
             'id' => $stat->id,
@@ -58,24 +72,26 @@ class UserStatController extends Controller
     {
         $currentUser = $request->user();
 
-        // Get top 50 users ordered by composite score
+        // Rank users: amount_spent DESC → time_spent DESC → daily_streak DESC → user_id ASC
+        // The user_id ASC tie-breaker guarantees NO two users share the same rank
         $topStats = UserStat::with('user:id,name,profile_photo_path')
             ->orderByDesc('amount_spent_kobo')
             ->orderByDesc('time_spent_minutes')
             ->orderByDesc('daily_streak')
+            ->orderBy('user_id')          // Earlier member wins on a full tie
             ->limit(50)
             ->get();
 
         $entries = $topStats->map(function ($stat, $index) use ($currentUser) {
             return [
-                'rank'             => $index + 1,
-                'user_id'         => $stat->user_id,
-                'name'            => $stat->user?->name ?? 'Initiate',
-                'avatar'          => $stat->user?->profile_photo_path,
-                'daily_streak'    => $stat->daily_streak ?? 0,
+                'rank'               => $index + 1,
+                'user_id'            => $stat->user_id,
+                'name'               => $stat->user?->name ?? 'Initiate',
+                'avatar'             => $stat->user?->profile_photo_path,
+                'daily_streak'       => $stat->daily_streak ?? 0,
                 'time_spent_minutes' => $stat->time_spent_minutes ?? 0,
                 'amount_spent_kobo'  => $stat->amount_spent_kobo ?? 0,
-                'is_current_user' => $stat->user_id === $currentUser->id,
+                'is_current_user'    => $stat->user_id === $currentUser->id,
             ];
         });
 
@@ -84,12 +100,25 @@ class UserStatController extends Controller
             ['user_id' => $currentUser->id],
             ['daily_streak' => 0, 'time_spent_minutes' => 0, 'amount_spent_kobo' => 0]
         );
-        $myGlobalRank = UserStat::where('amount_spent_kobo', '>', $myStat->amount_spent_kobo)
-            ->orWhere(function ($q) use ($myStat) {
-                $q->where('amount_spent_kobo', '=', $myStat->amount_spent_kobo)
-                  ->where('time_spent_minutes', '>', $myStat->time_spent_minutes);
-            })
-            ->count() + 1;
+        // Same 4-level tie-breaker as the dashboard rank
+        $myGlobalRank = UserStat::where(function ($q) use ($myStat) {
+            $q->where('amount_spent_kobo', '>', $myStat->amount_spent_kobo)
+              ->orWhere(function ($q2) use ($myStat) {
+                  $q2->where('amount_spent_kobo', '=', $myStat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '>', $myStat->time_spent_minutes);
+              })
+              ->orWhere(function ($q2) use ($myStat) {
+                  $q2->where('amount_spent_kobo', '=', $myStat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '=', $myStat->time_spent_minutes)
+                     ->where('daily_streak', '>', $myStat->daily_streak);
+              })
+              ->orWhere(function ($q2) use ($myStat) {
+                  $q2->where('amount_spent_kobo', '=', $myStat->amount_spent_kobo)
+                     ->where('time_spent_minutes', '=', $myStat->time_spent_minutes)
+                     ->where('daily_streak', '=', $myStat->daily_streak)
+                     ->where('user_id', '<', $myStat->user_id);
+              });
+        })->count() + 1;
 
         return response()->json([
             'entries'         => $entries,
