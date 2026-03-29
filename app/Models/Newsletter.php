@@ -12,6 +12,7 @@ class Newsletter extends Model
         'recipients_type',
         'status',
         'sent_at',
+        'batch_delay',
     ];
 
     protected $casts = [

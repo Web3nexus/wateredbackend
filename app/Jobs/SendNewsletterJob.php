@@ -35,6 +35,11 @@ class SendNewsletterJob implements ShouldQueue
 
         $users->chunk(100, function ($chunk) {
             Notification::send($chunk, new NewsletterNotification($this->newsletter->subject, $this->newsletter->content));
+            
+            // Wait between batches to avoid rate limiting
+            if ($this->newsletter->batch_delay > 0) {
+                sleep($this->newsletter->batch_delay);
+            }
         });
 
         $this->newsletter->update([

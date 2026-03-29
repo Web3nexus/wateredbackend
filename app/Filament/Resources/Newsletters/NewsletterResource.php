@@ -58,6 +58,12 @@ class NewsletterResource extends Resource
                 DateTimePicker::make('sent_at')
                     ->disabled()
                     ->label('Sent At'),
+                TextInput::make('batch_delay')
+                    ->numeric()
+                    ->required()
+                    ->default(1)
+                    ->label('Batch Sending Delay (seconds)')
+                    ->helperText('Seconds to wait between every 100 emails sent to avoid rate limits.'),
             ]);
     }
 
