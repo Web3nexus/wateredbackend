@@ -56,16 +56,19 @@ class ProductController extends Controller
         foreach ($request->items as $itemReq) {
             $product = Product::find($itemReq['product_id']);
             $quantity = $itemReq['quantity'];
-            $price = $product->price ?? 0;
+            
+            // Prioritize price_ngn (stored in Naira decimal) over legacy price (stored in cents integer)
+            $priceNgn = $product->price_ngn ?: ($product->price / 100);
+            $priceKobo = (int) round($priceNgn * 100);
             
             ShopOrderItem::create([
                 'shop_order_id' => $order->id,
                 'product_id' => $product->id,
                 'quantity' => $quantity,
-                'unit_price_kobo' => $price,
+                'unit_price_kobo' => $priceKobo,
             ]);
             
-            $totalKobo += ($price * $quantity);
+            $totalKobo += ($priceKobo * $quantity);
         }
 
         $order->update(['amount_kobo' => $totalKobo]);
