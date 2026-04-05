@@ -51,4 +51,8 @@ Route::get('/auth/action', [\App\Http\Controllers\Auth\PasswordResetController::
 Route::middleware(['auth:admin'])->group(function () {
     Route::get('/admin/exports/text-collections/{collection}', [\App\Http\Controllers\Admin\ExportController::class, 'exportTextCollection'])
         ->name('admin.export.text-collection');
+    Route::get('/admin/exports/incantations/{incantation}', [\App\Http\Controllers\Admin\ExportController::class, 'exportIncantation'])
+        ->name('admin.export.incantation');
+    Route::get('/admin/exports/rituals/{ritual}', [\App\Http\Controllers\Admin\ExportController::class, 'exportRitual'])
+        ->name('admin.export.ritual');
 });

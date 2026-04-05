@@ -93,6 +93,12 @@ class RevenueResource extends Resource
                     }),
             ])
             ->headerActions([
+                Action::make('export_pdf_all')
+                    ->label('Export All (PDF)')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('danger')
+                    ->action(fn($livewire) => static::exportPdf($livewire->getFilteredTableQuery())),
+
                 Action::make('export_all')
                     ->label('Export All (CSV)')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -152,6 +158,16 @@ class RevenueResource extends Resource
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="revenue-export-' . now()->format('Y-m-d') . '.csv"',
         ]);
+    }
+
+    public static function exportPdf($query)
+    {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+        $transactions = $query->get();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.transactions', ['transactions' => $transactions]);
+        $pdf->setPaper('a4', 'landscape');
+        return response()->streamDownload(fn () => print($pdf->output()), 'transactions-export-' . now()->format('Y-m-d') . '.pdf');
     }
 
     public static function getPages(): array

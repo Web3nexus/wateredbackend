@@ -12,6 +12,7 @@ class TeachingListingController extends Controller
     {
         $settings = GlobalSetting::first();
         $teachings = Teaching::where('is_published', true)
+            ->where('is_premium', false)
             ->orderByDesc('published_at')
             ->paginate(12);
 
@@ -21,10 +22,13 @@ class TeachingListingController extends Controller
     public function show($slug)
     {
         $settings = GlobalSetting::first();
-        $teaching = Teaching::where('slug', $slug)->firstOrFail();
+        $teaching = Teaching::where('slug', $slug)
+            ->where('is_premium', false)
+            ->firstOrFail();
 
         // Fetch 3 related teachings (latest excluding current)
         $related = Teaching::where('is_published', true)
+            ->where('is_premium', false)
             ->where('id', '!=', $teaching->id)
             ->orderByDesc('published_at')
             ->limit(3)

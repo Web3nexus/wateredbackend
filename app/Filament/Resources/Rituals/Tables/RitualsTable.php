@@ -39,6 +39,12 @@ class RitualsTable
                 //
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('export_pdf')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->url(fn($record) => route('admin.export.ritual', $record))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([
