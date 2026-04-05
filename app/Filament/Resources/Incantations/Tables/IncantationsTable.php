@@ -49,7 +49,7 @@ class IncantationsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    \Filament\Tables\Actions\BulkAction::make('export_pdf_bulk')
+                    \Filament\Actions\BulkAction::make('export_pdf_bulk')
                         ->label('Export Selection (PDF)')
                         ->icon('heroicon-o-document-arrow-down')
                         ->color('success')
