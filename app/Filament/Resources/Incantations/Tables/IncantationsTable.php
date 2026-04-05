@@ -46,7 +46,26 @@ class IncantationsTable
                     ->openUrlInNewTab(),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->headerActions([
+                \Filament\Actions\Action::make('export_pdf_all')
+                    ->label('Export All (PDF)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $records = $livewire->getFilteredTableQuery()->get();
+                        $data = [
+                            'items' => $records,
+                            'type' => 'Incantation',
+                            'date' => now()->format('F d, Y')
+                        ];
+                        ini_set('memory_limit', '512M');
+                        set_time_limit(300);
+                        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.spiritual-practices-bulk', $data);
+                        $pdf->setPaper('a4', 'portrait');
+                        return response()->streamDownload(fn () => print($pdf->output()), 'incantations-export-all-' . now()->format('Y-m-d') . '.pdf');
+                    }),
+            ])
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     \Filament\Actions\BulkAction::make('export_pdf_bulk')
@@ -63,7 +82,7 @@ class IncantationsTable
                             set_time_limit(300);
                             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.spiritual-practices-bulk', $data);
                             $pdf->setPaper('a4', 'portrait');
-                            return response()->streamDownload(fn () => print($pdf->output()), 'incantations-export-' . now()->format('Y-m-d') . '.pdf');
+                            return response()->streamDownload(fn () => print($pdf->output()), 'incantations-export-selection-' . now()->format('Y-m-d') . '.pdf');
                         })
                         ->deselectRecordsAfterCompletion(),
                 ]),
