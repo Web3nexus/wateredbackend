@@ -50,6 +50,23 @@ class RitualsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    \Filament\Tables\Actions\BulkAction::make('export_pdf_bulk')
+                        ->label('Export Selection (PDF)')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $data = [
+                                'items' => $records,
+                                'type' => 'Ritual',
+                                'date' => now()->format('F d, Y')
+                            ];
+                            ini_set('memory_limit', '512M');
+                            set_time_limit(300);
+                            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.spiritual-practices-bulk', $data);
+                            $pdf->setPaper('a4', 'portrait');
+                            return response()->streamDownload(fn () => print($pdf->output()), 'rituals-export-' . now()->format('Y-m-d') . '.pdf');
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }
