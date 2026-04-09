@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserStat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -114,8 +115,15 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
+        // Ensure this user has a stat record so they appear in the leaderboard
+        UserStat::firstOrCreate(
+            ['user_id' => $user->id],
+            ['daily_streak' => 0, 'time_spent_minutes' => 0,
+             'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
+        );
+
         return response()->json([
-            'user' => $user->fresh(),
+            'user'  => $user->fresh(),
             'token' => $token,
         ]);
     }
@@ -147,9 +155,16 @@ class AuthController extends Controller
 
         Log::info("[LOGIN] SUCCESS User {$user->id}.");
 
+        // Ensure this user has a stat record so they appear in the leaderboard
+        UserStat::firstOrCreate(
+            ['user_id' => $user->id],
+            ['daily_streak' => 0, 'time_spent_minutes' => 0,
+             'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
+        );
+
         // Return EXACTLY what AuthResponse.dart expects: user and token keys.
         return response()->json([
-            'user' => $freshUser->fresh(),
+            'user'  => $freshUser->fresh(),
             'token' => $token,
         ]);
     }
@@ -235,8 +250,15 @@ class AuthController extends Controller
 
         Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
 
+        // Ensure this user has a stat record so they appear in the leaderboard
+        UserStat::firstOrCreate(
+            ['user_id' => $user->id],
+            ['daily_streak' => 0, 'time_spent_minutes' => 0,
+             'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
+        );
+
         return response()->json([
-            'user' => $freshUser->fresh(),
+            'user'  => $freshUser->fresh(),
             'token' => $token,
         ]);
     }

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ShopOrder;
 use App\Models\ShopOrderItem;
 use App\Models\GlobalSetting;
+use App\Models\UserStat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -109,6 +110,20 @@ class ProductController extends Controller
             $data = $response->json('data');
             if ($data['status'] === 'success') {
                 $order->update(['status' => 'paid']);
+
+                // Immediately sync the user's spend stat so the dashboard
+                // and leaderboard reflect the payment without delay.
+                try {
+                    $stat = UserStat::firstOrCreate(
+                        ['user_id' => $request->user()->id],
+                        ['daily_streak' => 0, 'time_spent_minutes' => 0,
+                         'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
+                    );
+                    $stat->syncAmountSpent();
+                } catch (\Throwable $e) {
+                    \Log::warning('[ProductController] UserStat sync failed: ' . $e->getMessage());
+                }
+
                 return response()->json(['message' => 'Payment successful', 'order' => $order]);
             }
         }
