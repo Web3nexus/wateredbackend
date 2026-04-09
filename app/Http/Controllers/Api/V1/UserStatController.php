@@ -58,7 +58,7 @@ class UserStatController extends Controller
         );
 
         // Rank users: amount_spent DESC → time_spent DESC → daily_streak DESC → user_id ASC
-        $topStats = UserStat::with('user:id,name,profile_photo_path')
+        $topStats = UserStat::with('user:id,name,profile_image')
             ->orderByDesc('amount_spent_kobo')
             ->orderByDesc('time_spent_minutes')
             ->orderByDesc('daily_streak')
@@ -71,7 +71,7 @@ class UserStatController extends Controller
                 'rank'               => $index + 1,
                 'user_id'            => $stat->user_id,
                 'name'               => $stat->user?->name ?? 'Initiate',
-                'avatar'             => $stat->user?->profile_photo_path,
+                'avatar'             => $stat->user?->profile_image,
                 'daily_streak'       => (int) ($stat->daily_streak ?? 0),
                 'time_spent_minutes' => (int) ($stat->time_spent_minutes ?? 0),
                 'amount_spent_kobo'  => (int) ($stat->amount_spent_kobo ?? 0),

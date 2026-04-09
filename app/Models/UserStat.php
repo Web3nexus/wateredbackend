@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\ShopOrder;
 
 class UserStat extends Model
 {
