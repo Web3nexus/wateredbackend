@@ -6,6 +6,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Str;
@@ -28,9 +30,18 @@ class TextCollectionForm
                             ->dehydrated()
                             ->required()
                             ->maxLength(255),
-                        Textarea::make('description')
-                            ->rows(3)
+                        RichEditor::make('description')
+                            ->columnSpanFull()
                             ->maxLength(1000),
+                        FileUpload::make('cover_image')
+                            ->image()
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('16:9')
+                            ->disk('public')
+                            ->directory('collections'),
+                        RichEditor::make('content')
+                            ->label('Rich Content (MAIN)')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Classification (Optional)')
