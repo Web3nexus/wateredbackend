@@ -66,6 +66,11 @@ class TextCollectionForm
                         Toggle::make('is_premium')
                             ->label('Is Premium?')
                             ->default(false),
+                        TextInput::make('price')
+                            ->label('Price (NGN)')
+                            ->numeric()
+                            ->prefix('₦')
+                            ->default(0),
                     ]),
 
                 Section::make('Chapters & Verses')

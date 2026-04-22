@@ -67,9 +67,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/text-collections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
         Route::get('/textcollection', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
         Route::get('/textcollections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
-        Route::get('/text-collection', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
+        Route::get('/text-collections', [\App\Http\Controllers\Api\V1\CollectionController::class, 'index']);
         
         Route::get('/text-collections/{collection}', [\App\Http\Controllers\Api\V1\CollectionController::class, 'show']);
+        Route::post('/text-collections/{collection}/purchase', [\App\Http\Controllers\Api\V1\BookPurchaseController::class, 'initiate']);
+        Route::post('/text-collections/verify-purchase', [\App\Http\Controllers\Api\V1\BookPurchaseController::class, 'verify']);
         Route::get('/text-collections/{collection}/chapters', [\App\Http\Controllers\Api\V1\CollectionController::class, 'chapters']);
         
         Route::get('/collections/{collection}', [\App\Http\Controllers\Api\V1\CollectionController::class, 'show']);

@@ -25,6 +25,8 @@ class TextCollectionResource extends JsonResource
             'order' => $this->order,
             'is_active' => (bool) $this->is_active,
             'is_premium' => (bool) $this->is_premium,
+            'price' => $this->price,
+            'is_purchased' => $this->is_purchased,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\BookPurchase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,14 +20,31 @@ class TextCollection extends Model
         'order',
         'is_active',
         'is_premium',
+        'price',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'is_premium' => 'boolean',
+        'price' => 'decimal:2',
     ];
 
-    protected $appends = ['cover_image_url'];
+    protected $appends = ['cover_image_url', 'is_purchased'];
+
+    public function isPurchased(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                $user = auth('sanctum')->user();
+                if (!$user) return false;
+                
+                return BookPurchase::where('user_id', $user->id)
+                    ->where('text_collection_id', $this->id)
+                    ->where('status', 'completed')
+                    ->exists();
+            }
+        );
+    }
 
     public function coverImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
