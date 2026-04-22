@@ -15,9 +15,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class AppointmentResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = Appointment::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_appointments';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
 

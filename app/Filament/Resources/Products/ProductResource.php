@@ -15,9 +15,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class ProductResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = Product::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_shop';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 

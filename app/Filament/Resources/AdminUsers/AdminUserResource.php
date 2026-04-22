@@ -15,9 +15,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class AdminUserResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = AdminUser::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_users';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 

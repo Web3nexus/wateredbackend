@@ -15,9 +15,18 @@ use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 use BackedEnum;
 
+use App\Traits\HasModuleAccess;
+
 class RevenueResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = RevenueTransaction::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_financials';
+    }
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
     protected static UnitEnum|string|null $navigationGroup = 'Financials';

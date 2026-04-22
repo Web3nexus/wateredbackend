@@ -15,9 +15,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class GlobalSettingResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = GlobalSetting::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_settings';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 

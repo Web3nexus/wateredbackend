@@ -14,9 +14,18 @@ use Filament\Schemas\Schema;
 use BackedEnum;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class AudioResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = Audio::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_audio';
+    }
 
     protected static ?string $navigationLabel = 'Audio Teachings';
 

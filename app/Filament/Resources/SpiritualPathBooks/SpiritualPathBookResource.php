@@ -13,9 +13,18 @@ use Filament\Schemas\Schema;
 use BackedEnum;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class SpiritualPathBookResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = TextCollection::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_library';
+    }
 
     protected static ?string $navigationLabel = 'Spiritual Path Books';
 

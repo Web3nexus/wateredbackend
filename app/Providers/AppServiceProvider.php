@@ -23,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        // Super Admin bypass for Developers
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return method_exists($user, 'hasRole') && $user->hasRole('Developer', 'admin') ? true : null;
+        });
+
         \App\Models\Comment::observe(\App\Observers\CommentObserver::class);
         \App\Models\Announcement::observe(\App\Observers\AnnouncementObserver::class);
 

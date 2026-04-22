@@ -15,9 +15,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
+use App\Traits\HasModuleAccess;
+
 class RitualResource extends Resource
 {
+    use HasModuleAccess;
+
     protected static ?string $model = Ritual::class;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_rituals';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFire;
 
