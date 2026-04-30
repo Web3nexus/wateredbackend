@@ -58,6 +58,17 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        $settings = GlobalSetting::first();
+        if ($settings) {
+            $isEnabled = $request->user() ? $settings->is_app_bookings_enabled : $settings->is_web_bookings_enabled;
+            if (!$isEnabled) {
+                $platform = $request->user() ? 'app' : 'website';
+                return response()->json([
+                    'message' => "Appointment booking is currently disabled on the {$platform}.",
+                ], 403);
+            }
+        }
+
         $request->validate([
             'consultation_type_id' => 'required|exists:consultation_types,id',
             'start_time' => 'required|date|after:now',

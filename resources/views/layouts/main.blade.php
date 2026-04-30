@@ -69,9 +69,11 @@
             <div class="hidden md:flex items-center gap-8">
                 <a href="{{ route('home') }}#features"
                     class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Features</a>
+                @if($settings?->is_web_bookings_enabled)
                 <a href="{{ route('home') }}#appointments"
                     class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Book
                     Appointment</a>
+                @endif
                 <a href="{{ route('events.index') }}"
                     class="text-parchment/70 hover:text-app-blue text-sm transition uppercase tracking-widest font-medium">Events</a>
                 <a href="{{ route('teachings.index') }}"
@@ -100,9 +102,11 @@
             class="md:hidden absolute top-full left-0 w-full bg-sea-deep border-b border-parchment/10 shadow-2xl py-6 px-6 flex flex-col gap-6">
             <a href="{{ route('home') }}#features" @click="mobileMenuOpen = false"
                 class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Features</a>
+            @if($settings?->is_web_bookings_enabled)
             <a href="{{ route('home') }}#appointments" @click="mobileMenuOpen = false"
                 class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Book
                 Appointment</a>
+            @endif
             <a href="{{ route('events.index') }}"
                 class="text-parchment/70 hover:text-app-blue text-lg uppercase tracking-widest font-medium">Events</a>
             <a href="{{ route('teachings.index') }}" @click="mobileMenuOpen = false"

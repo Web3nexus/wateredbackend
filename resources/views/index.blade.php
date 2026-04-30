@@ -267,6 +267,7 @@
     </section>
 
     {{-- Appointment Booking Section --}}
+    @if($settings?->is_web_bookings_enabled)
     <section id="appointments" class="py-32 bg-app-blue/5 border-y border-app-blue/10">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-20 items-center">
@@ -395,6 +396,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- Rituals Section --}}
     <section id="rituals" class="py-32">

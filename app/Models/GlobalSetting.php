@@ -92,6 +92,8 @@ class GlobalSetting extends Model
         'is_incantations_premium_only',
         'is_incantations_enabled',
         'app_config_version',
+        'is_app_bookings_enabled',
+        'is_web_bookings_enabled',
     ];
 
     protected $hidden = [
@@ -123,6 +125,8 @@ class GlobalSetting extends Model
         'is_incantations_premium_only' => 'boolean',
         'is_incantations_enabled' => 'boolean',
         'app_config_version' => 'integer',
+        'is_app_bookings_enabled' => 'boolean',
+        'is_web_bookings_enabled' => 'boolean',
     ];
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {

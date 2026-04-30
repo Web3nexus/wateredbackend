@@ -452,6 +452,10 @@ class GlobalSettingForm
                                             ->label('Enable Nima Sedani'),
                                         Toggle::make('is_community_enabled')
                                             ->label('Enable Community'),
+                                        Toggle::make('is_app_bookings_enabled')
+                                            ->label('Enable App Bookings'),
+                                        Toggle::make('is_web_bookings_enabled')
+                                            ->label('Enable Web Bookings'),
                                     ])->columns(3),
 
                                 Section::make('Premium Overrides')
