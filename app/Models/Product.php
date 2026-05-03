@@ -34,6 +34,11 @@ class Product extends Model
     {
         return Attribute::make(
             get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : asset('storage/' . $value)) : null,
+            set: function (?string $value) {
+                if (!$value) return null;
+                $baseUrl = asset('storage/');
+                return str_replace($baseUrl, '', $value);
+            }
         );
     }
 }

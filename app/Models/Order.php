@@ -32,6 +32,11 @@ class Order extends Model implements HasMedia
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn(?string $value) => $value ? (str_starts_with($value, 'http') ? $value : \Illuminate\Support\Facades\Storage::url($value)) : null,
+            set: function (?string $value) {
+                if (!$value) return null;
+                $baseUrl = \Illuminate\Support\Facades\Storage::url('');
+                return str_replace($baseUrl, '', $value);
+            }
         );
     }
 

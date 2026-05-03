@@ -92,7 +92,8 @@ class TraditionResource extends Resource
                             ->label('Banner/Deity Image')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                             ->disk('public')
-                            ->directory('traditions'),
+                            ->directory('traditions')
+                            ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('deity_image_url'))),
                     ]),
             ]);
     }

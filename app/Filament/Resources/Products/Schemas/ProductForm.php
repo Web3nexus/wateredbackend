@@ -34,7 +34,8 @@ class ProductForm
                 FileUpload::make('image_url')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
-                    ->directory('products'),
+                    ->directory('products')
+                    ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('image_url'))),
                 TextInput::make('audio_sample_url')
                     ->url(),
                 Toggle::make('is_digital')

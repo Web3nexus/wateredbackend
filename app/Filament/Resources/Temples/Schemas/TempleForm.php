@@ -27,7 +27,8 @@ class TempleForm
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('temples')
-                    ->visibility('public'),
+                    ->visibility('public')
+                    ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('image_url'))),
                 Toggle::make('is_active')
                     ->required(),
             ]);
