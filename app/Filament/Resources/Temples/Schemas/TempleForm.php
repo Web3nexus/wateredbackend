@@ -28,7 +28,7 @@ class TempleForm
                     ->disk('public')
                     ->directory('temples')
                     ->visibility('public')
-                    ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('image_url'))),
+                    ->formatStateUsing(fn ($state, $record) => $record?->getRawOriginal('image_url')),
                 Toggle::make('is_active')
                     ->required(),
             ]);

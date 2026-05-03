@@ -62,7 +62,10 @@ class RitualForm
                     ->disk('public')
                     ->directory('rituals')
                     ->maxSize(102400) // 100MB
-                    ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('media_urls'))),
+                    ->formatStateUsing(function ($state, $record) {
+                        $raw = $record?->getRawOriginal('media_urls');
+                        return $raw ? json_decode($raw, true) : [];
+                    }),
                 Repeater::make('steps')
                     ->schema([
                         TextInput::make('step')

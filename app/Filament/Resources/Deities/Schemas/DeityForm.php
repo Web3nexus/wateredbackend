@@ -22,7 +22,7 @@ class DeityForm
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('deities')
-                    ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('image_url'))),
+                    ->formatStateUsing(fn ($state, $record) => $record?->getRawOriginal('image_url')),
                 Select::make('tradition_id')
                     ->relationship('tradition', 'name')
                     ->required(),

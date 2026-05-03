@@ -93,7 +93,7 @@ class TraditionResource extends Resource
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                             ->disk('public')
                             ->directory('traditions')
-                            ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('deity_image_url'))),
+                            ->formatStateUsing(fn ($state, $record) => $record?->getRawOriginal('deity_image_url')),
                     ]),
             ]);
     }

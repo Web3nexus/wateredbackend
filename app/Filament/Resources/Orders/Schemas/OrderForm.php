@@ -37,7 +37,7 @@ class OrderForm
                         ->disk('public')
                         ->directory('orders')
                         ->columnSpanFull()
-                        ->afterStateHydrated(fn (FileUpload $component, $record) => $component->state($record?->getRawOriginal('image_url'))),
+                        ->formatStateUsing(fn ($state, $record) => $record?->getRawOriginal('image_url')),
                 ])->columns(2),
 
                 Section::make('Call to Action')->schema([
