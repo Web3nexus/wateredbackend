@@ -35,7 +35,12 @@ class ProductForm
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                     ->disk('public')
                     ->directory('products')
-                    ->formatStateUsing(fn ($state, $record) => $record?->getRawOriginal('image_url')),
+                    ->formatStateUsing(function ($state) {
+                        if (is_string($state) && str_starts_with($state, 'http')) {
+                            return str_replace(\Illuminate\Support\Facades\Storage::url(''), '', $state);
+                        }
+                        return $state;
+                    }),
                 TextInput::make('audio_sample_url')
                     ->url(),
                 Toggle::make('is_digital')

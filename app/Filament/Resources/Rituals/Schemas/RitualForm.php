@@ -62,9 +62,14 @@ class RitualForm
                     ->disk('public')
                     ->directory('rituals')
                     ->maxSize(102400) // 100MB
-                    ->formatStateUsing(function ($state, $record) {
-                        $raw = $record?->getRawOriginal('media_urls');
-                        return $raw ? json_decode($raw, true) : [];
+                    ->formatStateUsing(function ($state) {
+                        if (!is_array($state)) return $state;
+                        return array_map(function ($url) {
+                            if (is_string($url) && str_starts_with($url, 'http')) {
+                                return str_replace(\Illuminate\Support\Facades\Storage::url(''), '', $url);
+                            }
+                            return $url;
+                        }, $state);
                     }),
                 Repeater::make('steps')
                     ->schema([
