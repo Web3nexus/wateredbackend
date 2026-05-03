@@ -61,16 +61,7 @@ class RitualForm
                     ->multiple()
                     ->disk('public')
                     ->directory('rituals')
-                    ->maxSize(102400) // 100MB
-                    ->formatStateUsing(function ($state) {
-                        if (!is_array($state)) return $state;
-                        return array_map(function ($url) {
-                            if (is_string($url) && str_starts_with($url, 'http')) {
-                                return str_replace(\Illuminate\Support\Facades\Storage::url(''), '', $url);
-                            }
-                            return $url;
-                        }, $state);
-                    }),
+                    ->maxSize(102400), // 100MB
                 Repeater::make('steps')
                     ->schema([
                         TextInput::make('step')

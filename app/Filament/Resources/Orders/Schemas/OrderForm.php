@@ -36,13 +36,7 @@ class OrderForm
                         ->image()
                         ->disk('public')
                         ->directory('orders')
-                        ->columnSpanFull()
-                        ->formatStateUsing(function ($state) {
-                            if (is_string($state) && str_starts_with($state, 'http')) {
-                                return str_replace(\Illuminate\Support\Facades\Storage::url(''), '', $state);
-                            }
-                            return $state;
-                        }),
+                        ->columnSpanFull(),
                 ])->columns(2),
 
                 Section::make('Call to Action')->schema([
