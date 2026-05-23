@@ -34,6 +34,8 @@ class TextCollectionForm
                             ->columnSpanFull()
                             ->maxLength(1000),
                         FileUpload::make('cover_image')
+                            ->label('Cover / Banner Image')
+                            ->helperText('Recommended size: 1600×900 pixels (16:9 ratio).')
                             ->image()
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('16:9')
