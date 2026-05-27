@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserStat;
+use App\Services\AppleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -187,12 +188,38 @@ class AuthController extends Controller
             'provider_id' => 'required|string',
             'device_name' => 'required|string',
             'email_verified' => 'nullable|boolean',
+            'apple_identity_token' => 'nullable|string',
         ]);
 
         $emailVerified = $request->email_verified ?? false;
         // Auto-verify trusted providers
         if (in_array($request->provider, ['google', 'apple'])) {
             $emailVerified = true;
+        }
+
+        // Server-side Apple identity token validation
+        if ($request->provider === 'apple' && $request->filled('apple_identity_token')) {
+            $appleService = app(AppleService::class);
+            $applePayload = $appleService->verifyIdentityToken($request->apple_identity_token);
+
+            if (!$applePayload) {
+                Log::warning('[SOCIAL_LOGIN] Apple identity token validation failed');
+                return response()->json(['message' => 'Apple identity verification failed.'], 422);
+            }
+
+            // Ensure the Apple user ID matches the Firebase UID
+            $appleUserId = $applePayload['sub'] ?? null;
+            if ($appleUserId && $appleUserId !== $request->provider_id) {
+                Log::warning('[SOCIAL_LOGIN] Apple user ID mismatch', [
+                    'apple_sub' => $appleUserId,
+                    'provider_id' => $request->provider_id,
+                ]);
+                return response()->json(['message' => 'Apple user ID mismatch.'], 422);
+            }
+
+            Log::info('[SOCIAL_LOGIN] Apple identity token verified successfully', [
+                'apple_sub' => $appleUserId,
+            ]);
         }
 
         $user = User::where('provider', $request->provider)

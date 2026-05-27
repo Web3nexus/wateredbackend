@@ -16,6 +16,15 @@ class ChapterController extends Controller
      */
     public function show(Chapter $chapter): JsonResponse
     {
+        if (!$chapter->collection->userCanAccess()) {
+            return response()->json([
+                'message' => 'This content requires purchase or premium subscription.',
+                'requires_purchase' => !$chapter->collection->is_premium && $chapter->collection->price > 0,
+                'requires_premium' => (bool) $chapter->collection->is_premium,
+                'price' => $chapter->collection->price,
+            ], 403);
+        }
+
         return response()->json(new ChapterResource($chapter));
     }
 
@@ -24,6 +33,15 @@ class ChapterController extends Controller
      */
     public function entries(Request $request, Chapter $chapter): JsonResponse
     {
+        if (!$chapter->collection->userCanAccess()) {
+            return response()->json([
+                'message' => 'This content requires purchase or premium subscription.',
+                'requires_purchase' => !$chapter->collection->is_premium && $chapter->collection->price > 0,
+                'requires_premium' => (bool) $chapter->collection->is_premium,
+                'price' => $chapter->collection->price,
+            ], 403);
+        }
+
         $perPage = $request->query('per_page', 50);
         $language = $request->query('language');
 

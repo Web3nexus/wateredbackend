@@ -73,4 +73,31 @@ class TextCollection extends Model
     {
         return $this->hasMany(Chapter::class, 'collection_id')->orderBy('number');
     }
+
+    /**
+     * Check if a user can access this book's content.
+     * Access granted if: book is free, user purchased it, or user has premium.
+     */
+    public function userCanAccess(?User $user = null): bool
+    {
+        $user = $user ?? auth('sanctum')->user();
+        if (!$user) return false;
+
+        // Free books are accessible to everyone
+        if (!$this->is_premium && ((float)$this->price === 0.0 || $this->price === null)) {
+            return true;
+        }
+
+        // User already purchased this book
+        if ($this->isPurchased()) {
+            return true;
+        }
+
+        // Premium books are accessible to premium users
+        if ($this->is_premium && $user->hasActivePremium()) {
+            return true;
+        }
+
+        return false;
+    }
 }

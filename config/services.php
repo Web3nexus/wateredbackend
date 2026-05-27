@@ -46,4 +46,11 @@ return [
         'credentials_path' => env('FCM_CREDENTIALS_PATH', storage_path('app/firebase-auth.json')),
     ],
 
+    'apple' => [
+        'team_id' => env('APPLE_TEAM_ID'),
+        'key_id' => env('APPLE_KEY_ID'),
+        'client_id' => env('APPLE_CLIENT_ID'),
+        'private_key' => env('APPLE_PRIVATE_KEY'),
+    ],
+
 ];

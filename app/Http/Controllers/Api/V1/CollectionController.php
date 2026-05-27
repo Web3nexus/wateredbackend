@@ -44,6 +44,20 @@ class CollectionController extends Controller
      */
     public function chapters(Request $request, TextCollection $collection): JsonResponse
     {
+        if (!$collection->userCanAccess()) {
+            return response()->json([
+                'message' => 'This content requires purchase or premium subscription.',
+                'requires_purchase' => !$collection->is_premium && $collection->price > 0,
+                'requires_premium' => (bool) $collection->is_premium,
+                'price' => $collection->price,
+                'data' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 0,
+                'total' => 0,
+            ], 403);
+        }
+
         $perPage = $request->query('per_page', 50);
 
         $chapters = $collection->chapters()

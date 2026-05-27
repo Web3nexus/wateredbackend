@@ -15,6 +15,16 @@ class EntryController extends Controller
      */
     public function show(Request $request, Entry $entry): JsonResponse
     {
+        $chapter = $entry->chapter;
+        if ($chapter && !$chapter->collection->userCanAccess()) {
+            return response()->json([
+                'message' => 'This content requires purchase or premium subscription.',
+                'requires_purchase' => !$chapter->collection->is_premium && $chapter->collection->price > 0,
+                'requires_premium' => (bool) $chapter->collection->is_premium,
+                'price' => $chapter->collection->price,
+            ], 403);
+        }
+
         $language = $request->query('language');
 
         // Load translations if language is specified

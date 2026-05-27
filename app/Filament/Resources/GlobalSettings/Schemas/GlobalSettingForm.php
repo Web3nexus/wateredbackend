@@ -284,7 +284,7 @@ class GlobalSettingForm
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_id')
                                             ->label('Monthly Product ID')
-                                            ->placeholder('e.g. premium_monthly')
+                                            ->placeholder('e.g. com.watered.premium.monthly')
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_monthly_price')
                                             ->label('Monthly Display Price')
@@ -302,7 +302,7 @@ class GlobalSettingForm
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_id')
                                             ->label('Yearly Product ID')
-                                            ->placeholder('e.g. premium_yearly')
+                                            ->placeholder('e.g. com.watered.premium.yearly')
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
                                         TextInput::make('premium_yearly_price')
                                             ->label('Yearly Display Price')
