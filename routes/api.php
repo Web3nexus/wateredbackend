@@ -24,6 +24,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/reset-password', [\App\Http\Controllers\Api\V1\AuthController::class, 'resetPassword'])
         ->name('password.update');
 
+    // Legal Documents (Public - required on auth/login screens)
+    Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
+
     // Appointment Tracking & Guest Submission (Public)
     Route::get('/appointments/track/{code}', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'show']);
     Route::post('/appointments/guest', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'store']);
@@ -31,9 +34,8 @@ Route::prefix('v1')->group(function () {
 
     // Protected Routes (Sanctum) - ALL app content requires authentication
     Route::middleware('auth:sanctum')->group(function () {
-        // App Settings & Legal Documents (Now Protected)
+        // App Settings (Protected)
         Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
-        Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
         Route::get('/payment-keys', [\App\Http\Controllers\Api\V1\SettingsController::class, 'paymentKeys']);
 
         // Traditions endpoints
