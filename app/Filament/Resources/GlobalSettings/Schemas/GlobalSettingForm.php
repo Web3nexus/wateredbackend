@@ -380,6 +380,133 @@ class GlobalSettingForm
                                     ])->columns(2),
                             ]),
 
+                        Tabs\Tab::make('Subscriptions')
+                            ->schema([
+                                Section::make('Apple In-App Purchase (iOS)')
+                                    ->description('Configure the product IDs for Apple App Store subscriptions. Used on all Apple devices.')
+                                    ->schema([
+                                        TextInput::make('premium_monthly_id')
+                                            ->label('Monthly Product ID (Apple)')
+                                            ->placeholder('e.g. com.watered.premium.monthly')
+                                            ->helperText('The Apple App Store product ID for the monthly subscription.'),
+                                        TextInput::make('premium_yearly_id')
+                                            ->label('Yearly Product ID (Apple)')
+                                            ->placeholder('e.g. com.watered.premium.yearly')
+                                            ->helperText('The Apple App Store product ID for the yearly subscription.'),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('apple_shared_secret')
+                                                ->label('Apple App Store Shared Secret')
+                                        ),
+                                    ])->columns(2),
+
+                                Section::make('Paystack (Android)')
+                                    ->description('Configure Paystack plan codes and keys for Android subscription payments.')
+                                    ->schema([
+                                        TextInput::make('paystack_monthly_plan_code')
+                                            ->label('Paystack Monthly Plan Code')
+                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('paystack_yearly_plan_code')
+                                            ->label('Paystack Yearly Plan Code')
+                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('paystack_public_key')
+                                                ->label('Paystack Public Key')
+                                        ),
+                                        static::addSecureRevealAction(
+                                            TextInput::make('paystack_secret_key')
+                                                ->label('Paystack Secret Key')
+                                        ),
+                                    ])->columns(2),
+
+                                Section::make('Local Pricing (NGN)')
+                                    ->schema([
+                                        TextInput::make('premium_monthly_price')
+                                            ->label('Monthly Display Price')
+                                            ->placeholder('e.g. ₦5,000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_monthly_amount')
+                                            ->label('Monthly Charge Amount (Kobo)')
+                                            ->numeric()
+                                            ->placeholder('500000')
+                                            ->helperText('Amount in kobo (500,000 kobo = ₦5,000)')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_yearly_price')
+                                            ->label('Yearly Display Price')
+                                            ->placeholder('e.g. ₦50,000')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_yearly_amount')
+                                            ->label('Yearly Charge Amount (Kobo)')
+                                            ->numeric()
+                                            ->placeholder('5000000')
+                                            ->helperText('Amount in kobo (5,000,000 kobo = ₦50,000)')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                    ])->columns(2),
+
+                                Section::make('International Pricing (USD)')
+                                    ->schema([
+                                        TextInput::make('premium_monthly_price_usd')
+                                            ->label('Monthly Display Price (USD)')
+                                            ->placeholder('e.g. $9.99')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_monthly_amount_usd')
+                                            ->label('Monthly Charge Amount (Cents)')
+                                            ->numeric()
+                                            ->placeholder('999')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_yearly_price_usd')
+                                            ->label('Yearly Display Price (USD)')
+                                            ->placeholder('e.g. $99.99')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_yearly_amount_usd')
+                                            ->label('Yearly Charge Amount (Cents)')
+                                            ->numeric()
+                                            ->placeholder('9999')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                    ])->columns(2),
+
+                                Section::make('Subscription Marketing Text')
+                                    ->schema([
+                                        TextInput::make('premium_title')
+                                            ->label('Premium Page Title')
+                                            ->placeholder('e.g. WATERED PLUS+')
+                                            ->default('WATERED PLUS+')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TextInput::make('premium_subtitle')
+                                            ->label('Premium Page Subtitle')
+                                            ->placeholder('e.g. Unlock the full depth of African spirituality.')
+                                            ->default('Unlock the full depth of African spirituality.')
+                                            ->dehydrated(fn(?string $state): bool => filled($state)),
+                                        TagsInput::make('premium_features')
+                                            ->label('Plan Features')
+                                            ->placeholder('Add a feature and press Enter...')
+                                            ->helperText('These features are shown on the subscription plans in the app.')
+                                            ->suggestions([
+                                                'Complete Sacred Library',
+                                                'Daily Audio Teachings',
+                                                'Community Access',
+                                                'Unlimited Rituals',
+                                                'Everything in Monthly',
+                                                '2 Months Free',
+                                                'Exclusive Yearly Content',
+                                                'Priority Support',
+                                                'Ad-Free Experience',
+                                                'Offline Access',
+                                                'Nima Sedani Access',
+                                                'Sacred Calendar',
+                                                'Daily Wisdom Verses',
+                                                'Direct Spiritual Guidance',
+                                            ])
+                                            ->default([
+                                                'Complete Sacred Library',
+                                                'Daily Audio Teachings',
+                                                'Community Access',
+                                                'Unlimited Rituals',
+                                            ]),
+                                    ]),
+                            ]),
+
                         Tabs\Tab::make('App Stores')
                             ->schema([
                                 Section::make('Apple App Store')

@@ -34,10 +34,11 @@ class SubscriptionController extends Controller
     {
         try {
             $request->validate([
-                'plan_id' => 'required',
+                'plan_id' => 'required_if:provider,apple',
                 'provider' => 'required|in:apple,paystack,google',
                 'receipt_data' => 'required_if:provider,apple',
                 'transaction_reference' => 'required_if:provider,paystack',
+                'is_yearly' => 'required_if:provider,paystack|boolean',
             ]);
 
             $user = $request->user();
@@ -143,15 +144,14 @@ class SubscriptionController extends Controller
             $status = $data['data']['status'];
 
             if ($status === 'success') {
-                // Success
-                // Determine duration based on plan_id in settings
-                $isYearly = $request->plan_id == $settings->premium_yearly_id;
+                // Determine duration from is_yearly flag (frontend no longer depends on Apple product IDs)
+                $isYearly = filter_var($request->is_yearly, FILTER_VALIDATE_BOOLEAN);
                 $duration = $isYearly ? now()->addYear() : now()->addMonth();
 
                 $user->subscriptions()->updateOrCreate(
                     ['provider_subscription_id' => $reference],
                     [
-                        'plan_id' => $request->plan_id,
+                        'plan_id' => $isYearly ? 'paystack_yearly' : 'paystack_monthly',
                         'provider' => 'paystack',
                         'platform' => 'android',
                         'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents

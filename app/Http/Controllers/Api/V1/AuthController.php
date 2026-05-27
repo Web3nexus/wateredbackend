@@ -191,65 +191,58 @@ class AuthController extends Controller
             'apple_identity_token' => 'nullable|string',
         ]);
 
-        $emailVerified = $request->email_verified ?? false;
-        // Auto-verify trusted providers
-        if (in_array($request->provider, ['google', 'apple'])) {
-            $emailVerified = true;
-        }
-
-        // Server-side Apple identity token validation
-        if ($request->provider === 'apple' && $request->filled('apple_identity_token')) {
-            $appleService = app(AppleService::class);
-            $applePayload = $appleService->verifyIdentityToken($request->apple_identity_token);
-
-            if (!$applePayload) {
-                Log::warning('[SOCIAL_LOGIN] Apple identity token validation failed');
-                return response()->json(['message' => 'Apple identity verification failed.'], 422);
+        try {
+            $emailVerified = $request->email_verified ?? false;
+            // Auto-verify trusted providers
+            if (in_array($request->provider, ['google', 'apple'])) {
+                $emailVerified = true;
             }
 
-            // Ensure the Apple user ID matches the Firebase UID
-            $appleUserId = $applePayload['sub'] ?? null;
-            if ($appleUserId && $appleUserId !== $request->provider_id) {
-                Log::warning('[SOCIAL_LOGIN] Apple user ID mismatch', [
-                    'apple_sub' => $appleUserId,
-                    'provider_id' => $request->provider_id,
+            // Server-side Apple identity token validation
+            // Only validates issuer, audience, and signature — no sub check against
+            // Firebase UID because Apple's sub (real Apple user ID) never matches
+            // the Firebase-generated UID (provider_id).
+            if ($request->provider === 'apple' && $request->filled('apple_identity_token')) {
+                $appleService = app(AppleService::class);
+                $applePayload = $appleService->verifyIdentityToken($request->apple_identity_token);
+
+                if (!$applePayload) {
+                    Log::warning('[SOCIAL_LOGIN] Apple identity token validation failed');
+                    return response()->json(['message' => 'Apple identity verification failed.'], 422);
+                }
+
+                Log::info('[SOCIAL_LOGIN] Apple identity token verified successfully', [
+                    'apple_sub' => $applePayload['sub'] ?? null,
                 ]);
-                return response()->json(['message' => 'Apple user ID mismatch.'], 422);
             }
 
-            Log::info('[SOCIAL_LOGIN] Apple identity token verified successfully', [
-                'apple_sub' => $appleUserId,
-            ]);
-        }
+            $user = User::where('provider', $request->provider)
+                ->where('provider_id', $request->provider_id)
+                ->first();
 
-        $user = User::where('provider', $request->provider)
-            ->where('provider_id', $request->provider_id)
-            ->first();
+            if (!$user && $request->email) {
+                Log::info("[SOCIAL_LOGIN] User not found by provider, checking email: {$request->email}");
+                $user = User::where('email', $request->email)->first();
+                if ($user) {
+                    Log::info("[SOCIAL_LOGIN] Matching email found, linking provider: {$request->provider}");
+                    $user->update([
+                        'provider' => $request->provider,
+                        'provider_id' => $request->provider_id,
+                    ]);
+                }
+            }
 
-        if (!$user && $request->email) {
-            Log::info("[SOCIAL_LOGIN] User not found by provider, checking email: {$request->email}");
-            $user = User::where('email', $request->email)->first();
             if ($user) {
-                Log::info("[SOCIAL_LOGIN] Matching email found, linking provider: {$request->provider}");
-                $user->update([
-                    'provider' => $request->provider,
-                    'provider_id' => $request->provider_id,
-                ]);
+                // Sync verification status if not already verified
+                if ($emailVerified && !$user->hasVerifiedEmail()) {
+                    $user->markEmailAsVerified();
+                }
             }
-        }
 
-        if ($user) {
-            // Sync verification status if not already verified
-            if ($emailVerified && !$user->hasVerifiedEmail()) {
-                $user->markEmailAsVerified();
-            }
-        }
+            if (!$user) {
+                Log::info("[SOCIAL_LOGIN] Creating new user for: {$request->email}");
+                $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
 
-        if (!$user) {
-            Log::info("[SOCIAL_LOGIN] Creating new user for: {$request->email}");
-            $email = $request->email ?? "{$request->provider_id}@{$request->provider}.com";
-
-            try {
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $email,
@@ -259,35 +252,37 @@ class AuthController extends Controller
                     'email_verified_at' => $emailVerified ? now() : null,
                 ]);
                 Log::info("[SOCIAL_LOGIN] New user created: ID {$user->id}");
-            } catch (\Exception $e) {
-                Log::error("[SOCIAL_LOGIN] FAILED TO CREATE USER: " . $e->getMessage());
-                return response()->json(['message' => 'Failed to create account in backend.'], 500);
             }
-        }
 
-        $token = $user->createToken($request->device_name)->plainTextToken;
-        $freshUser = $user->fresh();
+            $token = $user->createToken($request->device_name)->plainTextToken;
+            $freshUser = $user->fresh();
 
-        try {
-            // Ensure is_premium is synced from subscriptions
-            $freshUser->hasActivePremium();
+            try {
+                $freshUser->hasActivePremium();
+            } catch (\Exception $e) {
+                Log::warning("[SOCIAL_LOGIN] Premium sync warning: " . $e->getMessage());
+            }
+
+            Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
+
+            UserStat::firstOrCreate(
+                ['user_id' => $user->id],
+                ['daily_streak' => 0, 'time_spent_minutes' => 0,
+                 'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
+            );
+
+            return response()->json([
+                'user'  => $freshUser->fresh(),
+                'token' => $token,
+            ]);
         } catch (\Exception $e) {
-            Log::warning("[SOCIAL_LOGIN] Premium sync warning: " . $e->getMessage());
+            Log::error('[SOCIAL_LOGIN] UNEXPECTED ERROR: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['message' => 'An unexpected error occurred during sign in.'], 500);
         }
-
-        Log::info("[SOCIAL_LOGIN] SUCCESS User {$user->id}");
-
-        // Ensure this user has a stat record so they appear in the leaderboard
-        UserStat::firstOrCreate(
-            ['user_id' => $user->id],
-            ['daily_streak' => 0, 'time_spent_minutes' => 0,
-             'nima_sedani_time_minutes' => 0, 'amount_spent_kobo' => 0]
-        );
-
-        return response()->json([
-            'user'  => $freshUser->fresh(),
-            'token' => $token,
-        ]);
     }
 
     /**
