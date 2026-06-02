@@ -26,10 +26,10 @@ class SubscriptionPaystackTest extends TestCase
             'paystack_secret_key' => 'sk_test_123',
             'paystack_monthly_plan_code' => 'PLN_test_monthly',
             'paystack_yearly_plan_code' => 'PLN_test_yearly',
-            'premium_monthly_amount' => 5000,
-            'premium_yearly_amount' => 50000,
-            'premium_monthly_price' => '5,000',
-            'premium_yearly_price' => '50,000',
+            'premium_monthly_amount' => 10000,
+            'premium_yearly_amount' => 100000,
+            'premium_monthly_price' => '10,000',
+            'premium_yearly_price' => '100,000',
             'system_currency' => 'NGN',
             'currency_symbol' => '₦',
             'premium_monthly_id' => 'com.watered.premium.monthly',
@@ -82,7 +82,7 @@ class SubscriptionPaystackTest extends TestCase
                 'message' => 'Verification successful',
                 'data' => [
                     'status' => 'success',
-                    'amount' => 500000, // 5000 NGN in kobo
+                    'amount' => 1000000, // 10000 NGN in kobo
                     'currency' => 'NGN',
                     'reference' => 'ref_test123',
                     'channel' => 'card',
@@ -125,7 +125,7 @@ class SubscriptionPaystackTest extends TestCase
                 'message' => 'Verification successful',
                 'data' => [
                     'status' => 'failed',
-                    'amount' => 500000,
+                    'amount' => 1000000,
                     'currency' => 'NGN',
                     'reference' => 'ref_failed',
                     'gateway_response' => 'Declined',
@@ -185,7 +185,7 @@ class SubscriptionPaystackTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_other_user',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'pending',
             'starts_at' => now(),
             'expires_at' => now()->addMonth(),
@@ -211,7 +211,7 @@ class SubscriptionPaystackTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_webhook_test',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'pending',
             'starts_at' => now(),
             'expires_at' => now()->addMonth(),
@@ -221,7 +221,7 @@ class SubscriptionPaystackTest extends TestCase
             'event' => 'charge.success',
             'data' => [
                 'reference' => 'ref_webhook_test',
-                'amount' => 500000,
+                'amount' => 1000000,
                 'currency' => 'NGN',
                 'channel' => 'card',
                 'metadata' => [
@@ -263,7 +263,7 @@ class SubscriptionPaystackTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_idempotent',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'active',
             'starts_at' => now()->subMonth(),
             'expires_at' => now()->addMonth(),
@@ -273,7 +273,7 @@ class SubscriptionPaystackTest extends TestCase
             'event' => 'charge.success',
             'data' => [
                 'reference' => 'ref_idempotent',
-                'amount' => 500000,
+                'amount' => 1000000,
                 'currency' => 'NGN',
                 'channel' => 'card',
                 'metadata' => [
@@ -312,7 +312,7 @@ class SubscriptionPaystackTest extends TestCase
             'event' => 'charge.success',
             'data' => [
                 'reference' => 'ref_bad_sig',
-                'amount' => 500000,
+                'amount' => 1000000,
                 'currency' => 'NGN',
                 'metadata' => [],
             ],
@@ -332,7 +332,7 @@ class SubscriptionPaystackTest extends TestCase
             'event' => 'charge.success',
             'data' => [
                 'reference' => 'ref_unknown',
-                'amount' => 500000,
+                'amount' => 1000000,
                 'currency' => 'NGN',
                 'channel' => 'card',
                 'metadata' => [],

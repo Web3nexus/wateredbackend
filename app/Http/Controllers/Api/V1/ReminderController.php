@@ -18,7 +18,7 @@ class ReminderController extends Controller
     }
 
     /**
-     * Create or Sync reminder
+     * Create or Sync reminder (idempotent — no duplicate title+time per user)
      */
     public function store(Request $request)
     {
@@ -28,6 +28,16 @@ class ReminderController extends Controller
             'days' => 'nullable|array',
             'is_active' => 'boolean',
         ]);
+
+        // Prevent duplicates: same title + time for the same user
+        $existing = $request->user()->reminders()
+            ->where('title', $request->title)
+            ->where('time', $request->time)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['data' => $existing, 'message' => 'Reminder already exists'], 200);
+        }
 
         $reminder = $request->user()->reminders()->create([
             'title' => $request->title,

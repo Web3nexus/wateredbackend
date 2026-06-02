@@ -22,8 +22,8 @@ class SubscriptionSharedTest extends TestCase
         parent::setUp();
 
         $this->settings = GlobalSetting::create([
-            'premium_monthly_amount' => 5000,
-            'premium_yearly_amount' => 50000,
+            'premium_monthly_amount' => 10000,
+            'premium_yearly_amount' => 100000,
             'system_currency' => 'NGN',
             'currency_symbol' => '₦',
             'premium_monthly_id' => 'com.watered.premium.monthly',
@@ -48,7 +48,7 @@ class SubscriptionSharedTest extends TestCase
             originalTransactionId: null,
             planId: 'paystack_monthly',
             expiresAt: $expiresAt,
-            amount: 5000,
+            amount: 10000,
             platform: 'android',
         );
 
@@ -74,7 +74,7 @@ class SubscriptionSharedTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_original',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'active',
             'starts_at' => now()->subMonth(),
             'expires_at' => $fiveDaysFromNow,
@@ -91,7 +91,7 @@ class SubscriptionSharedTest extends TestCase
             originalTransactionId: null,
             planId: 'paystack_monthly',
             expiresAt: $newExpiresAt,
-            amount: 5000,
+            amount: 10000,
             platform: 'android',
         );
 
@@ -141,7 +141,7 @@ class SubscriptionSharedTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_deactivate',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'active',
             'starts_at' => now()->subMonth(),
             'expires_at' => now()->addMonth(),
@@ -169,7 +169,7 @@ class SubscriptionSharedTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_expired',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'expired',
             'starts_at' => now()->subMonths(2),
             'expires_at' => now()->subMonth(),
@@ -188,7 +188,7 @@ class SubscriptionSharedTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_profile',
-            'amount' => 5000,
+            'amount' => 10000,
             'status' => 'active',
             'starts_at' => now()->subMonth(),
             'expires_at' => now()->addMonth(),
@@ -217,7 +217,7 @@ class SubscriptionSharedTest extends TestCase
             'provider' => 'paystack',
             'platform' => 'android',
             'provider_subscription_id' => 'ref_status',
-            'amount' => 50000,
+            'amount' => 100000,
             'status' => 'active',
             'starts_at' => now(),
             'expires_at' => now()->addYear(),
