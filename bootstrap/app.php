@@ -35,5 +35,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // But we can force it here just in case.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Return JSON for unauthenticated API requests instead of redirecting to a web login route
+        $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $e->getMessage() ?: 'Unauthenticated.'], 401);
+            }
+        });
     })->create();
