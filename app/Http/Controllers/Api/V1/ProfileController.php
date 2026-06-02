@@ -17,7 +17,18 @@ class ProfileController extends Controller
         $user = $request->user()->fresh();
         // Ensure is_premium reflects the actual active subscription state
         $user->hasActivePremium();
-        return response()->json($user->fresh());
+        $user = $user->fresh();
+
+        $subscription = $user->subscription;
+
+        $data = $user->toArray();
+        $data['is_premium'] = $user->is_premium;
+        $data['subscription_status'] = $subscription?->status ?? 'none';
+        $data['subscription_provider'] = $subscription?->provider;
+        $data['subscription_plan'] = $subscription?->plan_id;
+        $data['subscription_expires_at'] = $subscription?->expires_at?->toIso8601String();
+
+        return response()->json($data);
     }
 
     /**

@@ -152,13 +152,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Subscription::class);
     }
 
-    // Helper to get active subscription
+    // Helper to get active subscription (newest first by id for deterministic ordering)
     public function getSubscriptionAttribute()
     {
         return $this->subscriptions()
             ->where('status', 'active')
             ->where('expires_at', '>', now())
-            ->latest()
+            ->latest('id')
             ->first();
     }
 
@@ -166,29 +166,40 @@ class User extends Authenticatable implements MustVerifyEmail
      * Check if the user has an active premium subscription.
      * 
      * Priority:
-     *  1. Active subscription record → user is premium, sync is_premium = true
-     *  2. No subscription but is_premium is manually set to true → treat as admin override (keep it)
-     *  3. No subscription AND is_premium is false → not premium
-     * 
-     * This prevents admin-granted manual premium from being auto-revoked.
+     *  1. Active subscription record (not expired) → user is premium, sync is_premium = true
+     *  2. No active subscription but is_premium is manually set to true (admin override)
+     *     → check if there's ANY subscription history; if none, treat as genuine override
+     *  3. Otherwise → not premium
      */
     public function hasActivePremium(): bool
     {
-        // 1. If currently marked as premium (admin override), trust it
-        if ($this->is_premium) {
-            return true;
-        }
-
+        // 1. Check for active subscription record
         $activeSub = $this->subscription;
 
         if ($activeSub !== null) {
             // Active subscription found — ensure flag is synced
-            $this->is_premium = true;
-            $this->save();
+            if (!$this->is_premium) {
+                $this->is_premium = true;
+                $this->save();
+            }
             return true;
         }
 
-        // 3. No active subscription and flag is false
+        // 2. No active subscription but is_premium flag is true (admin override)
+        // Check if there's subscription history - if yes, it's likely stale
+        // If no history at all, it's an admin grant
+        if ($this->is_premium) {
+            $hasHistory = $this->subscriptions()->exists();
+            if (!$hasHistory) {
+                return true;
+            }
+            // Has history but no active sub - auto-correct stale flag
+            $this->is_premium = false;
+            $this->save();
+            return false;
+        }
+
+        // 3. Not premium
         return false;
     }
 

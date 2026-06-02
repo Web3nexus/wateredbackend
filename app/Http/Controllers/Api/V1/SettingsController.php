@@ -74,9 +74,9 @@ class SettingsController extends Controller
     }
 
     /**
-     * Return payment gateway keys to authenticated users only.
-     * The secret keys are hidden from the public settings endpoint for security,
-     * but the flutter_paystack_plus plugin requires the secret key client-side.
+     * Return payment gateway public keys to authenticated users only.
+     * Secret keys must NEVER be exposed to the mobile client.
+     * Payment initialization is done server-side via the /subscription/initialize endpoint.
      */
     public function paymentKeys(): JsonResponse
     {
@@ -86,17 +86,13 @@ class SettingsController extends Controller
             return response()->json(['message' => 'Settings not configured'], 404);
         }
 
-        // makeVisible temporarily bypasses the $hidden array for this response only
-        $keys = $settings->makeVisible([
-            'paystack_secret_key',
-        ])->only([
-                    'paystack_public_key',
-                    'paystack_secret_key',
-                    'paystack_monthly_plan_code',
-                    'paystack_yearly_plan_code',
-                    'stripe_public_key',
-                    'flutterwave_public_key',
-                ]);
+        $keys = $settings->only([
+            'paystack_public_key',
+            'paystack_monthly_plan_code',
+            'paystack_yearly_plan_code',
+            'stripe_public_key',
+            'flutterwave_public_key',
+        ]);
 
         return response()->json($keys);
     }

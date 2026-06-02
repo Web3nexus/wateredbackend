@@ -5,25 +5,124 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\GlobalSetting;
 use App\Models\Subscription;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class SubscriptionController extends Controller
 {
+    protected SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
      * Get current subscription status
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $isPremium = $user->hasActivePremium();
+        $user->hasActivePremium();
         $subscription = $user->subscription;
 
         return response()->json([
-            'is_premium' => $isPremium,
+            'is_premium' => $user->is_premium,
+            'subscription_status' => $subscription?->status ?? 'none',
+            'subscription_provider' => $subscription?->provider,
+            'subscription_plan' => $subscription?->plan_id,
+            'subscription_expires_at' => $subscription?->expires_at?->toIso8601String(),
             'subscription' => $subscription,
+        ]);
+    }
+
+    /**
+     * Initialize a Paystack payment - creates a pending record before the mobile opens the popup.
+     * This ensures the webhook can always find the transaction by reference.
+     */
+    public function initializePaystack(Request $request)
+    {
+        $request->validate([
+            'is_yearly' => 'required|boolean',
+        ]);
+
+        $user = $request->user();
+        $isYearly = $request->boolean('is_yearly');
+        $settings = GlobalSetting::first();
+
+        if (!$settings || !$settings->paystack_secret_key) {
+            return response()->json(['message' => 'Payment gateway not configured'], 500);
+        }
+
+        $secretKey = $settings->paystack_secret_key;
+        $planId = $isYearly ? 'paystack_yearly' : 'paystack_monthly';
+        $amount = $isYearly
+            ? ($settings->premium_yearly_amount ?? 50000) * 100
+            : ($settings->premium_monthly_amount ?? 5000) * 100;
+        $currency = $settings->system_currency ?? 'NGN';
+        $planCode = $isYearly
+            ? $settings->paystack_yearly_plan_code
+            : $settings->paystack_monthly_plan_code;
+
+        // 1. Initialize transaction on Paystack server-side
+        $paystackResponse = Http::withToken($secretKey)
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $user->email,
+                'amount' => (int) $amount,
+                'currency' => $currency,
+                'plan' => $planCode,
+                'metadata' => [
+                    'user_id' => (string) $user->id,
+                    'plan_id' => $planId,
+                    'is_yearly' => $isYearly,
+                    'platform' => $this->resolvePlatform($request),
+                    'type' => 'subscription',
+                ],
+                'callback_url' => url('/payment/callback'),
+            ]);
+
+        if (!$paystackResponse->successful()) {
+            Log::error('Paystack initialize failed', [
+                'response' => $paystackResponse->body(),
+                'user_id' => $user->id,
+            ]);
+            return response()->json([
+                'message' => 'Failed to initialize payment',
+                'error' => $paystackResponse->json('message'),
+            ], 422);
+        }
+
+        $initData = $paystackResponse->json('data');
+        $reference = $initData['reference'];
+        $authorizationUrl = $initData['authorization_url'];
+
+        // 2. Create a pending subscription record so webhook can find it
+        $duration = $isYearly ? now()->addYear() : now()->addMonth();
+        Subscription::create([
+            'user_id' => $user->id,
+            'plan_id' => $planId,
+            'provider' => 'paystack',
+            'platform' => $this->resolvePlatform($request),
+            'provider_subscription_id' => $reference,
+            'amount' => $amount / 100,
+            'status' => 'pending',
+            'starts_at' => now(),
+            'expires_at' => $duration,
+        ]);
+
+        Log::info('Paystack payment initialized', [
+            'user_id' => $user->id,
+            'reference' => $reference,
+            'amount' => $amount / 100,
+            'plan_id' => $planId,
+        ]);
+
+        return response()->json([
+            'reference' => $reference,
+            'authorization_url' => $authorizationUrl,
+            'amount' => $amount / 100,
         ]);
     }
 
@@ -43,17 +142,15 @@ class SubscriptionController extends Controller
 
             $user = $request->user();
             $provider = $request->provider;
-            $settings = GlobalSetting::first();
 
             if ($provider === 'apple') {
-                return $this->verifyAppleSubscription($request, $user, $settings);
+                return $this->verifyAppleSubscription($request, $user);
             }
 
             if ($provider === 'paystack') {
-                return $this->verifyPaystackSubscription($request, $user, $settings);
+                return $this->verifyPaystackSubscription($request, $user);
             }
 
-            // Fallback for google if needed
             return response()->json(['message' => 'Provider not yet fully implemented'], 400);
 
         } catch (\Exception $e) {
@@ -65,12 +162,20 @@ class SubscriptionController extends Controller
         }
     }
 
-    protected function verifyAppleSubscription($request, $user, $settings)
+    protected function verifyAppleSubscription($request, $user)
     {
+        $settings = GlobalSetting::first();
         $sharedSecret = $settings->apple_shared_secret;
         $receiptData = $request->receipt_data;
+        $clientPlanId = $request->plan_id;
 
-        // Verify with Apple (Production first, then Sandbox if needed or vice versa)
+        // Resolve plan from product ID
+        $resolvedPlanId = $this->subscriptionService->resolveApplePlanId($clientPlanId);
+        if (!$resolvedPlanId) {
+            return response()->json(['message' => 'Invalid Apple product ID'], 422);
+        }
+
+        // Verify with Apple (Production first, then Sandbox fallback)
         $url = 'https://buy.itunes.apple.com/verifyReceipt';
         $response = Http::post($url, [
             'receipt-data' => $receiptData,
@@ -80,7 +185,6 @@ class SubscriptionController extends Controller
 
         $data = $response->json();
 
-        // If status is 21007, it's a sandbox receipt sent to production
         if (isset($data['status']) && $data['status'] == 21007) {
             $url = 'https://sandbox.itunes.apple.com/verifyReceipt';
             $response = Http::post($url, [
@@ -91,95 +195,179 @@ class SubscriptionController extends Controller
             $data = $response->json();
         }
 
-        if (isset($data['status']) && $data['status'] == 0) {
-            // Success
-            $latestReceipt = collect($data['latest_receipt_info'] ?? [])->sortByDesc('expires_date_ms')->first();
+        if (!isset($data['status']) || $data['status'] !== 0) {
+            return response()->json([
+                'message' => 'Invalid Apple receipt',
+                'apple_status' => $data['status'] ?? 'unknown',
+            ], 422);
+        }
 
-            if (!$latestReceipt) {
-                return response()->json(['message' => 'No active subscription found in receipt.'], 422);
-            }
+        $latestReceipt = collect($data['latest_receipt_info'] ?? [])
+            ->sortByDesc('expires_date_ms')
+            ->first();
 
-            // Check if it's actually active
-            $expiresAt = \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']);
-            if ($expiresAt->isPast()) {
-                return response()->json(['message' => 'Subscription found but it has expired.', 'expires_at' => $expiresAt], 422);
-            }
+        if (!$latestReceipt) {
+            return response()->json(['message' => 'No active subscription found in receipt.'], 422);
+        }
 
-            $user->subscriptions()->updateOrCreate(
-                ['provider_subscription_id' => $latestReceipt['transaction_id']],
-                [
-                    'plan_id' => $request->plan_id ?? $latestReceipt['product_id'],
-                    'provider' => 'apple',
-                    'platform' => 'ios',
-                    'status' => 'active',
-                    'starts_at' => now(),
-                    'expires_at' => $expiresAt,
+        $expiresAt = \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']);
+        if ($expiresAt->isPast()) {
+            return response()->json([
+                'message' => 'Subscription found but it has expired.',
+                'expires_at' => $expiresAt,
+            ], 422);
+        }
+
+        // Verify the Apple product ID matches what the client claims
+        $receiptProductId = $latestReceipt['product_id'];
+        if ($receiptProductId !== $clientPlanId) {
+            Log::warning('Apple product ID mismatch', [
+                'client_plan_id' => $clientPlanId,
+                'receipt_product_id' => $receiptProductId,
+            ]);
+            return response()->json(['message' => 'Product ID mismatch with receipt'], 422);
+        }
+
+        $transactionId = $latestReceipt['transaction_id'];
+        $originalTransactionId = $latestReceipt['original_transaction_id'];
+
+        // Prevent user from verifying another user's transaction
+        $existing = Subscription::where('provider_subscription_id', $transactionId)
+            ->orWhere('original_transaction_id', $originalTransactionId)
+            ->first();
+        if ($existing && $existing->user_id !== $user->id) {
+            Log::warning('Apple transaction belongs to another user', [
+                'transaction_id' => $transactionId,
+                'claiming_user' => $user->id,
+                'actual_user' => $existing->user_id,
+            ]);
+            return response()->json(['message' => 'Transaction does not belong to this user'], 403);
+        }
+
+        try {
+            $subscription = $this->subscriptionService->activatePremium(
+                user: $user,
+                provider: 'apple',
+                providerTransactionId: $transactionId,
+                originalTransactionId: $originalTransactionId,
+                planId: $resolvedPlanId,
+                expiresAt: $expiresAt,
+                amount: null,
+                platform: 'ios',
+                metadata: [
+                    'receipt_status' => $data['status'],
+                    'product_id' => $receiptProductId,
                 ]
             );
-
-            $user->is_premium = true;
-            $user->save();
 
             return response()->json([
                 'message' => 'Apple subscription verified successfully',
                 'is_premium' => true,
-                'expires_at' => $expiresAt,
+                'subscription_status' => 'active',
+                'subscription_provider' => 'apple',
+                'subscription_plan' => $resolvedPlanId,
+                'subscription_expires_at' => $subscription->expires_at->toIso8601String(),
             ]);
+        } catch (\Exception $e) {
+            Log::error('Apple subscription activation failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to activate subscription'], 500);
         }
-
-        return response()->json(['message' => 'Invalid Apple receipt', 'apple_status' => $data['status'] ?? 'unknown'], 422);
     }
 
-    protected function verifyPaystackSubscription($request, $user, $settings)
+    protected function verifyPaystackSubscription($request, $user)
     {
+        $settings = GlobalSetting::first();
         $secretKey = $settings->paystack_secret_key;
         $reference = $request->transaction_reference;
+
+        // Prevent user from verifying another user's transaction
+        $existing = Subscription::where('provider_subscription_id', $reference)->first();
+        if ($existing && $existing->user_id !== $user->id) {
+            Log::warning('Paystack reference belongs to another user', [
+                'reference' => $reference,
+                'claiming_user' => $user->id,
+                'actual_user' => $existing->user_id,
+            ]);
+            return response()->json(['message' => 'Transaction does not belong to this user'], 403);
+        }
 
         $response = Http::withToken($secretKey)
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
         $data = $response->json();
 
-        if ($response->successful() && isset($data['data']['status'])) {
-            $status = $data['data']['status'];
+        if (!$response->successful() || !isset($data['data']['status'])) {
+            return response()->json([
+                'message' => 'Paystack verification failed: ' . ($data['message'] ?? 'Unknown error'),
+            ], 422);
+        }
 
-            if ($status === 'success') {
-                // Determine duration from is_yearly flag (frontend no longer depends on Apple product IDs)
-                $isYearly = filter_var($request->is_yearly, FILTER_VALIDATE_BOOLEAN);
-                $duration = $isYearly ? now()->addYear() : now()->addMonth();
+        $status = $data['data']['status'];
+        $amount = $data['data']['amount'];
+        $currency = $data['data']['currency'];
 
-                $user->subscriptions()->updateOrCreate(
-                    ['provider_subscription_id' => $reference],
-                    [
-                        'plan_id' => $isYearly ? 'paystack_yearly' : 'paystack_monthly',
-                        'provider' => 'paystack',
-                        'platform' => 'android',
-                        'amount' => $data['data']['amount'] / 100, // Paystack is in kobo/cents
-                        'status' => 'active',
-                        'starts_at' => now(),
-                        'expires_at' => $duration,
-                    ]
-                );
-
-                $user->is_premium = true;
-                $user->save();
-
-                return response()->json([
-                    'message' => 'Paystack payment verified successfully',
-                    'is_premium' => true,
-                ]);
-            }
-
+        if ($status !== 'success') {
             if (in_array($status, ['pending', 'processing', 'ongoing'])) {
                 return response()->json([
                     'message' => 'Payment is still processing. Please wait a moment or check back later.',
                     'status' => $status,
                     'is_premium' => false,
-                ], 200); // Return 200 so the app can show the message gracefully
+                ], 200);
             }
+            return response()->json([
+                'message' => 'Payment status: ' . $status,
+                'is_premium' => false,
+            ], 422);
         }
 
-        return response()->json(['message' => 'Paystack verification failed: ' . ($data['data']['gateway_response'] ?? 'Unknown error')], 422);
+        // Determine plan
+        $isYearly = filter_var($request->is_yearly, FILTER_VALIDATE_BOOLEAN);
+        $planId = $isYearly ? 'paystack_yearly' : 'paystack_monthly';
+
+        // Verify amount against server-side plan configuration
+        if (!$this->subscriptionService->verifyPaystackAmount($planId, $amount, $currency)) {
+            Log::error('Paystack payment amount/currency mismatch', [
+                'reference' => $reference,
+                'user_id' => $user->id,
+                'amount_kobo' => $amount,
+                'currency' => $currency,
+                'plan_id' => $planId,
+            ]);
+            return response()->json([
+                'message' => 'Payment verification failed: amount or currency mismatch',
+            ], 422);
+        }
+
+        $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
+
+        try {
+            $subscription = $this->subscriptionService->activatePremium(
+                user: $user,
+                provider: 'paystack',
+                providerTransactionId: $reference,
+                originalTransactionId: null,
+                planId: $planId,
+                expiresAt: $expiresAt,
+                amount: $amount / 100,
+                platform: $this->resolvePlatform($request),
+                metadata: [
+                    'paystack_status' => $status,
+                    'channel' => $data['data']['channel'] ?? null,
+                ]
+            );
+
+            return response()->json([
+                'message' => 'Paystack payment verified successfully',
+                'is_premium' => true,
+                'subscription_status' => 'active',
+                'subscription_provider' => 'paystack',
+                'subscription_plan' => $planId,
+                'subscription_expires_at' => $subscription->expires_at->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Paystack subscription activation failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to activate subscription'], 500);
+        }
     }
 
     /**
@@ -188,17 +376,17 @@ class SubscriptionController extends Controller
     public function sync(Request $request)
     {
         $user = $request->user();
-        if (!$user)
+        if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
         $settings = GlobalSetting::first();
         $secretKey = $settings->paystack_secret_key;
 
-        // Fetch all transactions for this user/email from Paystack
         $response = Http::withToken($secretKey)
             ->get("https://api.paystack.co/transaction", [
                 'customer' => $user->email,
-                'status' => 'success'
+                'status' => 'success',
             ]);
 
         $data = $response->json();
@@ -208,44 +396,58 @@ class SubscriptionController extends Controller
 
             foreach ($data['data'] as $transaction) {
                 $metadata = $transaction['metadata'] ?? [];
+                $reference = $transaction['reference'];
 
-                // If it was a subscription payment (indicated by reference or custom metadata)
-                if (isset($metadata['plan_id']) || Str::startsWith($transaction['reference'], 'sub_')) {
-                    // Check if already in our DB
-                    $existing = Subscription::where('provider_subscription_id', $transaction['reference'])->first();
+                $existing = Subscription::where('provider_subscription_id', $reference)->first();
 
-                    if (!$existing) {
-                        $isYearly = ($metadata['plan_id'] ?? '') == $settings->premium_yearly_id;
-                        // For sync, we assume the transaction date as start
-                        $startsAt = \Carbon\Carbon::parse($transaction['paid_at']);
-                        $expiresAt = $isYearly ? $startsAt->copy()->addYear() : $startsAt->copy()->addMonth();
+                if (!$existing && (isset($metadata['plan_id']) || isset($metadata['type']))) {
+                    $isYearly = str_contains($metadata['plan_id'] ?? '', 'yearly');
+                    $startsAt = \Carbon\Carbon::parse($transaction['paid_at']);
+                    $expiresAt = $isYearly ? $startsAt->copy()->addYear() : $startsAt->copy()->addMonth();
 
-                        if ($expiresAt->isFuture()) {
-                            $user->subscriptions()->create([
-                                'plan_id' => $metadata['plan_id'] ?? 'premium',
-                                'provider' => 'paystack',
-                                'platform' => 'android',
-                                'provider_subscription_id' => $transaction['reference'],
-                                'amount' => $transaction['amount'] / 100,
-                                'status' => 'active',
-                                'starts_at' => $startsAt,
-                                'expires_at' => $expiresAt,
-                            ]);
-                            $foundSubscription = true;
-                        }
-                    } else if ($existing->status === 'active' && $existing->expires_at->isFuture()) {
+                    if ($expiresAt->isFuture()) {
+                        $this->subscriptionService->activatePremium(
+                            user: $user,
+                            provider: 'paystack',
+                            providerTransactionId: $reference,
+                            originalTransactionId: null,
+                            planId: $metadata['plan_id'] ?? 'premium',
+                            expiresAt: $expiresAt,
+                            amount: $transaction['amount'] / 100,
+                            platform: $metadata['platform'] ?? 'android',
+                        );
                         $foundSubscription = true;
+                    }
+                } elseif ($existing && $existing->status === 'active' && $existing->expires_at->isFuture()) {
+                    $foundSubscription = true;
+                    if (!$user->is_premium) {
+                        $user->update(['is_premium' => true]);
                     }
                 }
             }
 
             if ($foundSubscription) {
-                $user->is_premium = true;
-                $user->save();
-                return response()->json(['message' => 'Premium access restored.', 'is_premium' => true]);
+                return response()->json([
+                    'message' => 'Premium access restored.',
+                    'is_premium' => true,
+                    'subscription_status' => 'active',
+                ]);
             }
         }
 
         return response()->json(['message' => 'No active subscription found to restore.'], 404);
+    }
+
+    protected function resolvePlatform(Request $request): string
+    {
+        $userAgent = $request->userAgent() ?? '';
+        if (str_contains($userAgent, 'Android')) {
+            return 'android';
+        }
+        if (str_contains($userAgent, 'iOS') || str_contains($userAgent, 'iPhone') || str_contains($userAgent, 'iPad')) {
+            return 'ios';
+        }
+        // Check platform header or fallback
+        return $request->header('X-Platform', 'android');
     }
 }

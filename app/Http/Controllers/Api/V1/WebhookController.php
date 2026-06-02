@@ -8,14 +8,22 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Appointment;
 use App\Mail\UserAppointmentConfirmationMail;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class WebhookController extends Controller
 {
+    protected SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
-     * Apple Server-to-Server Notifications
+     * Apple Server-to-Server Notifications (App Store Server API v1 format)
      */
     public function apple(Request $request)
     {
@@ -33,38 +41,83 @@ class WebhookController extends Controller
             return response()->json(['message' => 'No receipt info'], 200);
         }
 
-        $transactionId = $latestReceipt['original_transaction_id'] ?? $latestReceipt['transaction_id'];
-        $subscription = Subscription::where('provider_subscription_id', $transactionId)
-            ->orWhere('provider_subscription_id', $latestReceipt['transaction_id'])
+        $originalTransactionId = $latestReceipt['original_transaction_id'] ?? null;
+        $transactionId = $latestReceipt['transaction_id'] ?? null;
+
+        if (!$originalTransactionId && !$transactionId) {
+            return response()->json(['message' => 'No transaction identifier'], 200);
+        }
+
+        // Find subscription by original_transaction_id or transaction_id
+        $subscription = Subscription::where('original_transaction_id', $originalTransactionId)
+            ->orWhere('provider_subscription_id', $transactionId)
+            ->orWhere('provider_subscription_id', $originalTransactionId)
             ->first();
 
         if (!$subscription) {
-            Log::warning("Subscription not found for Apple transaction: " . $transactionId);
+            Log::warning("Apple notification: subscription not found for transaction", [
+                'original_transaction_id' => $originalTransactionId,
+                'transaction_id' => $transactionId,
+            ]);
             return response()->json(['message' => 'Subscription not found'], 200);
         }
 
         $user = $subscription->user;
+        if (!$user) {
+            Log::error("Apple notification: user not found for subscription", [
+                'subscription_id' => $subscription->id,
+            ]);
+            return response()->json(['message' => 'OK'], 200);
+        }
 
         switch ($notificationType) {
             case 'DID_RENEW':
             case 'INTERACTIVE_RENEWAL':
             case 'SUBSCRIBED':
-                $subscription->update([
-                    'status' => 'active',
-                    'platform' => 'ios',
-                    'expires_at' => \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']),
-                ]);
-                $user->update(['is_premium' => true]);
+                $expiresAt = \Carbon\Carbon::createFromTimestampMs($latestReceipt['expires_date_ms']);
+                try {
+                    $this->subscriptionService->activatePremium(
+                        user: $user,
+                        provider: 'apple',
+                        providerTransactionId: $transactionId ?? $originalTransactionId,
+                        originalTransactionId: $originalTransactionId,
+                        planId: $subscription->plan_id,
+                        expiresAt: $expiresAt,
+                        platform: 'ios',
+                    );
+                } catch (\Exception $e) {
+                    Log::error("Apple notification: activation failed", [
+                        'error' => $e->getMessage(),
+                        'subscription_id' => $subscription->id,
+                    ]);
+                }
                 break;
 
             case 'CANCEL':
             case 'DID_FAIL_TO_RENEW':
             case 'EXPIRED':
-                $subscription->update(['status' => 'expired']);
-                // Check if user has other active subscriptions before downgrading
-                if (!$user->subscriptions()->where('status', 'active')->exists()) {
-                    $user->update(['is_premium' => false]);
+            case 'REVOKE':
+                try {
+                    $this->subscriptionService->deactivatePremium(
+                        user: $user,
+                        providerTransactionId: $originalTransactionId ?? $transactionId,
+                    );
+                } catch (\Exception $e) {
+                    Log::error("Apple notification: deactivation failed", [
+                        'error' => $e->getMessage(),
+                        'subscription_id' => $subscription->id,
+                    ]);
                 }
+                break;
+
+            case 'DID_CHANGE_RENEWAL_PREF':
+            case 'DID_CHANGE_RENEWAL_STATUS':
+                // User changed plan or turned off auto-renew - log it
+                Log::info("Apple subscription status changed", [
+                    'notification_type' => $notificationType,
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $user->id,
+                ]);
                 break;
         }
 
@@ -80,19 +133,19 @@ class WebhookController extends Controller
         $settings = GlobalSetting::first();
         $paystackSecret = $settings->paystack_secret_key;
 
+        if (!$paystackSecret) {
+            Log::error('Paystack Webhook: Missing Secret Key in Global Settings');
+            return response()->json(['message' => 'Internal configuration error'], 500);
+        }
+
         $signature = $request->header('x-paystack-signature');
         if (!$signature) {
             Log::error('Paystack Webhook: Missing signature header');
             return response()->json(['message' => 'Missing signature'], 400);
         }
 
-        if (!$paystackSecret) {
-            Log::error('Paystack Webhook: Missing Secret Key in Global Settings');
-            return response()->json(['message' => 'Internal configuration error'], 500);
-        }
-
         $computedSignature = hash_hmac('sha512', $request->getContent(), $paystackSecret);
-        if ($signature !== $computedSignature) {
+        if (!hash_equals($signature, $computedSignature)) {
             Log::error('Paystack Webhook: Invalid Signature');
             return response()->json(['message' => 'Invalid signature'], 400);
         }
@@ -100,7 +153,10 @@ class WebhookController extends Controller
         $event = $request->input('event');
         $data = $request->input('data');
 
-        Log::info("Paystack Webhook: {$event}", $data);
+        Log::info("Paystack Webhook: {$event}", [
+            'reference' => $data['reference'] ?? null,
+            'event' => $event,
+        ]);
 
         switch ($event) {
             case 'charge.success':
@@ -111,7 +167,7 @@ class WebhookController extends Controller
                 break;
             case 'subscription.create':
             case 'subscription.enable':
-                // Handled in verification or here
+                // Handled via charge.success verification
                 break;
             case 'subscription.disable':
                 $this->handlePaystackSubscriptionDisabled($data);
@@ -125,114 +181,279 @@ class WebhookController extends Controller
     {
         $reference = $data['reference'];
         $metadata = $data['metadata'] ?? [];
+        $amount = $data['amount'] ?? 0;
+        $currency = $data['currency'] ?? 'NGN';
 
         // 1. Handle Appointment Payment
         if (isset($metadata['type']) && $metadata['type'] === 'appointment') {
-            $appointmentId = $metadata['appointment_id'] ?? null;
-            $appointment = Appointment::find($appointmentId);
-
-            if ($appointment) {
-                // Verify amount (Naira to Kobo) and Currency
-                $paidAmount = $data['amount'] / 100;
-                $expectedAmount = (float)$appointment->amount;
-                $paidCurrency = $data['currency'] ?? 'NGN';
-
-                if ($paidAmount < $expectedAmount || $paidCurrency !== 'NGN') {
-                    Log::error("Payment mismatch for Appointment #{$appointment->id}: Expected {$expectedAmount} NGN, Got {$paidAmount} {$paidCurrency}");
-                    $appointment->update(['payment_status' => 'failed', 'notes' => 'Payment validation failed: Amount or Currency mismatch.']);
-                    return;
-                }
-
-                $appointment->update([
-                    'payment_status' => 'paid',
-                    'appointment_status' => 'confirmed',
-                    'payment_reference' => $reference,
-                ]);
-
-                // Send Confirmation Email to User
-                try {
-                    Mail::to($appointment->email)->send(new UserAppointmentConfirmationMail($appointment));
-                }
-                catch (\Exception $e) {
-                    Log::error('Failed to send user appointment confirmation: ' . $e->getMessage());
-                }
-
-                return;
-            }
+            $this->handleAppointmentPayment($data, $metadata, $reference);
+            return;
         }
 
         // 2. Handle Event Payment
         if (isset($metadata['type']) && $metadata['type'] === 'event') {
-            $eventId = $metadata['event_id'] ?? null;
-            $event = \App\Models\Event::find($eventId);
-
-            if ($event) {
-                // Check if registration already exists (e.g. from a failed attempt or double webhook)
-                $registration = $event->registrations()
-                    ->where(function ($q) use ($metadata) {
-                    if (isset($metadata['user_id'])) {
-                        $q->where('user_id', $metadata['user_id']);
-                    }
-                    else {
-                        $q->where('email', $metadata['email']);
-                    }
-                })->first();
-
-                if ($registration) {
-                    $registration->update([
-                        'payment_status' => 'completed',
-                        'payment_reference' => $reference,
-                        'amount' => $data['amount'] / 100,
-                        'payment_method' => $data['channel'],
-                        'status' => 'registered',
-                    ]);
-                }
-                else {
-                    $event->registrations()->create([
-                        'user_id' => $metadata['user_id'] ?? null,
-                        'full_name' => $metadata['full_name'] ?? null,
-                        'email' => $metadata['email'] ?? null,
-                        'phone' => $metadata['phone'] ?? null,
-                        'status' => 'registered',
-                        'payment_reference' => $reference,
-                        'amount' => $data['amount'] / 100,
-                        'payment_status' => 'completed',
-                        'payment_method' => $data['channel'],
-                    ]);
-                }
-
-                // TODO: Send Confirmation Email to User/Guest
-                return;
-            }
+            $this->handleEventPayment($data, $metadata, $reference);
+            return;
         }
 
-        // 3. Handle Subscription Payment (Default behavior)
+        // 3. Handle Subscription Payment
+        $this->handleSubscriptionPayment($data, $metadata, $reference, $amount, $currency);
+    }
+
+    protected function handleSubscriptionPayment($data, $metadata, string $reference, int $amount, string $currency)
+    {
+        // Try to find existing subscription by reference
         $subscription = Subscription::where('provider_subscription_id', $reference)->first();
 
-        if (!$subscription && isset($metadata['user_id']) && isset($metadata['plan_id'])) {
-            // Create subscription if it doesn't exist (e.g. from a transfer payment)
-            $user = User::find($metadata['user_id']);
-            if ($user) {
-                $settings = GlobalSetting::first();
-                $isYearly = $metadata['plan_id'] == $settings->premium_yearly_id;
-                $duration = $isYearly ? now()->addYear() : now()->addMonth();
+        if ($subscription) {
+            // Subscription record exists - verify and activate
+            $userId = $metadata['user_id'] ?? $subscription->user_id;
+            $user = User::find($userId);
 
-                $subscription = $user->subscriptions()->create([
-                    'plan_id' => $metadata['plan_id'],
-                    'provider' => 'paystack',
-                    'platform' => $metadata['platform'] ?? 'android',
-                    'provider_subscription_id' => $reference,
-                    'amount' => $data['amount'] / 100,
-                    'status' => 'active',
-                    'starts_at' => now(),
-                    'expires_at' => $duration,
+            if (!$user) {
+                Log::error('Paystack webhook: user not found', [
+                    'reference' => $reference,
+                    'user_id' => $userId,
                 ]);
+                return;
+            }
+
+            $planId = $metadata['plan_id'] ?? $subscription->plan_id;
+
+            // Verify amount against plan configuration
+            if (!$this->subscriptionService->verifyPaystackAmount($planId, $amount, $currency)) {
+                Log::warning('Paystack webhook: amount mismatch for subscription', [
+                    'reference' => $reference,
+                    'plan_id' => $planId,
+                    'amount_kobo' => $amount,
+                    'currency' => $currency,
+                ]);
+                // Still activate if user already has a pending record (amount might vary by region)
+                if ($subscription->status !== 'pending') {
+                    return;
+                }
+            }
+
+            $isYearly = str_contains($planId, 'yearly');
+            $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
+
+            // If subscription was pending (created by initialize endpoint), use its pre-set expiry
+            if ($subscription->status === 'pending' && $subscription->expires_at) {
+                $expiresAt = $subscription->expires_at;
+            }
+
+            try {
+                $this->subscriptionService->activatePremium(
+                    user: $user,
+                    provider: 'paystack',
+                    providerTransactionId: $reference,
+                    originalTransactionId: null,
+                    planId: $planId,
+                    expiresAt: $expiresAt,
+                    amount: $amount / 100,
+                    platform: $metadata['platform'] ?? 'android',
+                );
+                Log::info('Paystack webhook: subscription activated from existing record', [
+                    'reference' => $reference,
+                    'user_id' => $user->id,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Paystack webhook: activation failed', [
+                    'reference' => $reference,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            return;
+        }
+
+        // No existing subscription record - try to create from metadata
+        if (isset($metadata['user_id']) && isset($metadata['plan_id'])) {
+            $user = User::find($metadata['user_id']);
+            if (!$user) {
+                Log::error('Paystack webhook: user not found from metadata', [
+                    'reference' => $reference,
+                    'user_id' => $metadata['user_id'],
+                ]);
+                return;
+            }
+
+            $planId = $metadata['plan_id'];
+
+            if (!$this->subscriptionService->verifyPaystackAmount($planId, $amount, $currency)) {
+                Log::error('Paystack webhook: amount mismatch, rejecting', [
+                    'reference' => $reference,
+                    'plan_id' => $planId,
+                    'amount_kobo' => $amount,
+                ]);
+                return;
+            }
+
+            $isYearly = str_contains($planId, 'yearly');
+            $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
+
+            try {
+                $this->subscriptionService->activatePremium(
+                    user: $user,
+                    provider: 'paystack',
+                    providerTransactionId: $reference,
+                    originalTransactionId: null,
+                    planId: $planId,
+                    expiresAt: $expiresAt,
+                    amount: $amount / 100,
+                    platform: $metadata['platform'] ?? 'android',
+                );
+                Log::info('Paystack webhook: subscription created from metadata', [
+                    'reference' => $reference,
+                    'user_id' => $user->id,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Paystack webhook: activation failed', [
+                    'reference' => $reference,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            return;
+        }
+
+        // No metadata at all - try to find user by email from Paystack data
+        $customerEmail = $data['customer']['email'] ?? null;
+        if ($customerEmail) {
+            $user = User::where('email', $customerEmail)->first();
+            if ($user) {
+                // Determine plan from amount or default
+                $settings = GlobalSetting::first();
+                $monthlyAmount = ($settings->premium_monthly_amount ?? 5000) * 100;
+                $yearlyAmount = ($settings->premium_yearly_amount ?? 50000) * 100;
+
+                $isYearly = abs($amount - $yearlyAmount) < abs($amount - $monthlyAmount);
+                $planId = $isYearly ? 'paystack_yearly' : 'paystack_monthly';
+                $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
+
+                if ($this->subscriptionService->verifyPaystackAmount($planId, $amount, $currency)) {
+                    try {
+                        $this->subscriptionService->activatePremium(
+                            user: $user,
+                            provider: 'paystack',
+                            providerTransactionId: $reference,
+                            originalTransactionId: null,
+                            planId: $planId,
+                            expiresAt: $expiresAt,
+                            amount: $amount / 100,
+                            platform: 'android',
+                        );
+                        Log::info('Paystack webhook: subscription created from email lookup', [
+                            'reference' => $reference,
+                            'user_id' => $user->id,
+                            'email' => $customerEmail,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Paystack webhook: activation failed via email', [
+                            'reference' => $reference,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                    return;
+                }
             }
         }
 
-        if ($subscription) {
-            $subscription->update(['status' => 'active']);
-            $subscription->user->update(['is_premium' => true]);
+        Log::warning('Paystack webhook: could not process subscription payment', [
+            'reference' => $reference,
+            'has_metadata' => !empty($metadata),
+            'has_customer_email' => isset($customerEmail),
+        ]);
+    }
+
+    protected function handleAppointmentPayment($data, $metadata, string $reference)
+    {
+        $appointmentId = $metadata['appointment_id'] ?? null;
+        $appointment = Appointment::find($appointmentId);
+
+        if (!$appointment) {
+            Log::warning('Paystack webhook: appointment not found', [
+                'appointment_id' => $appointmentId,
+            ]);
+            return;
+        }
+
+        $paidAmount = $data['amount'] / 100;
+        $expectedAmount = (float) $appointment->amount;
+        $paidCurrency = $data['currency'] ?? 'NGN';
+
+        if ($paidAmount < $expectedAmount || $paidCurrency !== 'NGN') {
+            Log::error("Payment mismatch for Appointment #{$appointment->id}: Expected {$expectedAmount} NGN, Got {$paidAmount} {$paidCurrency}");
+            $appointment->update([
+                'payment_status' => 'failed',
+                'notes' => 'Payment validation failed: Amount or Currency mismatch.',
+            ]);
+            return;
+        }
+
+        $appointment->update([
+            'payment_status' => 'paid',
+            'appointment_status' => 'confirmed',
+            'payment_reference' => $reference,
+        ]);
+
+        try {
+            Mail::to($appointment->email)->send(new UserAppointmentConfirmationMail($appointment));
+        } catch (\Exception $e) {
+            Log::error('Failed to send user appointment confirmation: ' . $e->getMessage());
+        }
+    }
+
+    protected function handleEventPayment($data, $metadata, string $reference)
+    {
+        $eventId = $metadata['event_id'] ?? null;
+        $event = \App\Models\Event::find($eventId);
+
+        if (!$event) {
+            Log::warning('Paystack webhook: event not found', [
+                'event_id' => $eventId,
+            ]);
+            return;
+        }
+
+        $registration = $event->registrations()
+            ->where(function ($q) use ($metadata) {
+                if (isset($metadata['user_id'])) {
+                    $q->where('user_id', $metadata['user_id']);
+                } else {
+                    $q->where('email', $metadata['email']);
+                }
+            })->first();
+
+        if ($registration) {
+            $registration->update([
+                'payment_status' => 'completed',
+                'payment_reference' => $reference,
+                'amount' => $data['amount'] / 100,
+                'payment_method' => $data['channel'],
+                'status' => 'registered',
+            ]);
+        } else {
+            // Verify amount before creating
+            $paidAmount = $data['amount'] / 100;
+            $expectedAmount = (float) ($event->price ?? 0);
+            if ($paidAmount < $expectedAmount) {
+                Log::warning('Paystack webhook: event payment amount mismatch', [
+                    'paid' => $paidAmount,
+                    'expected' => $expectedAmount,
+                ]);
+                return;
+            }
+
+            $event->registrations()->create([
+                'user_id' => $metadata['user_id'] ?? null,
+                'full_name' => $metadata['full_name'] ?? null,
+                'email' => $metadata['email'] ?? null,
+                'phone' => $metadata['phone'] ?? null,
+                'status' => 'registered',
+                'payment_reference' => $reference,
+                'amount' => $data['amount'] / 100,
+                'payment_status' => 'completed',
+                'payment_method' => $data['channel'],
+            ]);
         }
     }
 
@@ -242,43 +463,49 @@ class WebhookController extends Controller
         $metadata = $data['metadata'] ?? [];
         $gatewayResponse = $data['gateway_response'] ?? 'Payment failed';
 
-        // 1. Handle Appointment Payment
+        // Mark any pending subscription as failed
+        $subscription = Subscription::where('provider_subscription_id', $reference)
+            ->where('status', 'pending')
+            ->first();
+        if ($subscription) {
+            $subscription->update(['status' => 'failed']);
+            Log::info('Paystack webhook: subscription marked as failed', [
+                'reference' => $reference,
+            ]);
+        }
+
+        // Handle appointment payment
         if (isset($metadata['type']) && $metadata['type'] === 'appointment') {
             $appointmentId = $metadata['appointment_id'] ?? null;
             $appointment = Appointment::find($appointmentId);
-
             if ($appointment) {
                 $appointment->update([
                     'payment_status' => 'failed',
-                    'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}"
+                    'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}",
                 ]);
-                return;
             }
+            return;
         }
 
-        // 2. Handle Event Payment
+        // Handle event payment
         if (isset($metadata['type']) && $metadata['type'] === 'event') {
             $eventId = $metadata['event_id'] ?? null;
             $event = \App\Models\Event::find($eventId);
-
             if ($event) {
                 $registration = $event->registrations()
                     ->where(function ($q) use ($metadata) {
-                    if (isset($metadata['user_id'])) {
-                        $q->where('user_id', $metadata['user_id']);
-                    }
-                    else {
-                        $q->where('email', $metadata['email']);
-                    }
-                })->first();
-
+                        if (isset($metadata['user_id'])) {
+                            $q->where('user_id', $metadata['user_id']);
+                        } else {
+                            $q->where('email', $metadata['email']);
+                        }
+                    })->first();
                 if ($registration) {
                     $registration->update([
                         'payment_status' => 'failed',
-                        'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}"
+                        'notes' => "Paystack Payment Failed: {$gatewayResponse}. Reference: {$reference}",
                     ]);
                 }
-                return;
             }
         }
     }
@@ -291,9 +518,13 @@ class WebhookController extends Controller
         if ($subscription) {
             $subscription->update(['status' => 'expired']);
             $user = $subscription->user;
-            if (!$user->subscriptions()->where('status', 'active')->exists()) {
+            if ($user && !$user->subscriptions()->where('status', 'active')->exists()) {
                 $user->update(['is_premium' => false]);
             }
+            Log::info('Paystack webhook: subscription disabled', [
+                'subscription_code' => $subscriptionCode,
+                'user_id' => $subscription->user_id,
+            ]);
         }
     }
 }

@@ -12,11 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('newsletters', function (Blueprint $table) {
-            $table->longText('content')->after('subject');
-            $table->string('recipients_type')->default('all')->after('content');
-            $table->string('status')->default('draft')->after('recipients_type');
-            $table->timestamp('sent_at')->nullable()->after('status');
-            $table->integer('batch_delay')->default(1)->after('sent_at'); // seconds to wait between batches of 100
+            if (!Schema::hasColumn('newsletters', 'content')) {
+                $table->longText('content')->after('subject');
+            }
+            if (!Schema::hasColumn('newsletters', 'recipients_type')) {
+                $table->string('recipients_type')->default('all')->after('content');
+            }
+            if (!Schema::hasColumn('newsletters', 'status')) {
+                $table->string('status')->default('draft')->after('recipients_type');
+            }
+            if (!Schema::hasColumn('newsletters', 'sent_at')) {
+                $table->timestamp('sent_at')->nullable()->after('status');
+            }
+            if (!Schema::hasColumn('newsletters', 'batch_delay')) {
+                $table->integer('batch_delay')->default(1)->after('sent_at');
+            }
         });
     }
 

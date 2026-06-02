@@ -24,8 +24,10 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->index('tradition_id');
-            // Full-text index for search
-            $table->fullText(['title', 'description', 'author']);
+            // Full-text index for search (MySQL only)
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->fullText(['title', 'description', 'author']);
+            }
         });
     }
 

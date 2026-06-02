@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
 
     // Legal Documents (Public - required on auth/login screens)
     Route::get('/legal-documents', [\App\Http\Controllers\Api\V1\SettingsController::class, 'legalDocuments']);
+    Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
 
     // Appointment Tracking & Guest Submission (Public)
     Route::get('/appointments/track/{code}', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'show']);
@@ -35,7 +36,6 @@ Route::prefix('v1')->group(function () {
     // Protected Routes (Sanctum) - ALL app content requires authentication
     Route::middleware('auth:sanctum')->group(function () {
         // App Settings (Protected)
-        Route::get('/settings', [\App\Http\Controllers\Api\V1\SettingsController::class, 'index']);
         Route::get('/payment-keys', [\App\Http\Controllers\Api\V1\SettingsController::class, 'paymentKeys']);
 
         // Traditions endpoints
@@ -158,6 +158,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
         Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
         Route::post('/subscription/sync', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'sync']);
+        Route::post('/subscription/initialize', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'initializePaystack']);
 
         // Reminders
         Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);

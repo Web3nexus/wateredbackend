@@ -23,8 +23,10 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->index('tradition_id');
-            // Full-text index for search
-            $table->fullText(['title', 'description']);
+            // Full-text index for search (MySQL only - SQLite/PgSQL don't support fullText in Blueprint)
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->fullText(['title', 'description']);
+            }
         });
     }
 
