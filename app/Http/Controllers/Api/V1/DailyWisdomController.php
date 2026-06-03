@@ -9,94 +9,76 @@ class DailyWisdomController extends Controller
 {
     public function index()
     {
+        $default = [
+            'data' => [
+                'id' => 0,
+                'quote' => 'The God of Seas and Voices guides those who acknowledge the current of divine will.',
+                'author' => 'Nima Sedani',
+                'background_image_url' => 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80',
+                'active_date' => now()->toDateString(),
+                'is_active' => true,
+                'publish_date' => now()->toDateString(),
+            ]
+        ];
+
         try {
-            // Priority: Explicitly fetch from TextCollection ID 1 (Nima Sedani as per user)
             $collection = \App\Models\TextCollection::find(1);
 
-            // Fallback: If ID 1 is missing, search by name
             if (!$collection) {
                 $collection = \App\Models\TextCollection::where('name', 'LIKE', '%Nima Sedani%')
                     ->orWhere('name', 'LIKE', '%ni maseani%')
                     ->first();
             }
 
-            if ($collection) {
-                // Get all active entries for this collection through its chapters
-                $query = \App\Models\Entry::where('entries.is_active', true)
-                    ->join('chapters', 'entries.chapter_id', '=', 'chapters.id')
-                    ->where('chapters.collection_id', $collection->id)
-                    ->where('chapters.is_active', true)
-                    ->select('entries.*');
-
-                $totalEntries = $query->count();
-
-                if ($totalEntries > 0) {
-                    // Use date as seed for randomization to ensure 24h consistency
-                    $seed = (int) date('Ymd');
-                    $entry = $query->with(['chapter'])
-                        ->orderByRaw("RAND($seed)")
-                        ->first();
-
-                    if ($entry) {
-                        // Background image logic
-                        $backgroundImage = $collection->background_image_url;
-
-                        // If collection doesn't have one, try its tradition
-                        if (!$backgroundImage && $collection->tradition_id) {
-                            $tradition = \App\Models\Tradition::find($collection->tradition_id);
-                            $backgroundImage = $tradition?->deity_image_url;
-                        }
-
-                        if (!$backgroundImage) {
-                            $backgroundImage = 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80';
-                        }
-
-                        // Format the entry as daily wisdom
-                        return response()->json([
-                            'data' => [
-                                'id' => $entry->id,
-                                'quote' => strip_tags($entry->text),
-                                'author' => 'Nima Sedani',
-                                'chapter_number' => $entry->chapter?->order ?? 1,
-                                'verse_number' => $entry->order ?? 1,
-                                'background_image_url' => $backgroundImage,
-                                'active_date' => now()->toDateString(),
-                                'publish_date' => now()->toDateString(),
-                                'is_active' => true,
-                                'citation' => "Chapter " . ($entry->chapter?->order ?? 1) . ":" . ($entry->order ?? 1),
-                            ]
-                        ]);
-                    }
-                }
+            if (!$collection) {
+                return response()->json($default);
             }
 
-            // Ultimate fallback if no Nima Sedani entries are found
-            return response()->json([
-                'data' => [
-                    'id' => 0,
-                    'quote' => 'The God of Seas and Voices guides those who acknowledge the current of divine will.',
-                    'author' => 'Nima Sedani',
-                    'background_image_url' => 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80',
-                    'active_date' => now()->toDateString(),
-                    'is_active' => true,
-                    'publish_date' => now()->toDateString(),
-                ]
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Daily Wisdom Error: ' . $e->getMessage());
+            $entry = \App\Models\Entry::where('entries.is_active', true)
+                ->join('chapters', 'entries.chapter_id', '=', 'chapters.id')
+                ->where('chapters.collection_id', $collection->id)
+                ->where('chapters.is_active', true)
+                ->select('entries.*')
+                ->with('chapter')
+                ->inRandomOrder()
+                ->first();
 
-            // Ultimate fallback
+            if (!$entry) {
+                return response()->json($default);
+            }
+
+            $chapterOrder = $entry->chapter?->order ?? 1;
+            $entryOrder = $entry->order ?? 1;
+
+            $backgroundImage = $collection->background_image_url;
+            if (!$backgroundImage && $collection->tradition_id) {
+                $tradition = \App\Models\Tradition::find($collection->tradition_id);
+                $backgroundImage = $tradition?->deity_image_url;
+            }
+            if (!$backgroundImage) {
+                $backgroundImage = $default['data']['background_image_url'];
+            }
+
             return response()->json([
                 'data' => [
-                    'id' => 0,
-                    'quote' => 'The God of Seas and Voices guides those who acknowledge the current of divine will.',
+                    'id' => $entry->id,
+                    'quote' => strip_tags((string) $entry->text),
                     'author' => 'Nima Sedani',
-                    'background_image_url' => 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80',
+                    'chapter_number' => $chapterOrder,
+                    'verse_number' => $entryOrder,
+                    'background_image_url' => $backgroundImage,
                     'active_date' => now()->toDateString(),
-                    'is_active' => true,
                     'publish_date' => now()->toDateString(),
+                    'is_active' => true,
+                    'citation' => "Chapter {$chapterOrder}:{$entryOrder}",
                 ]
             ]);
+        } catch (\Throwable $e) {
+            \Log::error('Daily Wisdom Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return response()->json($default);
         }
     }
 }
