@@ -185,6 +185,12 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        // 1b. Auto-expire any subscriptions still marked 'active' but past expires_at
+        $this->subscriptions()
+            ->where('status', 'active')
+            ->where('expires_at', '<=', now())
+            ->update(['status' => 'expired']);
+
         // 2. No active subscription but is_premium flag is true (admin override)
         // Check if there's subscription history - if yes, it's likely stale
         // If no history at all, it's an admin grant
