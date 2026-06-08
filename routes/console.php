@@ -11,5 +11,5 @@ Artisan::command('inspire', function () {
 // Send Ritual Reminders every minute
 Schedule::command('rituals:send-reminders')->everyMinute();
 
-// Expire subscriptions past their end date (runs every 5 minutes on the hour window)
-Schedule::command('subscriptions:expire')->everyFiveMinutes();
+// Expire subscriptions past their end date (runs every 5 minutes)
+Schedule::command('subscriptions:expire')->everyFiveMinutes()->withoutOverlapping();

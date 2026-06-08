@@ -25,11 +25,11 @@ class SubscriptionController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $user->hasActivePremium();
+        $isPremium = $user->hasActivePremium();
         $subscription = $user->subscription;
 
         return response()->json([
-            'is_premium' => $user->is_premium,
+            'is_premium' => $isPremium,
             'subscription_status' => $subscription?->status ?? 'none',
             'subscription_provider' => $subscription?->provider,
             'subscription_plan' => $subscription?->plan_id,
@@ -98,7 +98,12 @@ class SubscriptionController extends Controller
         $reference = $initData['reference'];
         $authorizationUrl = $initData['authorization_url'];
 
-        // 2. Create a pending subscription record so webhook can find it
+        // 2. Cancel any stale pending records for this user+plan, then create new one
+        Subscription::where('user_id', $user->id)
+            ->where('plan_id', $planId)
+            ->where('status', 'pending')
+            ->update(['status' => 'cancelled']);
+
         $duration = $isYearly ? now()->addYear() : now()->addMonth();
         Subscription::create([
             'user_id' => $user->id,
@@ -257,7 +262,9 @@ class SubscriptionController extends Controller
                 metadata: [
                     'receipt_status' => $data['status'],
                     'product_id' => $receiptProductId,
-                ]
+                ],
+                deviceType: $request->device_type,
+                osVersion: $request->os_version,
             );
 
             return response()->json([
@@ -353,7 +360,9 @@ class SubscriptionController extends Controller
                 metadata: [
                     'paystack_status' => $status,
                     'channel' => $data['data']['channel'] ?? null,
-                ]
+                ],
+                deviceType: $request->device_type,
+                osVersion: $request->os_version,
             );
 
             return response()->json([
@@ -404,8 +413,14 @@ class SubscriptionController extends Controller
                     $isYearly = str_contains($metadata['plan_id'] ?? '', 'yearly');
                     $startsAt = \Carbon\Carbon::parse($transaction['paid_at']);
                     $expiresAt = $isYearly ? $startsAt->copy()->addYear() : $startsAt->copy()->addMonth();
+                    $amount = ($transaction['amount'] ?? 0) / 100;
+                    $paidStatus = $transaction['status'] ?? '';
 
-                    if ($expiresAt->isFuture()) {
+                    if ($paidStatus !== 'success') {
+                        continue;
+                    }
+
+                    if ($expiresAt->isFuture() && $amount > 0) {
                         $this->subscriptionService->activatePremium(
                             user: $user,
                             provider: 'paystack',
@@ -413,7 +428,7 @@ class SubscriptionController extends Controller
                             originalTransactionId: null,
                             planId: $metadata['plan_id'] ?? 'premium',
                             expiresAt: $expiresAt,
-                            amount: $transaction['amount'] / 100,
+                            amount: $amount,
                             platform: $metadata['platform'] ?? 'android',
                         );
                         $foundSubscription = true;

@@ -15,6 +15,8 @@ class Subscription extends Model
         'plan_id',
         'provider',
         'platform',
+        'device_type',
+        'os_version',
         'provider_subscription_id',
         'original_transaction_id',
         'amount',

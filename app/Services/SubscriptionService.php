@@ -35,14 +35,16 @@ class SubscriptionService
         \DateTime $expiresAt,
         ?float $amount = null,
         ?string $platform = null,
-        array $metadata = []
+        array $metadata = [],
+        ?string $deviceType = null,
+        ?string $osVersion = null,
     ): Subscription {
         return DB::transaction(function () use (
             $user, $provider, $providerTransactionId, $originalTransactionId,
-            $planId, $expiresAt, $amount, $platform, $metadata
+            $planId, $expiresAt, $amount, $platform, $metadata, $deviceType, $osVersion
         ) {
             // 1. Check if already processed (idempotency)
-            $existing = $this->findExisting($provider, $providerTransactionId, $originalTransactionId);
+            $existing = $this->findExisting($provider, $providerTransactionId, $originalTransactionId, $user->id);
             if ($existing && $existing->status === 'active') {
                 Log::info("SubscriptionService: Duplicate event suppressed", [
                     'provider' => $provider,
@@ -93,6 +95,8 @@ class SubscriptionService
                 'plan_id' => $planId,
                 'provider' => $provider,
                 'platform' => $platform ?? $this->resolvePlatform($provider),
+                'device_type' => $deviceType,
+                'os_version' => $osVersion,
                 'provider_subscription_id' => $providerTransactionId,
                 'original_transaction_id' => $originalTransactionId,
                 'amount' => $amount ?? 0,
@@ -210,22 +214,25 @@ class SubscriptionService
             return 'apple_yearly';
         }
 
-        // Fallback: accept the product ID directly if it matches known patterns
-        Log::warning("Unknown Apple product ID, accepting as-is", [
+        Log::warning("Unknown Apple product ID, rejecting", [
             'product_id' => $productId,
         ]);
-        return $productId;
+        return null;
     }
 
     /**
      * Find existing subscription by provider transaction IDs.
      */
-    protected function findExisting(string $provider, string $transactionId, ?string $originalTransactionId): ?Subscription
+    protected function findExisting(string $provider, string $transactionId, ?string $originalTransactionId, ?int $userId = null): ?Subscription
     {
         $query = Subscription::where('provider_subscription_id', $transactionId);
 
         if ($originalTransactionId) {
             $query->orWhere('original_transaction_id', $originalTransactionId);
+        }
+
+        if ($userId) {
+            $query->where('user_id', $userId);
         }
 
         return $query->first();

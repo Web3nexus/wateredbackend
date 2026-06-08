@@ -173,40 +173,44 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasActivePremium(): bool
     {
-        // 1. Check for active subscription record
-        $activeSub = $this->subscription;
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            // Refresh user model inside transaction to avoid stale is_premium
+            $this->refresh();
 
-        if ($activeSub !== null) {
-            // Active subscription found — ensure flag is synced
-            if (!$this->is_premium) {
-                $this->is_premium = true;
-                $this->save();
-            }
-            return true;
-        }
+            // 1. Check for active subscription record
+            $activeSub = $this->subscriptions()
+                ->where('status', 'active')
+                ->where('expires_at', '>', now())
+                ->latest('id')
+                ->first();
 
-        // 1b. Auto-expire any subscriptions still marked 'active' but past expires_at
-        $this->subscriptions()
-            ->where('status', 'active')
-            ->where('expires_at', '<=', now())
-            ->update(['status' => 'expired']);
-
-        // 2. No active subscription but is_premium flag is true (admin override)
-        // Check if there's subscription history - if yes, it's likely stale
-        // If no history at all, it's an admin grant
-        if ($this->is_premium) {
-            $hasHistory = $this->subscriptions()->exists();
-            if (!$hasHistory) {
+            if ($activeSub !== null) {
+                if (!$this->is_premium) {
+                    $this->is_premium = true;
+                    $this->save();
+                }
                 return true;
             }
-            // Has history but no active sub - auto-correct stale flag
-            $this->is_premium = false;
-            $this->save();
-            return false;
-        }
 
-        // 3. Not premium
-        return false;
+            // 1b. Auto-expire any subscriptions still marked 'active' but past expires_at
+            $this->subscriptions()
+                ->where('status', 'active')
+                ->where('expires_at', '<=', now())
+                ->update(['status' => 'expired']);
+
+            // 2. No active subscription but is_premium flag is true (admin override)
+            if ($this->is_premium) {
+                $hasHistory = $this->subscriptions()->exists();
+                if (!$hasHistory) {
+                    return true;
+                }
+                $this->is_premium = false;
+                $this->save();
+                return false;
+            }
+
+            return false;
+        });
     }
 
     public function reminders(): \Illuminate\Database\Eloquent\Relations\HasMany

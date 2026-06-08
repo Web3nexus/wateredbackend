@@ -95,6 +95,15 @@ class WebhookController extends Controller
 
             case 'CANCEL':
             case 'DID_FAIL_TO_RENEW':
+                // User cancelled or billing issue — still has access until period end
+                Log::info("Apple notification: subscription will expire at period end", [
+                    'notification_type' => $notificationType,
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $user->id,
+                    'expires_at' => $latestReceipt['expires_date_ms'] ?? 'unknown',
+                ]);
+                break;
+
             case 'EXPIRED':
             case 'REVOKE':
                 try {
@@ -243,7 +252,7 @@ class WebhookController extends Controller
             }
 
             try {
-                $this->subscriptionService->activatePremium(
+                $sub = $this->subscriptionService->activatePremium(
                     user: $user,
                     provider: 'paystack',
                     providerTransactionId: $reference,
@@ -253,6 +262,11 @@ class WebhookController extends Controller
                     amount: $amount / 100,
                     platform: $metadata['platform'] ?? 'android',
                 );
+                if ($sub && !empty($data['subscription_code'])) {
+                    $sub->update(['raw_provider_event' => json_encode([
+                        'subscription_code' => $data['subscription_code'],
+                    ])]);
+                }
                 Log::info('Paystack webhook: subscription activated from existing record', [
                     'reference' => $reference,
                     'user_id' => $user->id,
@@ -292,7 +306,7 @@ class WebhookController extends Controller
             $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
 
             try {
-                $this->subscriptionService->activatePremium(
+                $sub = $this->subscriptionService->activatePremium(
                     user: $user,
                     provider: 'paystack',
                     providerTransactionId: $reference,
@@ -302,6 +316,11 @@ class WebhookController extends Controller
                     amount: $amount / 100,
                     platform: $metadata['platform'] ?? 'android',
                 );
+                if ($sub && !empty($data['subscription_code'])) {
+                    $sub->update(['raw_provider_event' => json_encode([
+                        'subscription_code' => $data['subscription_code'],
+                    ])]);
+                }
                 Log::info('Paystack webhook: subscription created from metadata', [
                     'reference' => $reference,
                     'user_id' => $user->id,
@@ -513,7 +532,11 @@ class WebhookController extends Controller
     protected function handlePaystackSubscriptionDisabled($data)
     {
         $subscriptionCode = $data['subscription_code'];
-        $subscription = Subscription::where('provider_subscription_id', $subscriptionCode)->first();
+
+        // Search in provider_subscription_id, or raw_provider_event (JSON-stored subscription_code)
+        $subscription = Subscription::where('provider_subscription_id', $subscriptionCode)
+            ->orWhere('raw_provider_event', 'LIKE', '%' . $subscriptionCode . '%')
+            ->first();
 
         if ($subscription) {
             $subscription->update(['status' => 'expired']);
@@ -524,6 +547,10 @@ class WebhookController extends Controller
             Log::info('Paystack webhook: subscription disabled', [
                 'subscription_code' => $subscriptionCode,
                 'user_id' => $subscription->user_id,
+            ]);
+        } else {
+            Log::warning('Paystack webhook: subscription not found for disable', [
+                'subscription_code' => $subscriptionCode,
             ]);
         }
     }
