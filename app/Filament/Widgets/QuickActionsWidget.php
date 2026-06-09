@@ -16,6 +16,16 @@ class QuickActionsWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
+    public static function canView(): bool
+    {
+        $user = auth('admin')->user();
+        if (!$user) return false;
+        return $user->hasPermissionTo('access_library', 'admin')
+            || $user->hasPermissionTo('access_audio', 'admin')
+            || $user->hasPermissionTo('access_rituals', 'admin')
+            || $user->hasPermissionTo('access_events', 'admin');
+    }
+
     public function getActions(): array
     {
         return [

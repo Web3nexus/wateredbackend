@@ -7,6 +7,10 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class SubscriptionStatsWidget extends StatsOverviewWidget
 {
+    public static function canView(): bool
+    {
+        return auth('admin')->user()?->hasPermissionTo('access_financials', 'admin') ?? false;
+    }
     protected function getStats(): array
     {
         $settings = \App\Models\GlobalSetting::first();

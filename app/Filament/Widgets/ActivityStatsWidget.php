@@ -11,6 +11,11 @@ class ActivityStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 10;
 
+    public static function canView(): bool
+    {
+        return auth('admin')->user()?->hasPermissionTo('access_users', 'admin') ?? false;
+    }
+
     protected function getStats(): array
     {
         $totalSeconds = UserActivity::sum('duration_seconds');

@@ -15,7 +15,7 @@ class SubscriptionRevenueChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return !request()->routeIs('filament.securegate.pages.dashboard');
+        return auth('admin')->user()?->hasPermissionTo('access_financials', 'admin') ?? false;
     }
 
     protected function getData(): array

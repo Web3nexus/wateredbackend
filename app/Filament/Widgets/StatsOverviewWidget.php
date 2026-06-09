@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Schema;
 
 class StatsOverviewWidget extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        $user = auth('admin')->user();
+        return $user?->hasPermissionTo('access_users', 'admin')
+            || $user?->hasPermissionTo('access_financials', 'admin');
+    }
+
     protected function getStats(): array
     {
         // Get Currency Symbol

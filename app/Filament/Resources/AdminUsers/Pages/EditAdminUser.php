@@ -23,7 +23,19 @@ class EditAdminUser extends EditRecord
     {
         parent::mount($record);
 
-        if ($this->record->isDeveloper() && !auth('admin')->user()->isDeveloper()) {
+        $user = auth('admin')->user();
+
+        if ($this->record->is($user)) {
+            Notification::make()
+                ->title('Access Denied')
+                ->body('You cannot edit your own account.')
+                ->danger()
+                ->send();
+
+            $this->redirect(AdminUserResource::getUrl('index'));
+        }
+
+        if ($this->record->isDeveloper() && !$user->isDeveloper()) {
             Notification::make()
                 ->title('Access Denied')
                 ->body('Developer accounts can only be edited by another Developer.')

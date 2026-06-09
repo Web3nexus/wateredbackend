@@ -15,7 +15,8 @@ class AppointmentRevenueChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return !request()->routeIs('filament.securegate.pages.dashboard');
+        return auth('admin')->user()?->hasPermissionTo('access_financials', 'admin')
+            && auth('admin')->user()?->hasPermissionTo('access_appointments', 'admin');
     }
 
     protected function getData(): array

@@ -4,10 +4,8 @@ namespace App\Filament\Resources\AdminUsers\Schemas;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Schemas\Components\Grid;
-use Filament\Forms\Components\Tabs;
 
 class AdminUserForm
 {
@@ -28,17 +26,6 @@ class AdminUserForm
                     ->password()
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(string $context): bool => $context === 'create'),
-
-                Section::make('Role')
-                    ->description('Assign a role to this staff member. Roles grant preset permission sets.')
-                    ->schema([
-                        Select::make('role')
-                            ->label('Admin Role')
-                            ->relationship('roles', 'name', fn($query) => $query->where('name', '!=', 'Developer'))
-                            ->multiple()
-                            ->preload()
-                            ->native(false),
-                    ]),
 
                 Section::make('Feature Access by Sidebar Group')
                     ->description('Select which sidebar groups and modules this staff member can access.')

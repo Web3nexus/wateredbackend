@@ -19,8 +19,14 @@ class SettingsController extends Controller
         $isNigeria = true;
 
         if ($settings) {
+            // Only read cached GeoIP; never block on the external API call.
             $ip = request()->ip();
-            $isNigeria = $this->checkIfNigeria($ip);
+            $cached = Cache::get('geoip_' . $ip);
+            if ($cached !== null) {
+                $isNigeria = (bool) $cached;
+            }
+            // Cache miss → default to Nigeria; the cache will warm on a later
+            // request via a separate lightweight endpoint or CLI command.
 
             if (!$isNigeria) {
                 // If the user is outside Nigeria, use USD fields if they are set
