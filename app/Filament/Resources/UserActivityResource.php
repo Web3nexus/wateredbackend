@@ -18,9 +18,17 @@ use Filament\Actions\DeleteBulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 use BackedEnum;
+use App\Traits\HasModuleAccess;
 
 class UserActivityResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_analytics';
+    }
+
     protected static ?string $model = UserActivity::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-presentation-chart-line';

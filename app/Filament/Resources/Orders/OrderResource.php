@@ -14,9 +14,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Traits\HasModuleAccess;
 
 class OrderResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_spiritual_practices';
+    }
+
     protected static ?string $model = Order::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedStar;

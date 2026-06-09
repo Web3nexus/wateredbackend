@@ -15,9 +15,17 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class LandingPageFeatureResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_settings';
+    }
+
     protected static ?string $model = LandingPageFeature::class;
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';

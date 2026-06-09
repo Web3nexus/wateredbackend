@@ -14,9 +14,17 @@ use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use BackedEnum;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class ChapterResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_sacred_texts';
+    }
+
     protected static ?string $model = Chapter::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';

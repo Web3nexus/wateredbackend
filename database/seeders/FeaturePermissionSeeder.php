@@ -17,7 +17,7 @@ class FeaturePermissionSeeder extends Seeder
         $guard = 'admin';
 
         $features = [
-            'access_library' => 'Manage Spiritual Library (Books, Chapters)',
+            'access_library' => 'Manage Spiritual Library (Books, Chapters, Traditions)',
             'access_audio' => 'Manage Audio & Sounds (Audios, Sacred Sounds)',
             'access_shop' => 'Manage Shop (Products, Orders, Applications)',
             'access_rituals' => 'Manage Rituals & Teachings (Incantations, Temples)',
@@ -25,7 +25,17 @@ class FeaturePermissionSeeder extends Seeder
             'access_appointments' => 'Manage Appointments (Consultations, Statuses)',
             'access_users' => 'Manage Users (App Users, Staff)',
             'access_financials' => 'Manage Financials (Revenue, Subscriptions)',
-            'access_settings' => 'Manage Settings (Global Settings, Templates, CMS)',
+            'access_settings' => 'Manage Settings (Global Settings, Templates, CMS, Languages)',
+            'access_discovery' => 'Manage Discovery (Temples, Locations)',
+            'access_subscriptions' => 'Manage Subscriptions (Apple, Paystack)',
+            'access_spiritual_practices' => 'Manage Spiritual Practices (Orders, Incantations, Rituals)',
+            'access_community' => 'Manage Community (Newsletters, Announcements, Teachings)',
+            'access_calendar' => 'Manage Calendar (Holidays, Watered Calendar)',
+            'access_content' => 'Manage Content (FAQs)',
+            'access_sacred_texts' => 'Manage Sacred Texts (Entries, Chapters, Nima Sedani)',
+            'access_deities' => 'Manage Deities',
+            'access_teaching' => 'Manage Teaching',
+            'access_analytics' => 'Manage Analytics (User Activity)',
         ];
 
         foreach ($features as $name => $description) {

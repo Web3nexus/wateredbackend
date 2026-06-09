@@ -26,9 +26,17 @@ use Filament\Actions\DeleteAction;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
+use App\Traits\HasModuleAccess;
 
 class OrderApplicationResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_spiritual_practices';
+    }
+
     protected static ?string $model = OrderApplication::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;

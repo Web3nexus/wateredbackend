@@ -14,9 +14,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class TeachingResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_teaching';
+    }
+
     protected static ?string $model = Teaching::class;
 
     protected static UnitEnum|string|null $navigationGroup = 'Community';

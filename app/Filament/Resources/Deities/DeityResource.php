@@ -14,9 +14,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class DeityResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_deities';
+    }
+
     protected static ?string $model = Deity::class;
 
     protected static ?string $navigationLabel = 'Deities';

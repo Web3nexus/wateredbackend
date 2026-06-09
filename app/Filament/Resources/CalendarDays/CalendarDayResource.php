@@ -18,9 +18,17 @@ use Filament\Schemas\Components\Section;
 use Filament\Actions;
 use BackedEnum;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class CalendarDayResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_calendar';
+    }
+
     protected static ?string $model = CalendarDay::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sun';

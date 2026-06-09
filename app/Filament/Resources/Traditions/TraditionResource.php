@@ -22,9 +22,17 @@ use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
 use BackedEnum;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class TraditionResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_library';
+    }
+
     protected static ?string $model = Tradition::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-flag';

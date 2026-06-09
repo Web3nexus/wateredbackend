@@ -13,9 +13,17 @@ use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use BackedEnum;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class CategoryResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_settings';
+    }
+
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationLabel = 'Topics';

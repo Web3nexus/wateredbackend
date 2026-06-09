@@ -14,9 +14,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class SacredSoundResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_settings';
+    }
+
     protected static ?string $model = SacredSound::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMusicalNote;

@@ -16,9 +16,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class AnnouncementResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_community';
+    }
+
     protected static ?string $model = Announcement::class;
 
     protected static UnitEnum|string|null $navigationGroup = 'Community';

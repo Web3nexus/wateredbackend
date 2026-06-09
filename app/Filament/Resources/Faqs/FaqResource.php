@@ -9,9 +9,17 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class FaqResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_content';
+    }
+
     protected static ?string $model = Faq::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-question-mark-circle';
     protected static UnitEnum|string|null $navigationGroup = 'Content';

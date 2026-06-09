@@ -22,9 +22,17 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use UnitEnum;
+use App\Traits\HasModuleAccess;
 
 class NewsletterResource extends Resource
 {
+    use HasModuleAccess;
+
+    public static function getPermissionName(): ?string
+    {
+        return 'access_community';
+    }
+
     protected static ?string $model = Newsletter::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
