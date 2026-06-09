@@ -46,19 +46,7 @@ class AdminUserForm
                         CheckboxList::make('permissions')
                             ->label('Sidebar Group Access')
                             ->helperText('Select which sidebar sections this admin can see. Organized by navigation group.')
-                            ->relationship('permissions', 'name')
-                            ->options([
-                                'access_admin_users' => '👤 User Management — Admin Users (Staff)',
-                                'access_users' => '👥 User Management — App Users',
-                                'access_appointments' => '📅 Consultation — Appointments & Booking',
-                                'access_audio' => '🎵 Teachings — Audio Teachings',
-                                'access_events' => '📆 Calendar — Events, Holidays & Calendar',
-                                'access_financials' => '💰 Financials — Revenue & Records',
-                                'access_shop' => '🛒 Commerce — Products & Orders',
-                                'access_rituals' => '🕯️ Spiritual Practices — Rituals & More',
-                                'access_library' => '📚 Library — Sacred Texts & Nima Sedani',
-                                'access_settings' => '⚙️ Settings — Global Configuration',
-                            ])
+                            ->relationship('permissions', 'name', fn($query) => $query->where('guard_name', 'admin'))
                             ->columns(2)
                             ->gridDirection('row'),
                     ]),

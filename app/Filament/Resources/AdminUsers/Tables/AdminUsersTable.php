@@ -17,6 +17,10 @@ class AdminUsersTable
                     ->searchable(),
                 \Filament\Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                \Filament\Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->badge()
+                    ->color(fn($record) => $record->isDeveloper() ? 'danger' : 'gray'),
                 \Filament\Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
