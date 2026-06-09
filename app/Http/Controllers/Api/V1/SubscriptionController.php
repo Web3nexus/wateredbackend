@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\GlobalSetting;
 use App\Models\Subscription;
+use App\Services\AppleService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Log;
 class SubscriptionController extends Controller
 {
     protected SubscriptionService $subscriptionService;
+    protected AppleService $appleService;
 
-    public function __construct(SubscriptionService $subscriptionService)
+    public function __construct(SubscriptionService $subscriptionService, AppleService $appleService)
     {
         $this->subscriptionService = $subscriptionService;
+        $this->appleService = $appleService;
     }
 
     /**
@@ -171,7 +174,7 @@ class SubscriptionController extends Controller
     {
         $settings = GlobalSetting::first();
         $sharedSecret = $settings->apple_shared_secret;
-        $receiptData = $request->receipt_data;
+        $receiptData = trim($request->receipt_data);
         $clientPlanId = $request->plan_id;
 
         // Resolve plan from product ID
@@ -180,9 +183,12 @@ class SubscriptionController extends Controller
             return response()->json(['message' => 'Invalid Apple product ID'], 422);
         }
 
-        // Verify with Apple (Production first, then Sandbox fallback)
-        $receiptData = trim($receiptData);
+        // Detect StoreKit 2 JWS format (starts with base64 of '{"alg":"ES256","x5c":[')
+        if (str_starts_with($receiptData, 'eyJ')) {
+            return $this->verifyAppleJWSSubscription($receiptData, $clientPlanId, $resolvedPlanId, $request, $user);
+        }
 
+        // Legacy PKCS7 receipt verification via Apple's /verifyReceipt endpoint
         if (empty($sharedSecret)) {
             Log::error('[Apple Verify] apple_shared_secret is empty in global_settings');
             return response()->json(['message' => 'Apple shared secret not configured'], 500);
@@ -299,6 +305,110 @@ class SubscriptionController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Apple subscription activation failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to activate subscription'], 500);
+        }
+    }
+
+    protected function verifyAppleJWSSubscription(
+        string $receiptData,
+        string $clientPlanId,
+        string $resolvedPlanId,
+        $request,
+        $user
+    ) {
+        Log::info('[Apple JWS] Verifying StoreKit 2 transaction JWS');
+
+        $payload = $this->appleService->verifyTransactionJWS($receiptData);
+        if (!$payload) {
+            return response()->json([
+                'message' => 'Invalid Apple StoreKit 2 transaction',
+                'apple_status' => 21002,
+            ], 422);
+        }
+
+        $transactionId = $payload->transactionId ?? null;
+        $originalTransactionId = $payload->originalTransactionId ?? null;
+        $productId = $payload->productId ?? null;
+        $expiresDateMs = $payload->expiresDate ?? null;
+        $environment = $payload->environment ?? 'Production';
+
+        Log::info('[Apple JWS] Transaction decoded', [
+            'transaction_id' => $transactionId,
+            'product_id' => $productId,
+            'environment' => $environment,
+        ]);
+
+        if (!$transactionId || !$productId) {
+            return response()->json(['message' => 'Transaction payload missing required fields'], 422);
+        }
+
+        // Verify the product ID matches what the client claims
+        if ($productId !== $clientPlanId) {
+            Log::warning('[Apple JWS] Product ID mismatch', [
+                'client_plan_id' => $clientPlanId,
+                'jws_product_id' => $productId,
+            ]);
+            return response()->json(['message' => 'Product ID mismatch with receipt'], 422);
+        }
+
+        // For subscriptions, validate expiration
+        $expiresAt = null;
+        if ($expiresDateMs) {
+            $expiresAt = \Carbon\Carbon::createFromTimestampMs((int) $expiresDateMs);
+            if ($expiresAt->isPast()) {
+                return response()->json([
+                    'message' => 'Subscription found but it has expired.',
+                    'expires_at' => $expiresAt,
+                ], 422);
+            }
+        }
+
+        if (!$expiresAt) {
+            return response()->json(['message' => 'No expiration date in transaction'], 422);
+        }
+
+        // Prevent cross-user transaction reuse
+        $existing = Subscription::where('provider_subscription_id', $transactionId)
+            ->orWhere('original_transaction_id', $originalTransactionId)
+            ->first();
+        if ($existing && $existing->user_id !== $user->id) {
+            Log::warning('[Apple JWS] Transaction belongs to another user', [
+                'transaction_id' => $transactionId,
+                'claiming_user' => $user->id,
+                'actual_user' => $existing->user_id,
+            ]);
+            return response()->json(['message' => 'Transaction does not belong to this user'], 403);
+        }
+
+        try {
+            $subscription = $this->subscriptionService->activatePremium(
+                user: $user,
+                provider: 'apple',
+                providerTransactionId: $transactionId,
+                originalTransactionId: $originalTransactionId,
+                planId: $resolvedPlanId,
+                expiresAt: $expiresAt,
+                amount: null,
+                platform: 'ios',
+                metadata: [
+                    'verification_method' => 'jws',
+                    'environment' => $environment,
+                    'product_id' => $productId,
+                ],
+                deviceType: $request->device_type,
+                osVersion: $request->os_version,
+            );
+
+            return response()->json([
+                'message' => 'Apple subscription verified successfully',
+                'is_premium' => true,
+                'subscription_status' => 'active',
+                'subscription_provider' => 'apple',
+                'subscription_plan' => $resolvedPlanId,
+                'subscription_expires_at' => $subscription->expires_at->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Apple JWS] Subscription activation failed: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to activate subscription'], 500);
         }
     }

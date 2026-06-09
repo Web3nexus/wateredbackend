@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\GlobalSetting;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\AppleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -361,5 +362,76 @@ class SubscriptionAppleTest extends TestCase
             ]);
 
         $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function apple_verify_supports_storekit2_jws_receipt()
+    {
+        $expiresDateMs = now()->addMonth()->timestamp * 1000;
+
+        $this->mock(AppleService::class, function ($mock) use ($expiresDateMs) {
+            $payload = (object) [
+                'transactionId' => '2000000000000001',
+                'originalTransactionId' => '2000000000000000',
+                'productId' => 'com.watered.premium.monthly',
+                'expiresDate' => $expiresDateMs,
+                'purchaseDate' => now()->timestamp * 1000,
+                'environment' => 'Sandbox',
+            ];
+            $mock->shouldReceive('verifyTransactionJWS')
+                ->once()
+                ->andReturn($payload);
+        });
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/v1/subscription/verify', [
+                'plan_id' => 'com.watered.premium.monthly',
+                'provider' => 'apple',
+                'receipt_data' => 'eyJhbGciOiJFUzI1NiIsIng1YyI6W119.fake.fake',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'is_premium' => true,
+                'subscription_status' => 'active',
+                'subscription_provider' => 'apple',
+            ]);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'user_id' => $this->user->id,
+            'provider_subscription_id' => '2000000000000001',
+            'original_transaction_id' => '2000000000000000',
+            'status' => 'active',
+            'provider' => 'apple',
+            'plan_id' => 'apple_monthly',
+        ]);
+
+        $this->user->refresh();
+        $this->assertTrue($this->user->is_premium);
+    }
+
+    /** @test */
+    public function apple_verify_rejects_invalid_storekit2_jws_receipt()
+    {
+        $this->mock(AppleService::class, function ($mock) {
+            $mock->shouldReceive('verifyTransactionJWS')
+                ->once()
+                ->andReturn(null);
+        });
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/v1/subscription/verify', [
+                'plan_id' => 'com.watered.premium.monthly',
+                'provider' => 'apple',
+                'receipt_data' => 'eyJhbGciOiJFUzI1NiIsIng1YyI6W119.fake.fake',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'apple_status' => 21002,
+            ]);
+
+        $this->user->refresh();
+        $this->assertFalse($this->user->is_premium);
     }
 }

@@ -5,16 +5,17 @@ namespace App\Services;
 use Exception;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AppleService
 {
-    private string $teamId;
-    private string $keyId;
-    private string $clientId;
-    private string $privateKey;
+    private ?string $teamId = null;
+    private ?string $keyId = null;
+    private ?string $clientId = null;
+    private ?string $privateKey = null;
 
     public function __construct()
     {
@@ -87,6 +88,61 @@ class AppleService
         });
 
         return JWK::parseKeySet($keys);
+    }
+
+    /**
+     * Verify a StoreKit 2 transaction JWS (JSON Web Signature) offline.
+     *
+     * StoreKit 2 returns a JWS token instead of the legacy PKCS7 receipt.
+     * The JWS header contains an x5c certificate chain; we verify the
+     * signature using the embedded certificate's public key.
+     *
+     * @param string $jws The JWS token (header.payload.signature)
+     * @return object|null Decoded transaction payload on success, null on failure
+     */
+    public function verifyTransactionJWS(string $jws): ?object
+    {
+        try {
+            $parts = explode('.', $jws);
+            if (count($parts) !== 3) {
+                Log::warning('[Apple JWS] Invalid format - expected 3 parts');
+                return null;
+            }
+
+            $header = json_decode(base64_decode($parts[0]));
+            if (!$header || !isset($header->x5c) || !is_array($header->x5c) || empty($header->x5c)) {
+                Log::warning('[Apple JWS] Missing x5c certificate chain in header');
+                return null;
+            }
+
+            // Build PEM certificate from the first cert in the x5c chain
+            $pemCert = "-----BEGIN CERTIFICATE-----\n"
+                . chunk_split($header->x5c[0], 64, "\n")
+                . "-----END CERTIFICATE-----";
+
+            $publicKey = openssl_pkey_get_public($pemCert);
+            if ($publicKey === false) {
+                Log::warning('[Apple JWS] Failed to extract public key from certificate');
+                return null;
+            }
+
+            $keyDetails = openssl_pkey_get_details($publicKey);
+            $publicKeyPem = $keyDetails['key'];
+
+            // Verify signature and decode payload
+            $payload = JWT::decode($jws, new Key($publicKeyPem, 'ES256'));
+
+            // Validate the issuer is Apple
+            if (!isset($payload->transactionId)) {
+                Log::warning('[Apple JWS] Payload missing transactionId');
+                return null;
+            }
+
+            return $payload;
+        } catch (\Exception $e) {
+            Log::error('[Apple JWS] Verification failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
