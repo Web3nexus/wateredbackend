@@ -27,7 +27,7 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-parchment">Email Us</h4>
-                            <p class="text-parchment/50">support@mywatered.com</p>
+                            <p class="text-parchment/50">{{ $settings?->contact_email ?? 'support@mywatered.com' }}</p>
                         </div>
                     </div>
 
@@ -44,9 +44,13 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-parchment">Temple Location</h4>
-                            <p class="text-parchment/50">Lagos, Nigeria</p>
+                            <p class="text-parchment/50">{{ $settings?->address ?? 'Lagos, Nigeria' }}</p>
                         </div>
                     </div>
+
+                    @if($settings?->is_map_enabled && $settings?->latitude && $settings?->longitude)
+                    <div id="contact-map" class="w-full h-[300px] rounded-3xl overflow-hidden border border-parchment/10 shadow-2xl" data-lat="{{ $settings->latitude }}" data-lng="{{ $settings->longitude }}" data-address="{{ $settings->address }}"></div>
+                    @endif
                 </div>
             </div>
 
@@ -86,4 +90,43 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    const mapEl = document.getElementById('contact-map');
+    if (mapEl) {
+        const lat = parseFloat(mapEl.dataset.lat);
+        const lng = parseFloat(mapEl.dataset.lng);
+        const address = mapEl.dataset.address;
+
+        if (isNaN(lat) || isNaN(lng)) {
+            console.error('Invalid map coordinates');
+            return;
+        }
+
+        const map = L.map('contact-map', {
+            center: [lat, lng],
+            zoom: 15,
+            scrollWheelZoom: false,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(map);
+
+        const popupEl = document.createElement('div');
+        popupEl.textContent = address;
+
+        L.marker([lat, lng])
+            .addTo(map)
+            .bindPopup(popupEl)
+            .openPopup();
+
+        map.on('click', function () {
+            map.scrollWheelZoom.enable();
+        });
+    }
+</script>
 @endsection

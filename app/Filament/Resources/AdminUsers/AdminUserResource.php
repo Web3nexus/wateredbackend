@@ -25,7 +25,7 @@ class AdminUserResource extends Resource
 
     public static function getPermissionName(): ?string
     {
-        return 'access_users';
+        return 'access_admin_users';
     }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;

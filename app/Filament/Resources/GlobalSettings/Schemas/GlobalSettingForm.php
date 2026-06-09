@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Grid;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Hash;
 use Filament\Notifications\Notification;
@@ -66,6 +67,31 @@ class GlobalSettingForm
                                             ->tel(),
                                         TextInput::make('social_links')
                                             ->helperText('Comma-separated URLs'),
+                                        Textarea::make('address')
+                                            ->label('Temple / Physical Address')
+                                            ->rows(3)
+                                            ->helperText('Full address displayed on the landing page and contact page.'),
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('latitude')
+                                                    ->label('Map Latitude')
+                                                    ->numeric()
+                                                    ->minValue(-90)
+                                                    ->maxValue(90)
+                                                    ->placeholder('e.g. 6.5244')
+                                                    ->helperText('GPS latitude coordinate for the map marker.'),
+                                                TextInput::make('longitude')
+                                                    ->label('Map Longitude')
+                                                    ->numeric()
+                                                    ->minValue(-180)
+                                                    ->maxValue(180)
+                                                    ->placeholder('e.g. 3.3792')
+                                                    ->helperText('GPS longitude coordinate for the map marker.'),
+                                            ]),
+                                        Toggle::make('is_map_enabled')
+                                            ->label('Show Map on Landing Page')
+                                            ->helperText('If enabled, an interactive map with the address marker will appear on the landing page.')
+                                            ->default(false),
                                     ]),
                             ]),
 

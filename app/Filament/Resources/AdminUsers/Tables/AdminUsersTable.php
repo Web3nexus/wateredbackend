@@ -25,11 +25,13 @@ class AdminUsersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn($record) => $record->isDeveloper() && !auth('admin')->user()->isDeveloper()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->hidden(fn() => !auth('admin')->user()->isDeveloper()),
                 ]),
             ]);
     }

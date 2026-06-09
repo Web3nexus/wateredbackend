@@ -181,8 +181,20 @@ class SubscriptionController extends Controller
         }
 
         // Verify with Apple (Production first, then Sandbox fallback)
+        $receiptData = trim($receiptData);
+
+        if (empty($sharedSecret)) {
+            Log::error('[Apple Verify] apple_shared_secret is empty in global_settings');
+            return response()->json(['message' => 'Apple shared secret not configured'], 500);
+        }
+
+        Log::info('[Apple Verify] sending to production', [
+            'receipt_length' => strlen($receiptData),
+            'shared_secret_length' => strlen($sharedSecret),
+        ]);
+
         $url = 'https://buy.itunes.apple.com/verifyReceipt';
-        $response = Http::post($url, [
+        $response = Http::asJson()->post($url, [
             'receipt-data' => $receiptData,
             'password' => $sharedSecret,
             'exclude-old-transactions' => true,
@@ -190,14 +202,24 @@ class SubscriptionController extends Controller
 
         $data = $response->json();
 
+        Log::info('[Apple Verify] production response', [
+            'status' => $data['status'] ?? 'unknown',
+            'receipt_count' => count($data['latest_receipt_info'] ?? []),
+        ]);
+
         if (isset($data['status']) && $data['status'] == 21007) {
+            Log::info('[Apple Verify] sandbox fallback');
             $url = 'https://sandbox.itunes.apple.com/verifyReceipt';
-            $response = Http::post($url, [
+            $response = Http::asJson()->post($url, [
                 'receipt-data' => $receiptData,
                 'password' => $sharedSecret,
                 'exclude-old-transactions' => true,
             ]);
             $data = $response->json();
+            Log::info('[Apple Verify] sandbox response', [
+                'status' => $data['status'] ?? 'unknown',
+                'receipt_count' => count($data['latest_receipt_info'] ?? []),
+            ]);
         }
 
         if (!isset($data['status']) || $data['status'] !== 0) {

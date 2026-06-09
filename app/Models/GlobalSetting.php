@@ -94,6 +94,10 @@ class GlobalSetting extends Model
         'app_config_version',
         'is_app_bookings_enabled',
         'is_web_bookings_enabled',
+        'address',
+        'latitude',
+        'longitude',
+        'is_map_enabled',
     ];
 
     protected $hidden = [
@@ -127,6 +131,7 @@ class GlobalSetting extends Model
         'app_config_version' => 'integer',
         'is_app_bookings_enabled' => 'boolean',
         'is_web_bookings_enabled' => 'boolean',
+        'is_map_enabled' => 'boolean',
     ];
     protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {

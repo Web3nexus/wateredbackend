@@ -3,6 +3,11 @@
 namespace App\Filament\Resources\AdminUsers\Schemas;
 
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Tabs;
 
 class AdminUserForm
 {
@@ -10,35 +15,52 @@ class AdminUserForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\TextInput::make('name')
-                    ->required(),
-                \Filament\Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->unique(ignoreRecord: true),
+                Grid::make(2)
+                    ->schema([
+                        \Filament\Forms\Components\TextInput::make('name')
+                            ->required(),
+                        \Filament\Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                    ]),
                 \Filament\Forms\Components\TextInput::make('password')
                     ->password()
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(string $context): bool => $context === 'create'),
 
-                \Filament\Forms\Components\Section::make('Feature Access')
-                    ->description('Select the modules this staff member can access.')
+                Section::make('Role')
+                    ->description('Assign a role to this staff member. Roles grant preset permission sets.')
                     ->schema([
-                        \Filament\Forms\Components\CheckboxList::make('permissions')
+                        Select::make('role')
+                            ->label('Admin Role')
+                            ->relationship('roles', 'name', fn($query) => $query->where('name', '!=', 'Developer'))
+                            ->multiple()
+                            ->preload()
+                            ->native(false),
+                    ]),
+
+                Section::make('Feature Access by Sidebar Group')
+                    ->description('Select which sidebar groups and modules this staff member can access.')
+                    ->schema([
+                        CheckboxList::make('permissions')
+                            ->label('Sidebar Group Access')
+                            ->helperText('Select which sidebar sections this admin can see. Organized by navigation group.')
                             ->relationship('permissions', 'name')
                             ->options([
-                                'access_library' => 'Spiritual Library',
-                                'access_audio' => 'Audio & Sounds',
-                                'access_shop' => 'Shop & Products',
-                                'access_rituals' => 'Rituals & Teachings',
-                                'access_events' => 'Events & News',
-                                'access_appointments' => 'Appointments',
-                                'access_users' => 'User Management',
-                                'access_financials' => 'Financials & Revenue',
-                                'access_settings' => 'System Settings',
+                                'access_admin_users' => '👤 User Management — Admin Users (Staff)',
+                                'access_users' => '👥 User Management — App Users',
+                                'access_appointments' => '📅 Consultation — Appointments & Booking',
+                                'access_audio' => '🎵 Teachings — Audio Teachings',
+                                'access_events' => '📆 Calendar — Events, Holidays & Calendar',
+                                'access_financials' => '💰 Financials — Revenue & Records',
+                                'access_shop' => '🛒 Commerce — Products & Orders',
+                                'access_rituals' => '🕯️ Spiritual Practices — Rituals & More',
+                                'access_library' => '📚 Library — Sacred Texts & Nima Sedani',
+                                'access_settings' => '⚙️ Settings — Global Configuration',
                             ])
                             ->columns(2)
-                            ->required(),
+                            ->gridDirection('row'),
                     ]),
             ]);
     }

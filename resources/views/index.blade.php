@@ -463,6 +463,22 @@
             </p>
         </div>
     </section>
+    {{-- Temple Location & Map Section --}}
+    @if($settings?->address)
+    <section id="temple-location" class="py-32 bg-parchment/[0.02] border-y border-parchment/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl text-parchment font-heading mb-4">Visit the Temple</h2>
+                <p class="text-lg text-parchment/60 max-w-2xl mx-auto">{{ $settings->address }}</p>
+            </div>
+
+            @if($settings?->is_map_enabled && $settings?->latitude && $settings?->longitude)
+            <div id="temple-map" class="w-full h-[400px] md:h-[500px] rounded-[2.5rem] overflow-hidden border border-parchment/10 shadow-2xl" data-lat="{{ $settings->latitude }}" data-lng="{{ $settings->longitude }}" data-address="{{ $settings->address }}"></div>
+            @endif
+        </div>
+    </section>
+    @endif
+
 @endsection
 
 @section('scripts')
@@ -559,6 +575,42 @@
                     } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
                 }
             }
+        }
+
+        // Temple Map
+        const mapEl = document.getElementById('temple-map');
+        if (mapEl) {
+            const lat = parseFloat(mapEl.dataset.lat);
+            const lng = parseFloat(mapEl.dataset.lng);
+            const address = mapEl.dataset.address;
+
+            if (isNaN(lat) || isNaN(lng)) {
+                console.error('Invalid map coordinates');
+                return;
+            }
+
+            const map = L.map('temple-map', {
+                center: [lat, lng],
+                zoom: 15,
+                scrollWheelZoom: false,
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
+
+            const popupEl = document.createElement('div');
+            popupEl.textContent = address;
+
+            L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(popupEl)
+                .openPopup();
+
+            map.on('click', function () {
+                map.scrollWheelZoom.enable();
+            });
         }
     </script>
 @endsection
