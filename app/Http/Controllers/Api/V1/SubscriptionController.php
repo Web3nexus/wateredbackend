@@ -7,6 +7,7 @@ use App\Models\GlobalSetting;
 use App\Models\Subscription;
 use App\Services\AppleService;
 use App\Services\SubscriptionService;
+use App\Services\GooglePlayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -15,11 +16,16 @@ class SubscriptionController extends Controller
 {
     protected SubscriptionService $subscriptionService;
     protected AppleService $appleService;
+    protected GooglePlayService $googlePlayService;
 
-    public function __construct(SubscriptionService $subscriptionService, AppleService $appleService)
-    {
+    public function __construct(
+        SubscriptionService $subscriptionService,
+        AppleService $appleService,
+        GooglePlayService $googlePlayService
+    ) {
         $this->subscriptionService = $subscriptionService;
         $this->appleService = $appleService;
+        $this->googlePlayService = $googlePlayService;
     }
 
     /**
@@ -55,11 +61,10 @@ class SubscriptionController extends Controller
         $isYearly = $request->boolean('is_yearly');
         $settings = GlobalSetting::first();
 
-        if (!$settings || !$settings->paystack_secret_key) {
+        $secretKey = config('services.paystack.secret_key') ?? $settings?->paystack_secret_key;
+        if (!$secretKey) {
             return response()->json(['message' => 'Payment gateway not configured'], 500);
         }
-
-        $secretKey = $settings->paystack_secret_key;
         $planId = $isYearly ? 'paystack_yearly' : 'paystack_monthly';
         $amount = $isYearly
             ? ($settings->premium_yearly_amount ?? 50000) * 100
@@ -69,22 +74,30 @@ class SubscriptionController extends Controller
             ? $settings->paystack_yearly_plan_code
             : $settings->paystack_monthly_plan_code;
 
+        // Build the Paystack payload - plan code is optional.
+        // If no plan code is configured in admin, it processes as a one-time charge.
+        $paystackPayload = [
+            'email'        => $user->email,
+            'amount'       => (int) $amount,
+            'currency'     => $currency,
+            'metadata'     => [
+                'user_id'  => (string) $user->id,
+                'plan_id'  => $planId,
+                'is_yearly' => $isYearly,
+                'platform' => $this->resolvePlatform($request),
+                'type'     => 'subscription',
+            ],
+            'callback_url' => url('/payment/callback'),
+        ];
+
+        // Only attach a plan code if one is configured — otherwise charge by amount
+        if (!empty($planCode)) {
+            $paystackPayload['plan'] = $planCode;
+        }
+
         // 1. Initialize transaction on Paystack server-side
         $paystackResponse = Http::withToken($secretKey)
-            ->post('https://api.paystack.co/transaction/initialize', [
-                'email' => $user->email,
-                'amount' => (int) $amount,
-                'currency' => $currency,
-                'plan' => $planCode,
-                'metadata' => [
-                    'user_id' => (string) $user->id,
-                    'plan_id' => $planId,
-                    'is_yearly' => $isYearly,
-                    'platform' => $this->resolvePlatform($request),
-                    'type' => 'subscription',
-                ],
-                'callback_url' => url('/payment/callback'),
-            ]);
+            ->post('https://api.paystack.co/transaction/initialize', $paystackPayload);
 
         if (!$paystackResponse->successful()) {
             Log::error('Paystack initialize failed', [
@@ -141,11 +154,12 @@ class SubscriptionController extends Controller
     {
         try {
             $request->validate([
-                'plan_id' => 'required_if:provider,apple',
+                'plan_id' => 'required_if:provider,apple,google',
                 'provider' => 'required|in:apple,paystack,google',
                 'receipt_data' => 'required_if:provider,apple',
                 'transaction_reference' => 'required_if:provider,paystack',
                 'is_yearly' => 'required_if:provider,paystack|boolean',
+                'purchase_token' => 'required_if:provider,google|string',
             ]);
 
             $user = $request->user();
@@ -159,7 +173,11 @@ class SubscriptionController extends Controller
                 return $this->verifyPaystackSubscription($request, $user);
             }
 
-            return response()->json(['message' => 'Provider not yet fully implemented'], 400);
+            if ($provider === 'google') {
+                return $this->verifyGoogleSubscription($request, $user);
+            }
+
+            return response()->json(['message' => 'Provider not supported'], 400);
 
         } catch (\Exception $e) {
             Log::error('Subscription verification failed: ' . $e->getMessage());
@@ -416,7 +434,10 @@ class SubscriptionController extends Controller
     protected function verifyPaystackSubscription($request, $user)
     {
         $settings = GlobalSetting::first();
-        $secretKey = $settings->paystack_secret_key;
+        $secretKey = config('services.paystack.secret_key') ?? $settings?->paystack_secret_key;
+        if (!$secretKey) {
+            return response()->json(['message' => 'Payment gateway not configured'], 500);
+        }
         $reference = $request->transaction_reference;
 
         // Prevent user from verifying another user's transaction
@@ -479,6 +500,10 @@ class SubscriptionController extends Controller
 
         $expiresAt = $isYearly ? now()->addYear() : now()->addMonth();
 
+        $subCode = $data['data']['subscription_code'] ?? $data['data']['subscription']['subscription_code'] ?? null;
+        $emailToken = $data['data']['email_token'] ?? $data['data']['subscription']['email_token'] ?? null;
+        $autoRenews = $subCode !== null;
+
         try {
             $subscription = $this->subscriptionService->activatePremium(
                 user: $user,
@@ -495,6 +520,9 @@ class SubscriptionController extends Controller
                 ],
                 deviceType: $request->device_type,
                 osVersion: $request->os_version,
+                paystackSubscriptionCode: $subCode,
+                paystackEmailToken: $emailToken,
+                autoRenews: $autoRenews,
             );
 
             return response()->json([
@@ -504,6 +532,8 @@ class SubscriptionController extends Controller
                 'subscription_provider' => 'paystack',
                 'subscription_plan' => $planId,
                 'subscription_expires_at' => $subscription->expires_at->toIso8601String(),
+                'paystack_subscription_code' => $subscription->paystack_subscription_code,
+                'auto_renews' => $subscription->auto_renews,
             ]);
         } catch (\Exception $e) {
             Log::error('Paystack subscription activation failed: ' . $e->getMessage());
@@ -522,7 +552,10 @@ class SubscriptionController extends Controller
         }
 
         $settings = GlobalSetting::first();
-        $secretKey = $settings->paystack_secret_key;
+        $secretKey = config('services.paystack.secret_key') ?? $settings?->paystack_secret_key;
+        if (!$secretKey) {
+            return response()->json(['message' => 'Payment gateway not configured'], 500);
+        }
 
         $response = Http::withToken($secretKey)
             ->get("https://api.paystack.co/transaction", [
@@ -585,6 +618,27 @@ class SubscriptionController extends Controller
         return response()->json(['message' => 'No active subscription found to restore.'], 404);
     }
 
+    /**
+     * Get Paystack portal link to manage or cancel a subscription
+     */
+    public function cancelLink(Request $request)
+    {
+        $user = $request->user();
+        $subscription = $user->subscription;
+
+        if (!$subscription || $subscription->provider !== 'paystack' || !$subscription->paystack_email_token) {
+            return response()->json([
+                'message' => 'No active auto-renewing Paystack subscription found for this user.'
+            ], 404);
+        }
+
+        $url = "https://paystack.com/manage/subscriptions/{$subscription->paystack_email_token}";
+
+        return response()->json([
+            'cancel_url' => $url,
+        ]);
+    }
+
     protected function resolvePlatform(Request $request): string
     {
         $userAgent = $request->userAgent() ?? '';
@@ -596,5 +650,132 @@ class SubscriptionController extends Controller
         }
         // Check platform header or fallback
         return $request->header('X-Platform', 'android');
+    }
+
+    protected function verifyGoogleSubscription($request, $user)
+    {
+        $settings      = GlobalSetting::first();
+        $packageName   = $settings?->google_play_package_name;
+        $purchaseToken = $request->purchase_token;
+        $productId     = $request->plan_id;  // e.g. "com.watered.premium.monthly"
+
+        if (!$packageName) {
+            return response()->json(['message' => 'Google Play not configured'], 500);
+        }
+
+        // ── 1. Prevent cross-user token reuse ──────────────────────────────────
+        $existing = Subscription::where('google_purchase_token', $purchaseToken)->first();
+        if ($existing && $existing->user_id !== $user->id) {
+            Log::warning('[Google] Purchase token belongs to another user', [
+                'product_id'     => $productId,
+                'claiming_user'  => $user->id,
+                'actual_user'    => $existing->user_id,
+            ]);
+            return response()->json(['message' => 'Purchase token does not belong to this user'], 403);
+        }
+
+        // ── 2. Verify with Google Publisher API ───────────────────────────────
+        $raw = $this->googlePlayService->verifySubscription($packageName, $productId, $purchaseToken);
+
+        if (!$raw) {
+            return response()->json(['message' => 'Google Play verification failed'], 422);
+        }
+
+        $parsed = $this->googlePlayService->parseSubscriptionData($raw);
+
+        if (!$parsed['is_active']) {
+            return response()->json([
+                'message'            => 'Google Play subscription is not active',
+                'subscription_state' => $parsed['state'],
+                'is_premium'         => false,
+            ], 422);
+        }
+
+        if (!$parsed['expires_at'] || $parsed['expires_at']->isPast()) {
+            return response()->json(['message' => 'Subscription is expired'], 422);
+        }
+
+        // ── 3. Resolve internal plan ID from Play product ID ─────────────────
+        $internalPlanId = $this->resolveGooglePlanId($productId, $settings);
+
+        // ── 4. Acknowledge if not yet acknowledged (required by Google) ───────
+        $ackResult = $this->googlePlayService->acknowledgeSubscription($packageName, $productId, $purchaseToken);
+        if (!$ackResult) {
+            Log::warning('[Google] Subscription acknowledge failed - may need retry', [
+                'user_id'    => $user->id,
+                'product_id' => $productId,
+            ]);
+        }
+
+        // ── 5. Activate premium in DB ─────────────────────────────────────────
+        try {
+            $subscription = $this->subscriptionService->activatePremium(
+                user:                    $user,
+                provider:                'google',
+                providerTransactionId:   $parsed['order_id'] ?? $purchaseToken,
+                originalTransactionId:   null,
+                planId:                  $internalPlanId,
+                expiresAt:               $parsed['expires_at'],
+                amount:                  null,
+                platform:                'android',
+                metadata:                [
+                    'google_state'      => $parsed['state'],
+                    'google_product_id' => $productId,
+                    'auto_renews'       => $parsed['auto_renews'],
+                ],
+                deviceType: $request->device_type,
+                osVersion:  $request->os_version,
+            );
+
+            // Persist the purchase token so RTDN webhooks can find this record later
+            $subscription->update([
+                'google_purchase_token' => $purchaseToken,
+                'google_order_id'       => $parsed['order_id'],
+                'google_product_id'     => $productId,
+                'auto_renews'           => $parsed['auto_renews'],
+            ]);
+
+            Log::info('[Google] Subscription verified and activated', [
+                'user_id'    => $user->id,
+                'product_id' => $productId,
+                'expires_at' => $parsed['expires_at'],
+            ]);
+
+            return response()->json([
+                'message'                  => 'Google Play subscription verified successfully',
+                'is_premium'               => true,
+                'subscription_status'      => 'active',
+                'subscription_provider'    => 'google',
+                'subscription_plan'        => $internalPlanId,
+                'subscription_expires_at'  => $subscription->expires_at->toIso8601String(),
+                'auto_renews'              => $parsed['auto_renews'],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('[Google] Subscription activation failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to activate subscription'], 500);
+        }
+    }
+
+    /**
+     * Map a Google Play product ID (e.g. "com.watered.premium.monthly")
+     * to the internal plan_id used in the DB.
+     */
+    private function resolveGooglePlanId(string $productId, $settings): string
+    {
+        // Check if the product ID matches the monthly or yearly Google product
+        $monthlyId = $settings?->google_monthly_product_id ?? '';
+        $yearlyId  = $settings?->google_yearly_product_id ?? '';
+
+        if ($productId === $yearlyId || str_contains($productId, 'yearly') || str_contains($productId, 'annual')) {
+            return 'google_yearly';
+        }
+
+        if ($productId === $monthlyId || str_contains($productId, 'monthly')) {
+            return 'google_monthly';
+        }
+
+        // Fallback: treat as monthly
+        return 'google_monthly';
     }
 }

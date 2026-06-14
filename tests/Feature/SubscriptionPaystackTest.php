@@ -350,4 +350,216 @@ class SubscriptionPaystackTest extends TestCase
 
         $response->assertStatus(200); // Webhook should return 200 even if no action taken
     }
+
+    /** @test */
+    public function paystack_webhook_handles_subscription_create()
+    {
+        // 1. Create a pending subscription
+        $sub = Subscription::create([
+            'user_id' => $this->user->id,
+            'plan_id' => 'paystack_monthly',
+            'provider' => 'paystack',
+            'platform' => 'android',
+            'provider_subscription_id' => 'ref_init_123',
+            'amount' => 10000,
+            'status' => 'pending',
+            'starts_at' => now(),
+            'expires_at' => now()->addMonth(),
+        ]);
+
+        // 2. Mock subscription.create webhook event
+        $payload = [
+            'event' => 'subscription.create',
+            'data' => [
+                'subscription_code' => 'SUB_test_123',
+                'email_token' => 'token_test_123',
+                'customer' => [
+                    'email' => $this->user->email,
+                ],
+                'plan' => [
+                    'plan_code' => 'PLN_test_monthly',
+                ],
+            ],
+        ];
+
+        $signature = hash_hmac('sha512', json_encode($payload), 'sk_test_123');
+
+        $response = $this->postJson('/api/v1/webhooks/paystack', $payload, [
+            'x-paystack-signature' => $signature,
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id' => $sub->id,
+            'paystack_subscription_code' => 'SUB_test_123',
+            'paystack_email_token' => 'token_test_123',
+            'auto_renews' => true,
+        ]);
+    }
+
+    /** @test */
+    public function paystack_webhook_handles_invoice_payment_failed()
+    {
+        // 1. Create active subscription with SUB_xxx code
+        $sub = Subscription::create([
+            'user_id' => $this->user->id,
+            'plan_id' => 'paystack_monthly',
+            'provider' => 'paystack',
+            'platform' => 'android',
+            'provider_subscription_id' => 'ref_init_123',
+            'paystack_subscription_code' => 'SUB_test_123',
+            'amount' => 10000,
+            'status' => 'active',
+            'starts_at' => now(),
+            'expires_at' => now()->addMonth(),
+            'auto_renews' => true,
+        ]);
+
+        $this->user->update(['is_premium' => true]);
+
+        // 2. Mock invoice.payment_failed event
+        $payload = [
+            'event' => 'invoice.payment_failed',
+            'data' => [
+                'gateway_response' => 'Insufficient funds',
+                'subscription' => [
+                    'subscription_code' => 'SUB_test_123',
+                ],
+            ],
+        ];
+
+        $signature = hash_hmac('sha512', json_encode($payload), 'sk_test_123');
+
+        $response = $this->postJson('/api/v1/webhooks/paystack', $payload, [
+            'x-paystack-signature' => $signature,
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id' => $sub->id,
+            'status' => 'past_due',
+            'failure_reason' => 'Insufficient funds',
+        ]);
+
+        $this->user->refresh();
+        $this->assertFalse($this->user->is_premium);
+    }
+
+    /** @test */
+    public function paystack_webhook_handles_subscription_not_renew()
+    {
+        // 1. Create active subscription
+        $sub = Subscription::create([
+            'user_id' => $this->user->id,
+            'plan_id' => 'paystack_monthly',
+            'provider' => 'paystack',
+            'platform' => 'android',
+            'provider_subscription_id' => 'ref_init_123',
+            'paystack_subscription_code' => 'SUB_test_123',
+            'amount' => 10000,
+            'status' => 'active',
+            'starts_at' => now(),
+            'expires_at' => now()->addMonth(),
+            'auto_renews' => true,
+        ]);
+
+        // 2. Mock subscription.not_renew event
+        $payload = [
+            'event' => 'subscription.not_renew',
+            'data' => [
+                'subscription_code' => 'SUB_test_123',
+            ],
+        ];
+
+        $signature = hash_hmac('sha512', json_encode($payload), 'sk_test_123');
+
+        $response = $this->postJson('/api/v1/webhooks/paystack', $payload, [
+            'x-paystack-signature' => $signature,
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id' => $sub->id,
+            'auto_renews' => false,
+        ]);
+    }
+
+    /** @test */
+    public function verify_endpoint_saves_subscription_code_when_present()
+    {
+        Http::fake([
+            'api.paystack.co/transaction/verify/*' => Http::response([
+                'status' => true,
+                'message' => 'Verification successful',
+                'data' => [
+                    'status' => 'success',
+                    'amount' => 1000000,
+                    'currency' => 'NGN',
+                    'reference' => 'ref_renew_123',
+                    'channel' => 'card',
+                    'paid_at' => now()->toIso8601String(),
+                    'subscription_code' => 'SUB_renew_123',
+                    'email_token' => 'token_renew_123',
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/v1/subscription/verify', [
+                'provider' => 'paystack',
+                'transaction_reference' => 'ref_renew_123',
+                'is_yearly' => false,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'is_premium' => true,
+                'paystack_subscription_code' => 'SUB_renew_123',
+                'auto_renews' => true,
+            ]);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'user_id' => $this->user->id,
+            'provider_subscription_id' => 'ref_renew_123',
+            'paystack_subscription_code' => 'SUB_renew_123',
+            'paystack_email_token' => 'token_renew_123',
+            'auto_renews' => true,
+        ]);
+    }
+
+    /** @test */
+    public function cancel_link_returns_correct_paystack_url()
+    {
+        // 1. No subscription returns 404
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->getJson('/api/v1/subscription/cancel-link');
+
+        $response->assertStatus(404);
+
+        // 2. Active subscription with token returns link
+        Subscription::create([
+            'user_id' => $this->user->id,
+            'plan_id' => 'paystack_monthly',
+            'provider' => 'paystack',
+            'platform' => 'android',
+            'provider_subscription_id' => 'ref_cancel_test',
+            'paystack_subscription_code' => 'SUB_cancel_123',
+            'paystack_email_token' => 'token_cancel_123',
+            'amount' => 10000,
+            'status' => 'active',
+            'starts_at' => now(),
+            'expires_at' => now()->addMonth(),
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->getJson('/api/v1/subscription/cancel-link');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'cancel_url' => 'https://paystack.com/manage/subscriptions/token_cancel_123',
+            ]);
+    }
 }

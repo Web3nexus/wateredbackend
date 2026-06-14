@@ -268,7 +268,8 @@ class GlobalSettingForm
                                             ]),
                                     ]),
 
-                                Section::make('Stripe Payments')
+                                Section::make('Payment Gateway Keys')
+                                    ->description('API keys for payment providers. Full subscription pricing and plan codes are configured in the Subscriptions tab.')
                                     ->schema([
                                         static::addSecureRevealAction(
                                             TextInput::make('stripe_public_key')
@@ -278,9 +279,6 @@ class GlobalSettingForm
                                             TextInput::make('stripe_secret_key')
                                                 ->label('Stripe Secret Key')
                                         ),
-                                    ])->columns(2),
-                                Section::make('Paystack Payments')
-                                    ->schema([
                                         static::addSecureRevealAction(
                                             TextInput::make('paystack_public_key')
                                                 ->label('Paystack Public Key')
@@ -289,9 +287,6 @@ class GlobalSettingForm
                                             TextInput::make('paystack_secret_key')
                                                 ->label('Paystack Secret Key')
                                         ),
-                                    ])->columns(2),
-                                Section::make('Flutterwave Payments')
-                                    ->schema([
                                         static::addSecureRevealAction(
                                             TextInput::make('flutterwave_public_key')
                                                 ->label('Flutterwave Public Key')
@@ -300,109 +295,6 @@ class GlobalSettingForm
                                             TextInput::make('flutterwave_secret_key')
                                                 ->label('Flutterwave Secret Key')
                                         ),
-                                    ])->columns(2),
-
-                                Section::make('Premium Subscription Pricing (Local/NGN)')
-                                    ->schema([
-                                        TextInput::make('paystack_monthly_plan_code')
-                                            ->label('Paystack Monthly Plan Code')
-                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_monthly_id')
-                                            ->label('Monthly Product ID')
-                                            ->placeholder('e.g. com.watered.premium.monthly')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_monthly_price')
-                                            ->label('Monthly Display Price')
-                                            ->placeholder('e.g. ₦5,000')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_monthly_amount')
-                                            ->label('Monthly Charge Amount (Kobo)')
-                                            ->numeric()
-                                            ->placeholder('500000')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-
-                                        TextInput::make('paystack_yearly_plan_code')
-                                            ->label('Paystack Yearly Plan Code')
-                                            ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_yearly_id')
-                                            ->label('Yearly Product ID')
-                                            ->placeholder('e.g. com.watered.premium.yearly')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_yearly_price')
-                                            ->label('Yearly Display Price')
-                                            ->placeholder('e.g. ₦50,000')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_yearly_amount')
-                                            ->label('Yearly Charge Amount (Kobo)')
-                                            ->numeric()
-                                            ->placeholder('5000000')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                    ])->columns(3),
-
-                                Section::make('Premium Plan Marketing Text')
-                                    ->schema([
-                                        TextInput::make('premium_title')
-                                            ->label('Premium Page Title')
-                                            ->placeholder('e.g. WATERED PLUS+')
-                                            ->default('WATERED PLUS+')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_subtitle')
-                                            ->label('Premium Page Subtitle')
-                                            ->placeholder('e.g. Unlock the full depth of African spirituality.')
-                                            ->default('Unlock the full depth of African spirituality.')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TagsInput::make('premium_features')
-                                            ->label('Plan Features')
-                                            ->placeholder('Add a feature and press Enter...')
-                                            ->helperText('These features are shown on the subscription plans in the app. Edit or add your own.')
-                                            ->suggestions([
-                                                'Complete Sacred Library',
-                                                'Daily Audio Teachings',
-                                                'Community Access',
-                                                'Unlimited Rituals',
-                                                'Everything in Monthly',
-                                                '2 Months Free',
-                                                'Exclusive Yearly Content',
-                                                'Priority Support',
-                                                'Ad-Free Experience',
-                                                'Offline Access',
-                                                'Nima Sedani Access',
-                                                'Sacred Calendar',
-                                                'Daily Wisdom Verses',
-                                                'Direct Spiritual Guidance',
-                                            ])
-                                            ->default([
-                                                'Complete Sacred Library',
-                                                'Daily Audio Teachings',
-                                                'Community Access',
-                                                'Unlimited Rituals',
-                                            ]),
-                                    ])->columns(2),
-
-                                Section::make('Premium Subscription Pricing (International/USD)')
-                                    ->description('These prices will be shown to users outside Nigeria.')
-                                    ->schema([
-                                        TextInput::make('premium_monthly_price_usd')
-                                            ->label('Monthly Display Price (USD)')
-                                            ->placeholder('e.g. $9.99')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_monthly_amount_usd')
-                                            ->label('Monthly Charge Amount (Cents)')
-                                            ->numeric()
-                                            ->placeholder('999')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-
-                                        TextInput::make('premium_yearly_price_usd')
-                                            ->label('Yearly Display Price (USD)')
-                                            ->placeholder('e.g. $99.99')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        TextInput::make('premium_yearly_amount_usd')
-                                            ->label('Yearly Charge Amount (Cents)')
-                                            ->numeric()
-                                            ->placeholder('9999')
-                                            ->dehydrated(fn(?string $state): bool => filled($state)),
                                     ])->columns(2),
                             ]),
 
@@ -423,6 +315,19 @@ class GlobalSettingForm
                                             TextInput::make('apple_shared_secret')
                                                 ->label('Apple App Store Shared Secret')
                                         ),
+                                    ])->columns(2),
+
+                                Section::make('Google Play Billing (Android)')
+                                    ->description('Configure Google Play subscription product IDs. These are what users buy inside the app via native Play Billing. Prices are managed in Google Play Console, not here.')
+                                    ->schema([
+                                        TextInput::make('google_monthly_product_id')
+                                            ->label('Monthly Product ID (Google Play)')
+                                            ->placeholder('e.g. com.watered.premium.monthly')
+                                            ->helperText('Must match exactly the Subscription Product ID created in Google Play Console.'),
+                                        TextInput::make('google_yearly_product_id')
+                                            ->label('Yearly Product ID (Google Play)')
+                                            ->placeholder('e.g. com.watered.premium.yearly')
+                                            ->helperText('Must match exactly the Subscription Product ID created in Google Play Console.'),
                                     ])->columns(2),
 
                                 Section::make('Paystack (Android)')

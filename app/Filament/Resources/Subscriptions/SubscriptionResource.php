@@ -104,9 +104,24 @@ class SubscriptionResource extends Resource
                         'active' => 'success',
                         'expired' => 'danger',
                         'cancelled' => 'warning',
+                        'past_due' => 'warning',
+                        'pending' => 'gray',
                         default => 'gray',
                     })
                     ->searchable(),
+                \Filament\Tables\Columns\IconColumn::make('auto_renews')
+                    ->label('Auto-Renews')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('paystack_subscription_code')
+                    ->label('Sub Code')
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('failure_reason')
+                    ->label('Failure Reason')
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('starts_at')
                     ->label('Started On')
                     ->dateTime()
@@ -120,9 +135,13 @@ class SubscriptionResource extends Resource
                 \Filament\Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
+                        'past_due' => 'Past Due',
                         'expired' => 'Expired',
                         'cancelled' => 'Cancelled',
+                        'pending' => 'Pending',
                     ]),
+                \Filament\Tables\Filters\TernaryFilter::make('auto_renews')
+                    ->label('Auto-Renews'),
                 \Filament\Tables\Filters\SelectFilter::make('platform')
                     ->label('Source')
                     ->options([
@@ -139,6 +158,22 @@ class SubscriptionResource extends Resource
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
+                \Filament\Tables\Actions\Action::make('revoke_premium')
+                    ->label('Revoke Premium')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn(Subscription $record): bool => $record->status === 'active' || $record->status === 'past_due')
+                    ->action(function (Subscription $record) {
+                        $service = app(\App\Services\SubscriptionService::class);
+                        $service->deactivatePremium($record->user, $record->provider_subscription_id);
+                        $record->update(['status' => 'cancelled']);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Premium access revoked')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -157,7 +192,7 @@ class SubscriptionResource extends Resource
             $handle = fopen('php://output', 'w');
 
             // Header
-            fputcsv($handle, ['Customer', 'Plan', 'Provider', 'Source', 'Amount', 'Status', 'Started At', 'Expires At']);
+            fputcsv($handle, ['Customer', 'Plan', 'Provider', 'Source', 'Amount', 'Status', 'Auto Renews', 'Sub Code', 'Failure Reason', 'Started At', 'Expires At']);
 
             $query = $records ? collect($records) : Subscription::with('user')->get();
 
@@ -169,7 +204,10 @@ class SubscriptionResource extends Resource
                     $subscription->platform,
                     $subscription->amount,
                     $subscription->status,
-                    $subscription->starts_at->format('Y-m-d H:i'),
+                    $subscription->auto_renews ? 'Yes' : 'No',
+                    $subscription->paystack_subscription_code ?? '',
+                    $subscription->failure_reason ?? '',
+                    $subscription->starts_at ? $subscription->starts_at->format('Y-m-d H:i') : '',
                     $subscription->expires_at ? $subscription->expires_at->format('Y-m-d H:i') : 'Never',
                 ]);
             }

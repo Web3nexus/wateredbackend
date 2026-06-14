@@ -176,10 +176,16 @@ class WebhookController extends Controller
                 break;
             case 'subscription.create':
             case 'subscription.enable':
-                // Handled via charge.success verification
+                $this->handlePaystackSubscriptionEnabledOrCreated($data);
                 break;
             case 'subscription.disable':
                 $this->handlePaystackSubscriptionDisabled($data);
+                break;
+            case 'subscription.not_renew':
+                $this->handlePaystackSubscriptionNotRenew($data);
+                break;
+            case 'invoice.payment_failed':
+                $this->handlePaystackInvoicePaymentFailed($data);
                 break;
         }
 
@@ -211,8 +217,16 @@ class WebhookController extends Controller
 
     protected function handleSubscriptionPayment($data, $metadata, string $reference, int $amount, string $currency)
     {
+        $subCode = $data['subscription']['subscription_code'] ?? $data['subscription_code'] ?? null;
+        $emailToken = $data['subscription']['email_token'] ?? $data['email_token'] ?? null;
+
         // Try to find existing subscription by reference
         $subscription = Subscription::where('provider_subscription_id', $reference)->first();
+
+        // If not found by reference, try to find by subscription_code (for auto-renewals)
+        if (!$subscription && $subCode) {
+            $subscription = Subscription::where('paystack_subscription_code', $subCode)->first();
+        }
 
         if ($subscription) {
             // Subscription record exists - verify and activate
@@ -260,16 +274,20 @@ class WebhookController extends Controller
                     planId: $planId,
                     expiresAt: $expiresAt,
                     amount: $amount / 100,
-                    platform: $metadata['platform'] ?? 'android',
+                    platform: $metadata['platform'] ?? $subscription->platform ?? 'android',
+                    paystackSubscriptionCode: $subCode,
+                    paystackEmailToken: $emailToken,
+                    autoRenews: true,
                 );
-                if ($sub && !empty($data['subscription_code'])) {
+                if ($sub && !empty($subCode)) {
                     $sub->update(['raw_provider_event' => json_encode([
-                        'subscription_code' => $data['subscription_code'],
+                        'subscription_code' => $subCode,
                     ])]);
                 }
-                Log::info('Paystack webhook: subscription activated from existing record', [
+                Log::info('Paystack webhook: subscription activated/renewed from existing record', [
                     'reference' => $reference,
                     'user_id' => $user->id,
+                    'subscription_code' => $subCode,
                 ]);
             } catch (\Exception $e) {
                 Log::error('Paystack webhook: activation failed', [
@@ -315,15 +333,19 @@ class WebhookController extends Controller
                     expiresAt: $expiresAt,
                     amount: $amount / 100,
                     platform: $metadata['platform'] ?? 'android',
+                    paystackSubscriptionCode: $subCode,
+                    paystackEmailToken: $emailToken,
+                    autoRenews: true,
                 );
-                if ($sub && !empty($data['subscription_code'])) {
+                if ($sub && !empty($subCode)) {
                     $sub->update(['raw_provider_event' => json_encode([
-                        'subscription_code' => $data['subscription_code'],
+                        'subscription_code' => $subCode,
                     ])]);
                 }
                 Log::info('Paystack webhook: subscription created from metadata', [
                     'reference' => $reference,
                     'user_id' => $user->id,
+                    'subscription_code' => $subCode,
                 ]);
             } catch (\Exception $e) {
                 Log::error('Paystack webhook: activation failed', [
@@ -359,11 +381,15 @@ class WebhookController extends Controller
                             expiresAt: $expiresAt,
                             amount: $amount / 100,
                             platform: 'android',
+                            paystackSubscriptionCode: $subCode,
+                            paystackEmailToken: $emailToken,
+                            autoRenews: true,
                         );
                         Log::info('Paystack webhook: subscription created from email lookup', [
                             'reference' => $reference,
                             'user_id' => $user->id,
                             'email' => $customerEmail,
+                            'subscription_code' => $subCode,
                         ]);
                     } catch (\Exception $e) {
                         Log::error('Paystack webhook: activation failed via email', [
@@ -533,13 +559,17 @@ class WebhookController extends Controller
     {
         $subscriptionCode = $data['subscription_code'];
 
-        // Search in provider_subscription_id, or raw_provider_event (JSON-stored subscription_code)
-        $subscription = Subscription::where('provider_subscription_id', $subscriptionCode)
+        // Search in provider_subscription_id, or raw_provider_event (JSON-stored subscription_code), or paystack_subscription_code
+        $subscription = Subscription::where('paystack_subscription_code', $subscriptionCode)
+            ->orWhere('provider_subscription_id', $subscriptionCode)
             ->orWhere('raw_provider_event', 'LIKE', '%' . $subscriptionCode . '%')
             ->first();
 
         if ($subscription) {
-            $subscription->update(['status' => 'expired']);
+            $subscription->update([
+                'status' => 'expired',
+                'auto_renews' => false,
+            ]);
             $user = $subscription->user;
             if ($user && !$user->subscriptions()->where('status', 'active')->exists()) {
                 $user->update(['is_premium' => false]);
@@ -553,5 +583,262 @@ class WebhookController extends Controller
                 'subscription_code' => $subscriptionCode,
             ]);
         }
+    }
+
+    protected function handlePaystackSubscriptionEnabledOrCreated($data)
+    {
+        $subscriptionCode = $data['subscription_code'] ?? null;
+        $emailToken = $data['email_token'] ?? null;
+        $customerEmail = $data['customer']['email'] ?? null;
+
+        if (!$subscriptionCode) {
+            return;
+        }
+
+        // Try to find the subscription by code
+        $subscription = Subscription::where('paystack_subscription_code', $subscriptionCode)->first();
+
+        // If not found, try to find the latest active/pending paystack subscription for this user
+        if (!$subscription && $customerEmail) {
+            $user = User::where('email', $customerEmail)->first();
+            if ($user) {
+                $subscription = Subscription::where('user_id', $user->id)
+                    ->where('provider', 'paystack')
+                    ->whereIn('status', ['active', 'pending'])
+                    ->orderByDesc('id')
+                    ->first();
+            }
+        }
+
+        if ($subscription) {
+            $subscription->update([
+                'paystack_subscription_code' => $subscriptionCode,
+                'paystack_email_token' => $emailToken ?? $subscription->paystack_email_token,
+                'auto_renews' => true,
+            ]);
+            Log::info('Paystack webhook: subscription created/enabled synced', [
+                'subscription_code' => $subscriptionCode,
+                'subscription_id' => $subscription->id,
+            ]);
+        } else {
+            Log::warning('Paystack webhook: subscription not found for enable/create', [
+                'subscription_code' => $subscriptionCode,
+                'email' => $customerEmail,
+            ]);
+        }
+    }
+
+    protected function handlePaystackSubscriptionNotRenew($data)
+    {
+        $subscriptionCode = $data['subscription_code'] ?? null;
+        if (!$subscriptionCode) {
+            return;
+        }
+
+        $subscription = Subscription::where('paystack_subscription_code', $subscriptionCode)->first();
+        if ($subscription) {
+            $subscription->update(['auto_renews' => false]);
+            Log::info('Paystack webhook: subscription auto-renew disabled', [
+                'subscription_code' => $subscriptionCode,
+            ]);
+        }
+    }
+
+    protected function handlePaystackInvoicePaymentFailed($data)
+    {
+        $subscriptionCode = $data['subscription']['subscription_code'] ?? $data['subscription_code'] ?? null;
+        $reason = $data['gateway_response'] ?? 'Invoice payment failed';
+
+        if (!$subscriptionCode) {
+            Log::warning('Paystack webhook: invoice.payment_failed missing subscription_code');
+            return;
+        }
+
+        $subscription = Subscription::where('paystack_subscription_code', $subscriptionCode)->first();
+        if ($subscription) {
+            $this->subscriptionService->handleRenewalFailure($subscription, $reason);
+        } else {
+            Log::warning('Paystack webhook: subscription not found for failed invoice', [
+                'subscription_code' => $subscriptionCode,
+            ]);
+        }
+    }
+
+    /**
+     * Google Play Real-Time Developer Notification (RTDN)
+     * Delivered via Cloud Pub/Sub push subscription.
+     *
+     * Google sends a base64-encoded JSON message inside a Pub/Sub envelope.
+     * The endpoint must return HTTP 200 to acknowledge receipt; any other
+     * status causes Google to retry with exponential back-off.
+     */
+    public function google(Request $request)
+    {
+        // ── 0. Verify Pub/Sub push authentication ─────────────────────────────
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            Log::warning('[Google RTDN] Missing or invalid Authorization header');
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // ── 1. Decode the Pub/Sub message ─────────────────────────────────────
+        $envelope  = $request->all();
+        $message   = $envelope['message'] ?? null;
+
+        if (!$message || !isset($message['data'])) {
+            Log::warning('[Google RTDN] Missing Pub/Sub message or data field');
+            return response()->json(['message' => 'OK']); // always 200 to avoid retries
+        }
+
+        $decodedData = base64_decode($message['data']);
+        $notification = json_decode($decodedData, true);
+
+        Log::info('[Google RTDN] Received', ['notification' => $notification]);
+
+        $packageName = $notification['packageName'] ?? null;
+
+        // ── 2. Handle SubscriptionNotification ────────────────────────────────
+        if (isset($notification['subscriptionNotification'])) {
+            $sub = $notification['subscriptionNotification'];
+            $this->handleGoogleSubscriptionNotification(
+                purchaseToken:    $sub['purchaseToken'] ?? null,
+                productId:        $sub['subscriptionId'] ?? null,
+                notificationType: (int) ($sub['notificationType'] ?? 0),
+                packageName:      $packageName,
+            );
+        }
+
+        // ── 3. Handle OneTimeProductNotification (not needed for subscriptions) ─
+        if (isset($notification['oneTimeProductNotification'])) {
+            Log::info('[Google RTDN] OneTimeProduct notification — ignored for subscriptions');
+        }
+
+        // Always return 200 OK so Pub/Sub doesn't retry
+        return response()->json(['message' => 'OK']);
+    }
+
+    /**
+     * Google Subscription Notification Types:
+     *  1  SUBSCRIPTION_RECOVERED        — recovered from account hold
+     *  2  SUBSCRIPTION_RENEWED          — renewed successfully
+     *  3  SUBSCRIPTION_CANCELED         — user cancelled (still active till period end)
+     *  4  SUBSCRIPTION_PURCHASED        — new initial purchase
+     *  5  SUBSCRIPTION_ON_HOLD          — payment failed, on hold
+     *  6  SUBSCRIPTION_IN_GRACE_PERIOD  — billing retry in grace period
+     *  7  SUBSCRIPTION_RESTARTED        — user reactivated from pause
+     *  8  SUBSCRIPTION_PRICE_CHANGE     — user confirmed price change
+     *  9  SUBSCRIPTION_DEFERRED         — renewal deferred
+     * 12  SUBSCRIPTION_REVOKED          — refunded / revoked by Google
+     * 13  SUBSCRIPTION_EXPIRED          — fully expired
+     */
+    protected function handleGoogleSubscriptionNotification(
+        ?string $purchaseToken,
+        ?string $productId,
+        int $notificationType,
+        ?string $packageName
+    ): void {
+        if (!$purchaseToken) {
+            Log::warning('[Google RTDN] Missing purchaseToken');
+            return;
+        }
+
+        // Find subscription by purchase token
+        $subscription = Subscription::where('google_purchase_token', $purchaseToken)->first();
+
+        Log::info('[Google RTDN] notificationType=' . $notificationType, [
+            'purchase_token_found' => $subscription ? $subscription->id : 'not found',
+            'product_id'           => $productId,
+        ]);
+
+        // ── ACTIVATION / RENEWAL events ───────────────────────────────────────
+        if (in_array($notificationType, [1, 2, 4, 6, 7])) {
+            // Re-verify with Google to get the fresh expiry date
+            if ($packageName && $productId) {
+                $googlePlayService = app(\App\Services\GooglePlayService::class);
+                $raw    = $googlePlayService->verifySubscription($packageName, $productId, $purchaseToken);
+                $parsed = $raw ? $googlePlayService->parseSubscriptionData($raw) : null;
+
+                if ($parsed && $parsed['is_active'] && $parsed['expires_at']) {
+                    if ($subscription) {
+                        $user = $subscription->user;
+                    } else {
+                        // New purchase with no existing record — cannot map to user
+                        // This happens when a purchase was made outside the app (e.g. Play Store website)
+                        // We rely on the mobile client's verify call to create the record first.
+                        Log::warning('[Google RTDN] Cannot map purchase token to user — awaiting client verify call');
+                        return;
+                    }
+
+                    try {
+                        $internalPlanId = str_contains($productId, 'yearly') ? 'google_yearly' : 'google_monthly';
+                        $activatedSub = $this->subscriptionService->activatePremium(
+                            user:                  $user,
+                            provider:              'google',
+                            providerTransactionId: $parsed['order_id'] ?? $purchaseToken,
+                            originalTransactionId: null,
+                            planId:                $internalPlanId,
+                            expiresAt:             $parsed['expires_at'],
+                            amount:                null,
+                            platform:              'android',
+                        );
+
+                        $activatedSub->update([
+                            'google_order_id' => $parsed['order_id'] ?? $subscription->google_order_id,
+                            'auto_renews'     => $parsed['auto_renews'],
+                        ]);
+
+                        Log::info('[Google RTDN] Subscription activated/renewed', [
+                            'user_id'         => $user->id,
+                            'notification'    => $notificationType,
+                            'expires_at'      => $parsed['expires_at'],
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('[Google RTDN] Activation failed: ' . $e->getMessage());
+                    }
+                }
+            }
+            return;
+        }
+
+        // ── CANCELLATION (still active until period end) ───────────────────────
+        if ($notificationType === 3) {
+            if ($subscription) {
+                $subscription->update(['auto_renews' => false]);
+                Log::info('[Google RTDN] Subscription cancelled (access until period end)', [
+                    'subscription_id' => $subscription->id,
+                ]);
+            }
+            return;
+        }
+
+        // ── EXPIRY / REVOCATION events ────────────────────────────────────────
+        if (in_array($notificationType, [12, 13])) {
+            if ($subscription && $subscription->user) {
+                try {
+                    $this->subscriptionService->deactivatePremium(
+                        user:                    $subscription->user,
+                        providerTransactionId:   $purchaseToken,
+                    );
+                    Log::info('[Google RTDN] Subscription expired/revoked', [
+                        'subscription_id' => $subscription->id,
+                        'type'            => $notificationType,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('[Google RTDN] Deactivation failed: ' . $e->getMessage());
+                }
+            }
+            return;
+        }
+
+        // ── ON HOLD (payment failed — suspend without deactivating fully) ─────
+        if ($notificationType === 5) {
+            if ($subscription) {
+                $subscription->update(['status' => 'on_hold', 'auto_renews' => false]);
+                Log::info('[Google RTDN] Subscription on hold', ['subscription_id' => $subscription->id]);
+            }
+            return;
+        }
+
+        Log::info('[Google RTDN] Unhandled notification type', ['type' => $notificationType]);
     }
 }

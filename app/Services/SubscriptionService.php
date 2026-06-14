@@ -38,14 +38,26 @@ class SubscriptionService
         array $metadata = [],
         ?string $deviceType = null,
         ?string $osVersion = null,
+        ?string $paystackSubscriptionCode = null,
+        ?string $paystackEmailToken = null,
+        ?bool $autoRenews = null,
     ): Subscription {
         return DB::transaction(function () use (
             $user, $provider, $providerTransactionId, $originalTransactionId,
-            $planId, $expiresAt, $amount, $platform, $metadata, $deviceType, $osVersion
+            $planId, $expiresAt, $amount, $platform, $metadata, $deviceType, $osVersion,
+            $paystackSubscriptionCode, $paystackEmailToken, $autoRenews
         ) {
             // 1. Check if already processed (idempotency)
-            $existing = $this->findExisting($provider, $providerTransactionId, $originalTransactionId, $user->id);
-            if ($existing && $existing->status === 'active') {
+            // For Paystack, if we have a subscription code, look up by that first to update the existing auto-renewing subscription
+            $existing = null;
+            if ($provider === 'paystack' && $paystackSubscriptionCode) {
+                $existing = Subscription::where('paystack_subscription_code', $paystackSubscriptionCode)->first();
+            }
+            if (!$existing) {
+                $existing = $this->findExisting($provider, $providerTransactionId, $originalTransactionId, $user->id);
+            }
+
+            if ($existing && $existing->status === 'active' && $existing->provider_subscription_id === $providerTransactionId) {
                 Log::info("SubscriptionService: Duplicate event suppressed", [
                     'provider' => $provider,
                     'transaction_id' => $providerTransactionId,
@@ -60,12 +72,24 @@ class SubscriptionService
 
             // 2. If record exists but is expired, reactivate
             if ($existing && $existing->status !== 'active') {
-                $existing->update([
+                $updateData = [
                     'status' => 'active',
                     'expires_at' => $expiresAt,
                     'starts_at' => now(),
                     'amount' => $amount ?? $existing->amount,
-                ]);
+                ];
+                if ($paystackSubscriptionCode !== null) {
+                    $updateData['paystack_subscription_code'] = $paystackSubscriptionCode;
+                }
+                if ($paystackEmailToken !== null) {
+                    $updateData['paystack_email_token'] = $paystackEmailToken;
+                }
+                if ($autoRenews !== null) {
+                    $updateData['auto_renews'] = $autoRenews;
+                } else if ($paystackSubscriptionCode !== null) {
+                    $updateData['auto_renews'] = true;
+                }
+                $existing->update($updateData);
                 $user->update(['is_premium' => true]);
                 Log::info("SubscriptionService: Reactivated expired subscription", [
                     'subscription_id' => $existing->id,
@@ -79,7 +103,8 @@ class SubscriptionService
             $startsAt = now();
             $finalExpiresAt = $expiresAt;
 
-            if ($activeSub && $activeSub->expires_at && $activeSub->expires_at->isFuture()) {
+            // If the existing subscription is active and it's not the one we found (preventing self-extension loop for renewal)
+            if ($activeSub && $activeSub->expires_at && $activeSub->expires_at->isFuture() && (!$existing || $existing->id !== $activeSub->id)) {
                 $diffDays = abs($expiresAt->diffInDays($startsAt, true));
                 $finalExpiresAt = $activeSub->expires_at->copy()->addDays((int) round($diffDays));
                 Log::info("SubscriptionService: Extending existing subscription", [
@@ -106,9 +131,33 @@ class SubscriptionService
             ];
 
             if ($existing) {
+                // Clear failure reason on successful payment/renewal
+                $subscriptionData['failure_reason'] = null;
+                if ($paystackSubscriptionCode !== null) {
+                    $subscriptionData['paystack_subscription_code'] = $paystackSubscriptionCode;
+                }
+                if ($paystackEmailToken !== null) {
+                    $subscriptionData['paystack_email_token'] = $paystackEmailToken;
+                }
+                if ($autoRenews !== null) {
+                    $subscriptionData['auto_renews'] = $autoRenews;
+                } else if ($paystackSubscriptionCode !== null) {
+                    $subscriptionData['auto_renews'] = true;
+                }
                 $existing->update($subscriptionData);
                 $subscription = $existing->fresh();
             } else {
+                if ($paystackSubscriptionCode !== null) {
+                    $subscriptionData['paystack_subscription_code'] = $paystackSubscriptionCode;
+                }
+                if ($paystackEmailToken !== null) {
+                    $subscriptionData['paystack_email_token'] = $paystackEmailToken;
+                }
+                if ($autoRenews !== null) {
+                    $subscriptionData['auto_renews'] = $autoRenews;
+                } else if ($paystackSubscriptionCode !== null) {
+                    $subscriptionData['auto_renews'] = true;
+                }
                 $subscription = Subscription::create($subscriptionData);
             }
 
@@ -248,5 +297,41 @@ class SubscriptionService
             'paystack' => 'android',
             default => 'web',
         };
+    }
+
+    /**
+     * Find subscription by Paystack subscription code.
+     */
+    public function findBySubscriptionCode(string $code): ?Subscription
+    {
+        return Subscription::where('paystack_subscription_code', $code)->first();
+    }
+
+    /**
+     * Handle renewal failure: marks subscription as past_due, logs the failure reason,
+     * and revokes user premium status if they have no other active subscriptions.
+     */
+    public function handleRenewalFailure(Subscription $sub, string $reason): void
+    {
+        DB::transaction(function () use ($sub, $reason) {
+            $sub->update([
+                'status' => 'past_due',
+                'failure_reason' => substr($reason, 0, 500),
+            ]);
+
+            Log::warning("SubscriptionService: Subscription marked past_due", [
+                'subscription_id' => $sub->id,
+                'user_id' => $sub->user_id,
+                'reason' => $reason,
+            ]);
+
+            $user = $sub->user;
+            if ($user && !$user->subscriptions()->where('status', 'active')->exists()) {
+                $user->update(['is_premium' => false]);
+                Log::info("SubscriptionService: User premium access revoked due to renewal failure", [
+                    'user_id' => $user->id,
+                ]);
+            }
+        });
     }
 }

@@ -62,6 +62,8 @@ class GlobalSetting extends Model
         'apple_shared_secret',
         'google_play_package_name',
         'google_play_service_account_json',
+        'google_monthly_product_id',
+        'google_yearly_product_id',
         'notification_sound_path',
         'alarm_sound_path',
         'privacy_policy',

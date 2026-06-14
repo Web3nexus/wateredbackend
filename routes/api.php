@@ -12,6 +12,7 @@ Route::prefix('v1')->group(function () {
     // Webhooks
     Route::post('/webhooks/apple', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apple']);
     Route::post('/webhooks/paystack', [\App\Http\Controllers\Api\V1\WebhookController::class, 'paystack']);
+    Route::post('/webhooks/google', [\App\Http\Controllers\Api\V1\WebhookController::class, 'google']);
 
     // Authentication
     Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
@@ -169,6 +170,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
         Route::post('/subscription/sync', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'sync']);
         Route::post('/subscription/initialize', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'initializePaystack']);
+        Route::get('/subscription/cancel-link', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'cancelLink']);
 
         // Reminders
         Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);
