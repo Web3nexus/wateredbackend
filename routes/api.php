@@ -168,9 +168,6 @@ Route::prefix('v1')->group(function () {
         // Subscriptions
         Route::get('/subscription', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'index']);
         Route::post('/subscription/verify', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'verify']);
-        Route::post('/subscription/sync', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'sync']);
-        Route::post('/subscription/initialize', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'initializePaystack']);
-        Route::get('/subscription/cancel-link', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'cancelLink']);
 
         // Reminders
         Route::get('/reminders', [\App\Http\Controllers\Api\V1\ReminderController::class, 'index']);

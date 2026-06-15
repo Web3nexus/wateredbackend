@@ -205,42 +205,6 @@ class SubscriptionService
     }
 
     /**
-     * Verify Paystack transaction amount matches expected plan price.
-     */
-    public function verifyPaystackAmount(string $planId, float $amountPaidKobo, string $currency): bool
-    {
-        $settings = GlobalSetting::first();
-        if (!$settings) {
-            return false;
-        }
-
-        $isYearly = str_contains($planId, 'yearly');
-        $expectedAmount = $isYearly
-            ? ($settings->premium_yearly_amount ?? 0) * 100
-            : ($settings->premium_monthly_amount ?? 0) * 100;
-
-        $expectedCurrency = $settings->system_currency ?? 'NGN';
-
-        if ($currency !== $expectedCurrency) {
-            Log::warning("Paystack currency mismatch", [
-                'expected' => $expectedCurrency,
-                'got' => $currency,
-            ]);
-            return false;
-        }
-
-        if ((int)$amountPaidKobo < (int)$expectedAmount) {
-            Log::warning("Paystack amount mismatch", [
-                'expected_kobo' => $expectedAmount,
-                'got_kobo' => $amountPaidKobo,
-            ]);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Verify Apple product ID maps to a valid premium plan.
      */
     public function resolveApplePlanId(string $productId): ?string
@@ -254,12 +218,6 @@ class SubscriptionService
             return 'apple_monthly';
         }
         if ($productId === $settings->premium_yearly_id) {
-            return 'apple_yearly';
-        }
-        if ($productId === $settings->premium_monthly_id_usd ?? null) {
-            return 'apple_monthly';
-        }
-        if ($productId === $settings->premium_yearly_id_usd ?? null) {
             return 'apple_yearly';
         }
 
@@ -302,11 +260,6 @@ class SubscriptionService
     /**
      * Find subscription by Paystack subscription code.
      */
-    public function findBySubscriptionCode(string $code): ?Subscription
-    {
-        return Subscription::where('paystack_subscription_code', $code)->first();
-    }
-
     /**
      * Handle renewal failure: marks subscription as past_due, logs the failure reason,
      * and revokes user premium status if they have no other active subscriptions.

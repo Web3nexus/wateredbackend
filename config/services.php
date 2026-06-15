@@ -52,5 +52,4 @@ return [
         'client_id' => env('APPLE_CLIENT_ID'),
         'private_key' => env('APPLE_PRIVATE_KEY'),
     ],
-
 ];
