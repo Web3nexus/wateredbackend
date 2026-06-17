@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\TextCollection;
 use App\Models\BookPurchase;
 use App\Models\GlobalSetting;
+use App\Mail\BookPurchaseConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class BookPurchaseController extends Controller
 {
@@ -72,6 +74,14 @@ class BookPurchaseController extends Controller
             $data = $response->json('data');
             if ($data['status'] === 'success') {
                 $purchase->update(['status' => 'completed']);
+
+                // Send confirmation email
+                try {
+                    $purchase->loadMissing('textCollection', 'user');
+                    Mail::to($purchase->user->email)->queue(new BookPurchaseConfirmationMail($purchase));
+                } catch (\Throwable $e) {
+                    \Log::error('[BookPurchaseController] Email failed: ' . $e->getMessage());
+                }
 
                 return response()->json([
                     'message' => 'Purchase successful',

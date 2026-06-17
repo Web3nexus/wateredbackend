@@ -9,8 +9,11 @@ use App\Models\ShopOrder;
 use App\Models\ShopOrderItem;
 use App\Models\GlobalSetting;
 use App\Models\UserStat;
+use App\Mail\OrderConfirmationMail;
+use App\Mail\AdminOrderNotificationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class ProductController extends Controller
 {
@@ -93,6 +96,7 @@ class ProductController extends Controller
             ->firstOrFail();
 
         if ($order->status === 'paid') {
+            $order->loadMissing('items.product', 'user');
             return response()->json(['message' => 'Payment already verified', 'order' => $order]);
         }
 
@@ -122,6 +126,20 @@ class ProductController extends Controller
                     $stat->syncAmountSpent();
                 } catch (\Throwable $e) {
                     \Log::warning('[ProductController] UserStat sync failed: ' . $e->getMessage());
+                }
+
+                // Send confirmation email to the user
+                try {
+                    $order->loadMissing('items.product', 'user');
+                    Mail::to($order->user->email)->queue(new OrderConfirmationMail($order));
+                } catch (\Throwable $e) {
+                    \Log::error('[ProductController] Customer email failed: ' . $e->getMessage());
+                }
+
+                try {
+                    AdminOrderNotificationMail::sendToAdmins($order);
+                } catch (\Throwable $e) {
+                    \Log::error('[ProductController] Admin notification failed: ' . $e->getMessage());
                 }
 
                 return response()->json(['message' => 'Payment successful', 'order' => $order]);

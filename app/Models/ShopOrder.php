@@ -12,6 +12,9 @@ class ShopOrder extends Model
         'amount_kobo',
         'currency',
         'status',
+        'shipping_name',
+        'shipping_phone',
+        'shipping_address',
     ];
 
     public function user()
