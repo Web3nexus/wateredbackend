@@ -604,7 +604,6 @@ class GlobalSettingForm
     {
         return $component
             ->password()
-            ->revealable()
             ->dehydrated(fn(?string $state): bool => filled($state))
             ->required(fn(string $operation): bool => $operation === 'create')
             ->suffixAction(
@@ -616,7 +615,7 @@ class GlobalSettingForm
                         TextInput::make('verify_password')
                             ->label('Admin Password')
                             ->password()
-                            ->required()
+                            ->required(),
                     ])
                     ->action(function (array $data, TextInput $component) {
                         if (!Hash::check($data['verify_password'], auth()->user()->getAuthPassword())) {
@@ -628,14 +627,7 @@ class GlobalSettingForm
                             return;
                         }
 
-                        $state = $component->getState();
-
-                        Notification::make()
-                            ->title('Key Revealed')
-                            ->body("Value: {$state}")
-                            ->success()
-                            ->persistent()
-                            ->send();
+                        $component->password(false);
                     })
             );
     }
