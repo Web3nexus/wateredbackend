@@ -166,7 +166,8 @@ class AppointmentController extends Controller
             return null;
         }
 
-        $secretKey = $settings->paystack_secret_key;
+        $secretKey = $settings->paystack_secret_key
+            ?? config('services.paystack.secret_key');
 
         if (!$secretKey) {
             Log::error('Paystack Secret Key not found in settings');

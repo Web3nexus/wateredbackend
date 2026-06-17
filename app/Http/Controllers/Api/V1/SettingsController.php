@@ -16,6 +16,11 @@ class SettingsController extends Controller
     {
         $settings = GlobalSetting::first();
 
+        if ($settings) {
+            $settings->paystack_public_key = $settings->paystack_public_key
+                ?? config('services.paystack.public_key');
+        }
+
         return response()->json([
             'settings' => $settings,
             'languages' => Language::where('is_active', true)->get(),
@@ -44,10 +49,11 @@ class SettingsController extends Controller
         }
 
         $keys = $settings->only([
-            'paystack_public_key',
             'stripe_public_key',
             'flutterwave_public_key',
         ]);
+        $keys['paystack_public_key'] = $settings->paystack_public_key
+            ?? config('services.paystack.public_key');
 
         return response()->json($keys);
     }

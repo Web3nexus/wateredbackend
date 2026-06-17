@@ -250,7 +250,8 @@ class EventController extends Controller
             ], 500);
         }
 
-        $paystackSecretKey = $settings->paystack_secret_key;
+        $paystackSecretKey = $settings->paystack_secret_key
+            ?? config('services.paystack.secret_key');
 
         if (!$paystackSecretKey) {
             return response()->json([

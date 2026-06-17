@@ -97,7 +97,7 @@ class ProductController extends Controller
         }
 
         $settings = GlobalSetting::first();
-        $secretKey = config('services.paystack.secret_key') ?? $settings?->paystack_secret_key;
+        $secretKey = $settings?->paystack_secret_key ?? config('services.paystack.secret_key');
 
         if (!$secretKey) {
             return response()->json(['message' => 'Payment verification unavailable'], 500);

@@ -140,7 +140,8 @@ class WebhookController extends Controller
     {
         // Verify Paystack Signature
         $settings = GlobalSetting::first();
-        $paystackSecret = $settings->paystack_secret_key;
+        $paystackSecret = $settings?->paystack_secret_key
+            ?? config('services.paystack.secret_key');
 
         if (!$paystackSecret) {
             Log::error('Paystack Webhook: Missing Secret Key in Global Settings');
