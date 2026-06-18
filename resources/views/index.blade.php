@@ -486,8 +486,11 @@
         function bookingSystem() {
             return {
                 allTypes: [], filteredTypes: [], selectedCategory: '', selectedSubType: '', templeVisitTypeId: '', startTime: '', timeError: '', isSubmitting: false, fp: null,
-                async init() {
-                    this.initFlatpickr();
+                init() {
+                    this.$nextTick(() => this.initFlatpickr());
+                    this.fetchTypes();
+                },
+                async fetchTypes() {
                     try {
                         const response = await fetch('/api/v1/consultation-types');
                         const result = await response.json();
@@ -497,14 +500,16 @@
                     }
                 },
                 initFlatpickr() {
+                    const el = document.getElementById('start_time_picker');
+                    if (!el) return;
                     if (typeof flatpickr === 'undefined') {
                         console.error('Flatpickr failed to load from CDN');
                         return;
                     }
                     try {
-                        this.fp = flatpickr("#start_time_picker", {
+                        this.fp = flatpickr(el, {
                             enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", disable: [(date) => {
-                                if (!this.selectedCategory) return true;
+                                if (!this.selectedCategory) return false;
                                 if (this.selectedCategory === 'lord_uzih') {
                                     return ![2, 3, 5].includes(date.getDay());
                                 }
@@ -528,7 +533,18 @@
                     }
                     this.selectedSubType = '';
                     this.startTime = '';
-                    if (this.fp) this.fp.clear();
+                    if (this.fp) {
+                        this.fp.clear();
+                        this.fp.set('disable', [
+                            (date) => {
+                                if (!this.selectedCategory) return false;
+                                if (this.selectedCategory === 'lord_uzih') {
+                                    return ![2, 3, 5].includes(date.getDay());
+                                }
+                                return false;
+                            }
+                        ]);
+                    }
                     this.validateTime();
                 },
                 validateTime() {
