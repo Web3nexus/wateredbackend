@@ -115,6 +115,13 @@ class AppointmentController extends Controller
         $paymentUrl = null;
         if ($appointment->amount > 0) {
             $paymentUrl = $this->generatePaystackUrl($appointment);
+            if (!$paymentUrl) {
+                // Payment URL generation failed — clean up and return error
+                $appointment->delete();
+                return response()->json([
+                    'message' => 'Unable to initialize payment. Please try again later or contact support.',
+                ], 502);
+            }
         } else {
             // If free (e.g., Visit the Temple), confirm immediately
             $appointment->update(['appointment_status' => 'confirmed', 'payment_status' => 'paid']);
@@ -162,7 +169,7 @@ class AppointmentController extends Controller
     {
         $settings = GlobalSetting::first();
         if (!$settings) {
-            Log::error('Global settings not found when generating Paystack URL');
+            Log::error('Paystack: Global settings not found when generating URL for appointment #' . $appointment->id);
             return null;
         }
 
@@ -170,17 +177,19 @@ class AppointmentController extends Controller
             ?? config('services.paystack.secret_key');
 
         if (!$secretKey) {
-            Log::error('Paystack Secret Key not found in settings');
+            Log::error('Paystack: Secret Key not configured (empty in DB and .env) for appointment #' . $appointment->id);
             return null;
         }
 
         try {
+            $reference = 'APT_' . ($appointment->appointment_code ?? $appointment->id) . '_' . time();
+
             $response = Http::withToken($secretKey)
                 ->post('https://api.paystack.co/transaction/initialize', [
                     'email' => $appointment->email,
-                    'amount' => (int) ($appointment->amount * 100), // Ensure integer Kobo
+                    'amount' => (int) ($appointment->amount * 100),
                     'currency' => 'NGN',
-                    'reference' => 'APT_' . ($appointment->appointment_code ?? $appointment->id) . '_' . time(),
+                    'reference' => $reference,
                     'callback_url' => route('payment.callback'),
                     'metadata' => [
                         'appointment_id' => $appointment->id,
@@ -189,12 +198,14 @@ class AppointmentController extends Controller
                 ]);
 
             if ($response->successful()) {
-                return $response->json()['data']['authorization_url'];
+                $body = $response->json();
+                Log::info('Paystack: URL generated for appointment #' . $appointment->id . ' ref=' . $reference);
+                return $body['data']['authorization_url'] ?? null;
             } else {
-                Log::error('Paystack initialization failed: ' . $response->body());
+                Log::error('Paystack: initialization failed for appointment #' . $appointment->id . ': ' . $response->body());
             }
         } catch (\Exception $e) {
-            Log::error('Paystack Initialization Error: ' . $e->getMessage());
+            Log::error('Paystack: Initialization Error for appointment #' . $appointment->id . ': ' . $e->getMessage());
         }
 
         return null;

@@ -487,33 +487,37 @@
             return {
                 allTypes: [], filteredTypes: [], selectedCategory: '', selectedSubType: '', templeVisitTypeId: '', startTime: '', timeError: '', isSubmitting: false, fp: null,
                 async init() {
+                    this.initFlatpickr();
                     try {
                         const response = await fetch('/api/v1/consultation-types');
                         const result = await response.json();
                         this.allTypes = result.data || [];
-                        this.initFlatpickr();
                     } catch (error) {
                         console.error('Failed to fetch types:', error);
                     }
                 },
                 initFlatpickr() {
-                    this.fp = flatpickr("#start_time_picker", {
-                        enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", disable: [(date) => {
-                            if (!this.selectedCategory) return true;
-                            if (this.selectedCategory === 'lord_uzih') {
-                                // Only Tue(2), Wed(3), Fri(5)
-                                return ![2, 3, 5].includes(date.getDay());
-                            }
-                            return false; // Temple visits all days
-                        }],
-                        onChange: (selectedDates, dateStr) => {
-                            this.startTime = dateStr;
-                            this.validateTime();
-                        },
-                        onOpen: (selectedDates, dateStr, instance) => {
-                            // Ensure instance is ready for category-specific disabling
-                        }
-                    });
+                    if (typeof flatpickr === 'undefined') {
+                        console.error('Flatpickr failed to load from CDN');
+                        return;
+                    }
+                    try {
+                        this.fp = flatpickr("#start_time_picker", {
+                            enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", disable: [(date) => {
+                                if (!this.selectedCategory) return true;
+                                if (this.selectedCategory === 'lord_uzih') {
+                                    return ![2, 3, 5].includes(date.getDay());
+                                }
+                                return false;
+                            }],
+                            onChange: (selectedDates, dateStr) => {
+                                this.startTime = dateStr;
+                                this.validateTime();
+                            },
+                        });
+                    } catch (error) {
+                        console.error('Flatpickr init error:', error);
+                    }
                 },
                 updateSubTypes() {
                     this.filteredTypes = this.allTypes.filter(t => t.category === this.selectedCategory);

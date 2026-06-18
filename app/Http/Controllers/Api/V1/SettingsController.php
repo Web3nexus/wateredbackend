@@ -48,12 +48,12 @@ class SettingsController extends Controller
             return response()->json(['message' => 'Settings not configured'], 404);
         }
 
-        $keys = $settings->only([
-            'stripe_public_key',
-            'flutterwave_public_key',
-        ]);
-        $keys['paystack_public_key'] = $settings->paystack_public_key
-            ?? config('services.paystack.public_key');
+        $keys = [
+            'stripe_public_key' => $settings->stripe_public_key,
+            'flutterwave_public_key' => $settings->flutterwave_public_key,
+            'paystack_public_key' => $settings->paystack_public_key
+                ?? config('services.paystack.public_key'),
+        ];
 
         return response()->json($keys);
     }

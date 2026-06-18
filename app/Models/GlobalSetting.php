@@ -86,6 +86,8 @@ class GlobalSetting extends Model
         'app_config_version',
         'is_app_bookings_enabled',
         'is_web_bookings_enabled',
+        'paystack_monthly_plan_code',
+        'paystack_yearly_plan_code',
         'address',
         'latitude',
         'longitude',
