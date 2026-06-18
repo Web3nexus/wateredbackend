@@ -311,25 +311,22 @@
                         </div>
                     </div>
                 </div>
-                <form id="appointmentForm" class="space-y-6" x-data="bookingSystem()" @submit.prevent="submitForm">
+                <form id="appointmentForm" class="space-y-6">
                     @csrf
                     <div class="grid grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Full
-                                Name</label>
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Full Name</label>
                             <input type="text" name="full_name" required
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Phone
-                                Number</label>
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Phone Number</label>
                             <input type="tel" name="phone" required
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Email
-                            Address</label>
+                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Email Address</label>
                         <input type="email" name="email" required
                             class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                     </div>
@@ -337,59 +334,46 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Category</label>
-                            <select x-model="selectedCategory" @change="onCategoryChange()"
+                            <select id="categorySelect"
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                                 <option value="">Select Category</option>
-                                <template x-for="cat in categories" :key="cat.value">
-                                    <option :value="cat.value" x-text="cat.label + (cat.hasFree ? ' (FREE)' : '')"></option>
-                                </template>
                             </select>
                         </div>
 
-                        <div class="space-y-2" x-show="selectedCategory && hasPaidTypes">
-                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Consultation
-                                Type</label>
-                            <select name="consultation_type_id" x-model="selectedSubType"
-                                :required="!!selectedCategory"
+                        <div id="typeSelectWrapper" class="space-y-2" style="display:none">
+                            <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Consultation Type</label>
+                            <select id="typeSelect"
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                                 <option value="">Select Type</option>
-                                <template x-for="type in filteredTypes" :key="type.id">
-                                    <option :value="type.id" x-text="`${type.name} - ₦${formatNumber(type.price)}`">
-                                    </option>
-                                </template>
                             </select>
                         </div>
-                        <template x-if="selectedCategory && !hasPaidTypes">
-                            <input type="hidden" name="consultation_type_id" :value="freeTypeId">
-                        </template>
+                        <div id="freeTypeWrapper" style="display:none">
+                            <input type="hidden" id="freeTypeInput">
+                        </div>
                     </div>
 
-                    <template x-if="selectedCategory === 'temple_visit'">
+                    <div id="templeNotice" style="display:none">
                         <div class="p-4 bg-app-blue/10 border border-app-blue/20 rounded-xl">
-                            <p class="text-sm text-app-blue font-medium italic">"Visitors may not meet Lord Uzih the
-                                priest during temple visits."</p>
+                            <p class="text-sm text-app-blue font-medium italic">"Visitors may not meet Lord Uzih the priest during temple visits."</p>
                         </div>
-                    </template>
+                    </div>
 
                     <div class="space-y-2">
-                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date
-                            & Time</label>
-                        <input type="datetime-local" id="start_time_picker" name="start_time" x-model="startTime" required
+                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date & Time</label>
+                        <input type="datetime-local" id="startTime" name="start_time" required
                             class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Notes
-                            (Optional)</label>
+                        <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Notes (Optional)</label>
                         <textarea name="notes" rows="3"
                             class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment"
                             placeholder="Any specific questions..."></textarea>
                     </div>
 
-                    <button type="submit"
-                        :disabled="isSubmitting || !selectedCategory || !selectedSubType || !startTime"
-                        class="w-full py-5 bg-app-blue text-white font-bold rounded-xl hover:bg-app-blue/90 transition shadow-xl shadow-app-blue/20 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-                        x-text="isSubmitting ? 'Processing...' : (selectedTypeIsFree ? 'Book Free Appointment' : 'Confirm & Pay')">
+                    <button type="submit" id="submitBtn" disabled
+                        class="w-full py-5 bg-app-blue text-white font-bold rounded-xl hover:bg-app-blue/90 transition shadow-xl shadow-app-blue/20 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+                        Select a category to begin
                     </button>
                 </form>
                 <div id="appointmentMessage" class="hidden mt-6 p-4 rounded-xl text-center"></div>
@@ -483,108 +467,187 @@
 
 @section('scripts')
     <script>
-        function bookingSystem() {
-            return {
-                allTypes: [], selectedCategory: '', selectedSubType: '', startTime: '', isSubmitting: false,
-                get categories() {
-                    const seen = {};
-                    const labels = {
-                        'temple_visit': 'Visit the Temple',
-                        'lord_uzih': 'Talk to Lord Uzih',
-                    };
-                    return this.allTypes.reduce((acc, t) => {
-                        if (!seen[t.category]) {
-                            seen[t.category] = true;
-                            acc.push({
-                                value: t.category,
-                                label: labels[t.category] || t.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                                hasFree: this.allTypes.some(t2 => t2.category === t.category && (t2.price === 0 || t2.price === '0' || t2.is_free)),
-                            });
-                        }
-                        return acc;
-                    }, []);
-                },
-                get filteredTypes() {
-                    return this.allTypes.filter(t => t.category === this.selectedCategory);
-                },
-                get hasPaidTypes() {
-                    return this.allTypes.some(t => t.category === this.selectedCategory && !(t.price === 0 || t.price === '0' || t.is_free));
-                },
-                get selectedTypeIsFree() {
-                    const t = this.allTypes.find(t => String(t.id) === String(this.selectedSubType));
-                    return t ? (t.price === 0 || t.price === '0' || t.is_free) : false;
-                },
-                get freeTypeId() {
-                    const t = this.allTypes.find(t => t.category === this.selectedCategory && (t.price === 0 || t.price === '0' || t.is_free));
-                    return t ? String(t.id) : '';
-                },
-                init() {
-                    this.fetchTypes();
-                },
-                async fetchTypes() {
-                    try {
-                        const response = await fetch('/api/v1/consultation-types', { headers: { 'Accept': 'application/json' } });
-                        const result = await response.json();
-                        this.allTypes = result.data || [];
-                    } catch (error) {
-                        console.error('Failed to fetch types:', error);
-                    }
-                },
-                onCategoryChange() {
-                    const free = this.allTypes.find(t => t.category === this.selectedCategory && (t.price === 0 || t.price === '0' || t.is_free));
-                    this.selectedSubType = free ? free.id : '';
-                    this.startTime = '';
-                },
-                formatNumber(num) { return new Intl.NumberFormat('en-NG').format(num); },
-                async submitForm(e) {
-                    const form = e.target; const msg = document.getElementById('appointmentMessage');
-                    this.isSubmitting = true; msg.classList.add('hidden');
-                    try {
-                        const formData = new FormData(form); const response = await fetch('/api/v1/appointments/guest', { method: 'POST', headers: { 'Accept': 'application/json', }, body: formData });
-                        const result = await response.json();
-                        if (response.ok) {
-                            msg.innerText = 'Success! Redirecting...'; msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20'); msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
-                            if (result.payment_url) { window.location.href = result.payment_url; } else { msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code; form.reset(); this.selectedCategory = ''; this.selectedSubType = ''; this.startTime = ''; this.isSubmitting = false; }
-                        } else { throw new Error(result.message || 'Failed to create appointment'); }
-                    } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-red-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
+        document.addEventListener('DOMContentLoaded', function() {
+            var types = @json($consultationTypes) || [];
+            var cats = @json($consultationCategories) || [];
+
+            var categorySelect = document.getElementById('categorySelect');
+            var typeSelect = document.getElementById('typeSelect');
+            var typeWrapper = document.getElementById('typeSelectWrapper');
+            var freeWrapper = document.getElementById('freeTypeWrapper');
+            var freeInput = document.getElementById('freeTypeInput');
+            var templeNotice = document.getElementById('templeNotice');
+            var startTime = document.getElementById('startTime');
+            var submitBtn = document.getElementById('submitBtn');
+            var form = document.getElementById('appointmentForm');
+            var msg = document.getElementById('appointmentMessage');
+
+            cats.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c.slug;
+                opt.textContent = c.name + (c.is_free ? ' (FREE)' : '');
+                categorySelect.appendChild(opt);
+            });
+
+            function filterTypes(cat) {
+                return types.filter(function(t) { return t.category === cat; });
+            }
+
+            function findCategory(slug) {
+                return cats.find(function(c) { return c.slug === slug; });
+            }
+
+            function hasPaid(cat) {
+                var c = findCategory(cat);
+                return c ? !c.is_free : true;
+            }
+
+            function getFreeId(cat) {
+                var t = types.find(function(t) { return t.category === cat; });
+                return t ? String(t.id) : '';
+            }
+
+            function updateButton() {
+                var cat = categorySelect.value;
+                var typeVal = typeSelect.value;
+                var paid = hasPaid(cat);
+                var timeVal = startTime.value;
+                var canSubmit = cat && (paid ? typeVal : getFreeId(cat)) && timeVal;
+
+                submitBtn.disabled = !canSubmit || msg.dataset.submitting === 'true';
+
+                if (msg.dataset.submitting === 'true') {
+                    submitBtn.textContent = 'Processing...';
+                } else if (!cat) {
+                    submitBtn.textContent = 'Select a category to begin';
+                } else if (paid && !typeVal) {
+                    submitBtn.textContent = 'Select a consultation type';
+                } else if (!timeVal) {
+                    submitBtn.textContent = 'Pick a date & time';
+                } else if (paid) {
+                    submitBtn.textContent = 'Confirm & Pay';
+                } else {
+                    submitBtn.textContent = 'Book Free Appointment';
                 }
             }
-        }
 
-        // Temple Map
-        const mapEl = document.getElementById('temple-map');
-        if (mapEl) {
-            const lat = parseFloat(mapEl.dataset.lat);
-            const lng = parseFloat(mapEl.dataset.lng);
-            const address = mapEl.dataset.address;
+            categorySelect.addEventListener('change', function() {
+                var cat = categorySelect.value;
+                var filtered = filterTypes(cat);
+                var paid = hasPaid(cat);
 
-            if (isNaN(lat) || isNaN(lng)) {
-                console.error('Invalid map coordinates');
-                return;
+                typeSelect.innerHTML = '<option value="">Select Type</option>';
+                filtered.forEach(function(t) {
+                    var opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = t.name + ' - \u20A6' + new Intl.NumberFormat('en-NG').format(t.price);
+                    typeSelect.appendChild(opt);
+                });
+
+                if (paid) {
+                    typeWrapper.style.display = '';
+                    freeWrapper.style.display = 'none';
+                    typeSelect.name = 'consultation_type_id';
+                    typeSelect.required = true;
+                    freeInput.removeAttribute('name');
+                } else {
+                    typeWrapper.style.display = 'none';
+                    freeWrapper.style.display = '';
+                    typeSelect.removeAttribute('name');
+                    typeSelect.required = false;
+                    freeInput.name = 'consultation_type_id';
+                    freeInput.value = getFreeId(cat);
+                }
+
+                templeNotice.style.display = cat === 'temple_visit' ? '' : 'none';
+                typeSelect.value = '';
+                startTime.value = '';
+                updateButton();
+            });
+
+            typeSelect.addEventListener('change', updateButton);
+            startTime.addEventListener('change', updateButton);
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (msg.dataset.submitting === 'true') return;
+                msg.dataset.submitting = 'true';
+                updateButton();
+
+                msg.className = 'hidden mt-6 p-4 rounded-xl text-center';
+
+                fetch('/api/v1/appointments/guest', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: new FormData(form)
+                })
+                .then(function(r) {
+                    return r.json().then(function(data) {
+                        if (!r.ok) throw new Error(data.message || 'Failed to create appointment');
+                        return data;
+                    });
+                })
+                .then(function(result) {
+                    msg.className = 'mt-6 p-4 rounded-xl text-center border';
+                    if (result.payment_url) {
+                        msg.textContent = 'Success! Redirecting...';
+                        msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20');
+                        window.location.href = result.payment_url;
+                    } else {
+                        msg.textContent = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code;
+                        msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20');
+                        form.reset();
+                        typeSelect.innerHTML = '<option value="">Select Type</option>';
+                        typeWrapper.style.display = 'none';
+                        freeWrapper.style.display = 'none';
+                        templeNotice.style.display = 'none';
+                        msg.dataset.submitting = 'false';
+                        updateButton();
+                    }
+                })
+                .catch(function(error) {
+                    msg.className = 'mt-6 p-4 rounded-xl text-center bg-red-100/10 text-red-400 border border-red-400/20';
+                    msg.textContent = error.message || 'Failed to create appointment';
+                    msg.dataset.submitting = 'false';
+                    updateButton();
+                });
+            });
+
+            // Temple Map
+            var mapEl = document.getElementById('temple-map');
+            if (mapEl) {
+                var lat = parseFloat(mapEl.dataset.lat);
+                var lng = parseFloat(mapEl.dataset.lng);
+                var address = mapEl.dataset.address;
+
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.error('Invalid map coordinates');
+                    return;
+                }
+
+                var map = L.map('temple-map', {
+                    center: [lat, lng],
+                    zoom: 15,
+                    scrollWheelZoom: false,
+                });
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                var popupEl = document.createElement('div');
+                popupEl.textContent = address;
+
+                L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup(popupEl)
+                    .openPopup();
+
+                map.on('click', function () {
+                    map.scrollWheelZoom.enable();
+                });
             }
-
-            const map = L.map('temple-map', {
-                center: [lat, lng],
-                zoom: 15,
-                scrollWheelZoom: false,
-            });
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 19,
-            }).addTo(map);
-
-            const popupEl = document.createElement('div');
-            popupEl.textContent = address;
-
-            L.marker([lat, lng])
-                .addTo(map)
-                .bindPopup(popupEl)
-                .openPopup();
-
-            map.on('click', function () {
-                map.scrollWheelZoom.enable();
-            });
-        }
+        });
     </script>
 @endsection

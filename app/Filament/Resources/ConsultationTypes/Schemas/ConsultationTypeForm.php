@@ -18,10 +18,7 @@ class ConsultationTypeForm
                 TextInput::make('name')
                     ->required(),
                 Select::make('category')
-                    ->options([
-                        'temple_visit' => 'Visit the Temple',
-                        'lord_uzih' => 'Talk to Lord Uzih',
-                    ])
+                    ->options(fn(): array => \App\Models\ConsultationCategory::orderBy('sort_order')->pluck('name', 'slug')->toArray())
                     ->required(),
                 TextInput::make('price')
                     ->numeric()

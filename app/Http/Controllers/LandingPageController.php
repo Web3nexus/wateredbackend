@@ -6,6 +6,8 @@ use App\Models\Tradition;
 use App\Models\GlobalSetting;
 use App\Models\Teaching;
 use App\Models\LandingPageFeature;
+use App\Models\ConsultationCategory;
+use App\Models\ConsultationType;
 use Illuminate\Http\Request;
 
 class LandingPageController extends Controller
@@ -21,7 +23,10 @@ class LandingPageController extends Controller
             return response()->view('welcome');
         }
 
-        return view('index', compact('settings', 'traditions', 'features', 'teachings'));
+        $consultationCategories = ConsultationCategory::orderBy('sort_order')->get();
+        $consultationTypes = ConsultationType::where('is_active', true)->get();
+
+        return view('index', compact('settings', 'traditions', 'features', 'teachings', 'consultationCategories', 'consultationTypes'));
     }
 
     public function paymentCallback(Request $request)
