@@ -337,19 +337,20 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Category</label>
-                            <select x-model="selectedCategory" @change="updateSubTypes()"
+                            <select x-model="selectedCategory" @change="onCategoryChange()"
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                                 <option value="">Select Category</option>
-                                <option value="temple_visit">Visit the Temple (FREE)</option>
-                                <option value="lord_uzih">Talk to Lord Uzih</option>
+                                <template x-for="cat in categories" :key="cat.value">
+                                    <option :value="cat.value" x-text="cat.label + (cat.hasFree ? ' (FREE)' : '')"></option>
+                                </template>
                             </select>
                         </div>
 
-                        <div class="space-y-2" x-show="selectedCategory === 'lord_uzih'">
+                        <div class="space-y-2" x-show="selectedCategory && hasPaidTypes">
                             <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Consultation
                                 Type</label>
                             <select name="consultation_type_id" x-model="selectedSubType"
-                                :required="selectedCategory === 'lord_uzih'" :disabled="selectedCategory !== 'lord_uzih'"
+                                :required="!!selectedCategory"
                                 class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                                 <option value="">Select Type</option>
                                 <template x-for="type in filteredTypes" :key="type.id">
@@ -358,24 +359,23 @@
                                 </template>
                             </select>
                         </div>
-                        <template x-if="selectedCategory === 'temple_visit'">
-                            <input type="hidden" name="consultation_type_id" :value="templeVisitTypeId">
+                        <template x-if="selectedCategory && !hasPaidTypes">
+                            <input type="hidden" name="consultation_type_id" :value="freeTypeId">
                         </template>
                     </div>
 
-                    <div x-show="selectedCategory === 'temple_visit'"
-                        class="p-4 bg-app-blue/10 border border-app-blue/20 rounded-xl">
-                        <p class="text-sm text-app-blue font-medium italic">"Visitors may not meet Lord Uzih the
-                            priest during temple visits."</p>
-                    </div>
+                    <template x-if="selectedCategory === 'temple_visit'">
+                        <div class="p-4 bg-app-blue/10 border border-app-blue/20 rounded-xl">
+                            <p class="text-sm text-app-blue font-medium italic">"Visitors may not meet Lord Uzih the
+                                priest during temple visits."</p>
+                        </div>
+                    </template>
 
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date
                             & Time</label>
-                        <input type="text" id="start_time_picker" name="start_time" x-model="startTime" required
-                            class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment"
-                            placeholder="Select Day & Hour">
-                        <p x-show="timeError" class="text-xs text-red-400 mt-1" x-text="timeError"></p>
+                        <input type="datetime-local" id="start_time_picker" name="start_time" x-model="startTime" required
+                            class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
                     </div>
 
                     <div class="space-y-2">
@@ -387,9 +387,9 @@
                     </div>
 
                     <button type="submit"
-                        :disabled="isSubmitting || !!timeError || !selectedCategory || (selectedCategory === 'lord_uzih' && !selectedSubType)"
+                        :disabled="isSubmitting || !selectedCategory || !selectedSubType || !startTime"
                         class="w-full py-5 bg-app-blue text-white font-bold rounded-xl hover:bg-app-blue/90 transition shadow-xl shadow-app-blue/20 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-                        x-text="isSubmitting ? 'Processing...' : (selectedCategory === 'temple_visit' ? 'Book Temple Visit' : 'Confirm & Pay')">
+                        x-text="isSubmitting ? 'Processing...' : (selectedTypeIsFree ? 'Book Free Appointment' : 'Confirm & Pay')">
                     </button>
                 </form>
                 <div id="appointmentMessage" class="hidden mt-6 p-4 rounded-xl text-center"></div>
@@ -485,101 +485,55 @@
     <script>
         function bookingSystem() {
             return {
-                allTypes: [], filteredTypes: [], selectedCategory: '', selectedSubType: '', templeVisitTypeId: '', startTime: '', timeError: '', isSubmitting: false, fp: null,
+                allTypes: [], selectedCategory: '', selectedSubType: '', startTime: '', isSubmitting: false,
+                get categories() {
+                    const seen = {};
+                    const labels = {
+                        'temple_visit': 'Visit the Temple',
+                        'lord_uzih': 'Talk to Lord Uzih',
+                    };
+                    return this.allTypes.reduce((acc, t) => {
+                        if (!seen[t.category]) {
+                            seen[t.category] = true;
+                            acc.push({
+                                value: t.category,
+                                label: labels[t.category] || t.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                                hasFree: this.allTypes.some(t2 => t2.category === t.category && (t2.price === 0 || t2.price === '0' || t2.is_free)),
+                            });
+                        }
+                        return acc;
+                    }, []);
+                },
+                get filteredTypes() {
+                    return this.allTypes.filter(t => t.category === this.selectedCategory);
+                },
+                get hasPaidTypes() {
+                    return this.allTypes.some(t => t.category === this.selectedCategory && !(t.price === 0 || t.price === '0' || t.is_free));
+                },
+                get selectedTypeIsFree() {
+                    const t = this.allTypes.find(t => String(t.id) === String(this.selectedSubType));
+                    return t ? (t.price === 0 || t.price === '0' || t.is_free) : false;
+                },
+                get freeTypeId() {
+                    const t = this.allTypes.find(t => t.category === this.selectedCategory && (t.price === 0 || t.price === '0' || t.is_free));
+                    return t ? String(t.id) : '';
+                },
                 init() {
-                    this.$nextTick(() => this.initFlatpickr());
                     this.fetchTypes();
                 },
                 async fetchTypes() {
                     try {
-                        const response = await fetch('/api/v1/consultation-types');
+                        const response = await fetch('/api/v1/consultation-types', { headers: { 'Accept': 'application/json' } });
                         const result = await response.json();
                         this.allTypes = result.data || [];
                     } catch (error) {
                         console.error('Failed to fetch types:', error);
                     }
                 },
-                initFlatpickr() {
-                    const el = document.getElementById('start_time_picker');
-                    if (!el) return;
-                    if (typeof flatpickr === 'undefined') {
-                        console.error('Flatpickr failed to load from CDN');
-                        return;
-                    }
-                    try {
-                        this.fp = flatpickr(el, {
-                            enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", disable: [(date) => {
-                                if (!this.selectedCategory) return false;
-                                if (this.selectedCategory === 'lord_uzih') {
-                                    return ![2, 3, 5].includes(date.getDay());
-                                }
-                                return false;
-                            }],
-                            onChange: (selectedDates, dateStr) => {
-                                this.startTime = dateStr;
-                                this.validateTime();
-                            },
-                        });
-                    } catch (error) {
-                        console.error('Flatpickr init error:', error);
-                    }
-                },
-                updateSubTypes() {
-                    this.filteredTypes = this.allTypes.filter(t => t.category === this.selectedCategory);
-                    if (this.selectedCategory === 'temple_visit' && this.filteredTypes.length > 0) {
-                        this.templeVisitTypeId = this.filteredTypes[0].id;
-                    } else {
-                        this.templeVisitTypeId = '';
-                    }
-                    this.selectedSubType = '';
+                onCategoryChange() {
+                    const free = this.allTypes.find(t => t.category === this.selectedCategory && (t.price === 0 || t.price === '0' || t.is_free));
+                    this.selectedSubType = free ? free.id : '';
                     this.startTime = '';
-                    if (this.fp) {
-                        this.fp.clear();
-                        this.fp.set('disable', [
-                            (date) => {
-                                if (!this.selectedCategory) return false;
-                                if (this.selectedCategory === 'lord_uzih') {
-                                    return ![2, 3, 5].includes(date.getDay());
-                                }
-                                return false;
-                            }
-                        ]);
-                    }
-                    this.validateTime();
-                },
-                validateTime() {
-                    if (!this.startTime || !this.selectedCategory) { this.timeError = ''; return; }
-                    const date = new Date(this.startTime); const day = date.getDay(); // 0-6 (Sun-Sat)                 
-                    const hour = date.getHours();
-                    const minutes = date.getMinutes();
-                    const timeInt = hour * 100 + minutes;
-
-                    if (this.selectedCategory === 'temple_visit') {
-                        // Mon-Wed, Fri, Sun: 10:00 AM – 4:00 PM (1000 - 1600)                     
-                        // Thu, Sat: 7:00 AM – 6:00 PM (0700 - 1800)                     
-                        if ([1, 2, 3, 5, 0].includes(day)) {
-                            if (timeInt < 1000 || timeInt > 1600) {
-                                this.timeError = 'Temple visits are only available 10:00 AM - 4:00 PM on this day.';
-                                return;
-                            }
-                        } else if ([4, 6].includes(day)) {
-                            if (timeInt < 700 || timeInt > 1800) {
-                                this.timeError = 'Temple visits are only available 7:00 AM - 6:00 PM on this day.';
-                                return;
-                            }
-                        }
-                    } else if (this.selectedCategory === 'lord_uzih') {
-                        // Tue, Wed, Fri: 10:00 AM – 4:00 PM                     
-                        if (![2, 3, 5].includes(day)) {
-                            this.timeError = 'Consultations with Lord Uzih are only available on Tuesday, Wednesday, and Friday.';
-                            return;
-                        }
-                        if (timeInt < 1000 || timeInt > 1600) {
-                            this.timeError = 'Consultations with Lord Uzih are only available 10:00 AM - 4:00 PM.';
-                            return;
-                        }
-                    }
-                    this.timeError = '';
                 },
                 formatNumber(num) { return new Intl.NumberFormat('en-NG').format(num); },
                 async submitForm(e) {
@@ -590,9 +544,9 @@
                         const result = await response.json();
                         if (response.ok) {
                             msg.innerText = 'Success! Redirecting...'; msg.classList.remove('hidden', 'bg-red-100/10', 'text-red-400', 'border-red-400/20'); msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20', 'border');
-                            if (result.payment_url) { window.location.href = result.payment_url; } else { msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code; form.reset(); this.selectedCategory = ''; this.isSubmitting = false; }
+                            if (result.payment_url) { window.location.href = result.payment_url; } else { msg.innerText = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code; form.reset(); this.selectedCategory = ''; this.selectedSubType = ''; this.startTime = ''; this.isSubmitting = false; }
                         } else { throw new Error(result.message || 'Failed to create appointment'); }
-                    } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-green-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
+                    } catch (error) { msg.innerText = error.message; msg.classList.remove('hidden', 'bg-red-100/10', 'text-green-400', 'border-green-400/20'); msg.classList.add('bg-red-100/10', 'text-red-400', 'border-red-400/20', 'border'); this.isSubmitting = false; }
                 }
             }
         }
