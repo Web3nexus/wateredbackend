@@ -26,8 +26,17 @@ class AppointmentController extends Controller
         $types = ConsultationType::where('is_active', true)
             ->when($request->category, function ($query, $category) {
                 return $query->where('category', $category);
-            })->get();
-        return response()->json(['data' => $types]);
+            })
+            ->with('categoryModel')
+            ->get();
+
+        $data = $types->map(function ($type) {
+            return array_merge($type->toArray(), [
+                'availability' => $type->categoryModel?->availability ?? [],
+            ]);
+        });
+
+        return response()->json(['data' => $data]);
     }
 
     /**

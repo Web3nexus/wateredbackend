@@ -30,12 +30,11 @@ class AdminUsersTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->hidden(fn($record) => $record->is(auth('admin')->user()) || ($record->isDeveloper() && !auth('admin')->user()->isDeveloper())),
+                    ->hidden(fn($record) => $record->is(auth('admin')->user())),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->hidden(fn() => !auth('admin')->user()->isDeveloper()),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

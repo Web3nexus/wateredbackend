@@ -14,8 +14,7 @@ class EditAdminUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make()
-                ->hidden(fn() => $this->record?->isDeveloper() && !auth('admin')->user()->isDeveloper()),
+            DeleteAction::make(),
         ];
     }
 
@@ -29,16 +28,6 @@ class EditAdminUser extends EditRecord
             Notification::make()
                 ->title('Access Denied')
                 ->body('You cannot edit your own account.')
-                ->danger()
-                ->send();
-
-            $this->redirect(AdminUserResource::getUrl('index'));
-        }
-
-        if ($this->record->isDeveloper() && !$user->isDeveloper()) {
-            Notification::make()
-                ->title('Access Denied')
-                ->body('Developer accounts can only be edited by another Developer.')
                 ->danger()
                 ->send();
 

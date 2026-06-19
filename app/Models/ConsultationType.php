@@ -22,4 +22,9 @@ class ConsultationType extends Model
         'is_active' => 'boolean',
         'price' => 'decimal:2',
     ];
+
+    public function categoryModel()
+    {
+        return $this->belongsTo(ConsultationCategory::class, 'category', 'slug');
+    }
 }
