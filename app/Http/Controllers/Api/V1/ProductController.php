@@ -105,6 +105,7 @@ class ProductController extends Controller
             'amount_kobo' => $totalKobo,
             'currency' => 'NGN',
             'authorization_url' => $authorizationUrl,
+            'callback_url' => route('payment.callback'),
         ]);
     }
 

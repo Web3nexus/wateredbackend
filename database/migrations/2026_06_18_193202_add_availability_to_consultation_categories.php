@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::table('consultation_categories', function (Blueprint $table) {
             $table->json('availability')->nullable()->after('is_free');
-            $table->dropColumn('price');
         });
     }
 
@@ -18,7 +17,6 @@ return new class extends Migration
     {
         Schema::table('consultation_categories', function (Blueprint $table) {
             $table->dropColumn('availability');
-            $table->decimal('price', 10, 2)->nullable()->after('is_free');
         });
     }
 };

@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action as TableAction;
 use Filament\Tables\Table;
 use UnitEnum;
 use App\Traits\HasModuleAccess;
@@ -158,7 +159,7 @@ class SubscriptionResource extends Resource
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
-                \Filament\Tables\Actions\Action::make('revoke_premium')
+                TableAction::make('revoke_premium')
                     ->label('Revoke Premium')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')

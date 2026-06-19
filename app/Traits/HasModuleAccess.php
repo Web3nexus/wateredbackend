@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+
 trait HasModuleAccess
 {
     public static function canViewAny(): bool
@@ -12,7 +14,11 @@ trait HasModuleAccess
             return true;
         }
 
-        return auth('admin')->user()?->hasPermissionTo($permission, 'admin') ?? false;
+        try {
+            return auth('admin')->user()?->hasPermissionTo($permission, 'admin') ?? false;
+        } catch (PermissionDoesNotExist $e) {
+            return false;
+        }
     }
 
     /**

@@ -66,6 +66,7 @@ class BookPurchaseController extends Controller
             'currency' => 'NGN',
             'book' => $collection->name,
             'authorization_url' => $authorizationUrl,
+            'callback_url' => route('payment.callback'),
         ]);
     }
 

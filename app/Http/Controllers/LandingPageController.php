@@ -23,8 +23,13 @@ class LandingPageController extends Controller
             return response()->view('welcome');
         }
 
-        $consultationCategories = ConsultationCategory::orderBy('sort_order')->get();
-        $consultationTypes = ConsultationType::where('is_active', true)->get();
+        try {
+            $consultationCategories = ConsultationCategory::orderBy('sort_order')->get();
+            $consultationTypes = ConsultationType::where('is_active', true)->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $consultationCategories = collect();
+            $consultationTypes = collect();
+        }
 
         return view('index', compact('settings', 'traditions', 'features', 'teachings', 'consultationCategories', 'consultationTypes'));
     }
