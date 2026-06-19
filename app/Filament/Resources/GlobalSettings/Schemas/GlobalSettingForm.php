@@ -341,14 +341,6 @@ class GlobalSettingForm
                                             ->label('Paystack Yearly Plan Code')
                                             ->placeholder('e.g. PLN_gx2wn530m0i3w3m')
                                             ->dehydrated(fn(?string $state): bool => filled($state)),
-                                        static::addSecureRevealAction(
-                                            TextInput::make('paystack_public_key')
-                                                ->label('Paystack Public Key')
-                                        ),
-                                        static::addSecureRevealAction(
-                                            TextInput::make('paystack_secret_key')
-                                                ->label('Paystack Secret Key')
-                                        ),
                                     ])->columns(2),
 
                                 Section::make('Local Pricing (NGN)')
