@@ -37,12 +37,35 @@ class BookPurchaseController extends Controller
             'status' => 'pending',
         ]);
 
+        $settings = GlobalSetting::first();
+        $secretKey = $settings?->paystack_secret_key ?? config('services.paystack.secret_key');
+
+        $authorizationUrl = null;
+        if ($secretKey) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::withToken($secretKey)
+                    ->post('https://api.paystack.co/transaction/initialize', [
+                        'email' => $user->email,
+                        'amount' => (int) ($collection->price * 100),
+                        'reference' => $reference,
+                        'callback_url' => route('payment.callback'),
+                        'currency' => 'NGN',
+                    ]);
+                if ($response->successful()) {
+                    $authorizationUrl = $response->json('data.authorization_url');
+                }
+            } catch (\Throwable $e) {
+                \Log::error('[BookPurchase] Paystack init failed: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'message' => 'Purchase initiated',
             'reference' => $reference,
             'amount' => $collection->price,
             'currency' => 'NGN',
             'book' => $collection->name,
+            'authorization_url' => $authorizationUrl,
         ]);
     }
 
