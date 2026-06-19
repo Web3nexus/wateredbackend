@@ -13,14 +13,14 @@ class ConsultationCategory extends Model
         'name',
         'slug',
         'is_free',
-        'price',
+        'availability',
         'description',
         'sort_order',
     ];
 
     protected $casts = [
         'is_free' => 'boolean',
-        'price' => 'decimal:2',
+        'availability' => 'array',
         'sort_order' => 'integer',
     ];
 

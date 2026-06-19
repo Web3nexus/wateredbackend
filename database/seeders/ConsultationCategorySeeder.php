@@ -14,6 +14,10 @@ class ConsultationCategorySeeder extends Seeder
             [
                 'name' => 'Visit the Temple',
                 'is_free' => true,
+                'availability' => [
+                    ['days' => [1, 2, 3, 5, 0], 'start' => '10:00', 'end' => '16:00'],
+                    ['days' => [4, 6], 'start' => '07:00', 'end' => '18:00'],
+                ],
                 'description' => 'Free temple visitation — visitors may not meet Lord Uzih the priest during temple visits.',
                 'sort_order' => 1,
             ]
@@ -24,7 +28,9 @@ class ConsultationCategorySeeder extends Seeder
             [
                 'name' => 'Talk to Lord Uzih',
                 'is_free' => false,
-                'price' => 50000.00,
+                'availability' => [
+                    ['days' => [2, 3, 5], 'start' => '10:00', 'end' => '16:00'],
+                ],
                 'description' => 'Paid consultations with Lord Uzih.',
                 'sort_order' => 2,
             ]

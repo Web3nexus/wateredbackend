@@ -360,8 +360,10 @@
 
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-parchment/40 uppercase tracking-widest">Preferred Date & Time</label>
-                        <input type="datetime-local" id="startTime" name="start_time" required
+                        <input type="text" id="startTimePicker" readonly placeholder="Select Day & Hour"
                             class="w-full px-5 py-4 bg-parchment/5 border border-parchment/10 rounded-xl focus:border-app-blue outline-none transition text-parchment">
+                        <input type="hidden" id="startTime" name="start_time">
+                        <p id="timeError" class="text-xs text-red-400 mt-1" style="display:none"></p>
                     </div>
 
                     <div class="space-y-2">
@@ -477,10 +479,13 @@
             var freeWrapper = document.getElementById('freeTypeWrapper');
             var freeInput = document.getElementById('freeTypeInput');
             var templeNotice = document.getElementById('templeNotice');
-            var startTime = document.getElementById('startTime');
+            var startTimeHidden = document.getElementById('startTime');
+            var startTimePicker = document.getElementById('startTimePicker');
+            var timeError = document.getElementById('timeError');
             var submitBtn = document.getElementById('submitBtn');
             var form = document.getElementById('appointmentForm');
             var msg = document.getElementById('appointmentMessage');
+            var fp = null;
 
             cats.forEach(function(c) {
                 var opt = document.createElement('option');
@@ -507,11 +512,40 @@
                 return t ? String(t.id) : '';
             }
 
+            function isDayAvailable(date, catSlug) {
+                var c = findCategory(catSlug);
+                if (!c || !c.availability || c.availability.length === 0) return true;
+                var day = date.getDay();
+                return c.availability.some(function(slot) { return slot.days.indexOf(day) !== -1; });
+            }
+
+            function isTimeValid(date, catSlug) {
+                var c = findCategory(catSlug);
+                if (!c || !c.availability || c.availability.length === 0) return true;
+                var day = date.getDay();
+                var h = ('0' + date.getHours()).slice(-2);
+                var m = ('0' + date.getMinutes()).slice(-2);
+                var timeStr = h + ':' + m;
+                return c.availability.some(function(slot) {
+                    return slot.days.indexOf(day) !== -1 && timeStr >= slot.start && timeStr <= slot.end;
+                });
+            }
+
+            function updateFlatpickr(catSlug) {
+                if (!fp) return;
+                fp.set('disable', [
+                    function(date) { return !isDayAvailable(date, catSlug); }
+                ]);
+                fp.clear();
+                startTimeHidden.value = '';
+                timeError.style.display = 'none';
+            }
+
             function updateButton() {
                 var cat = categorySelect.value;
                 var typeVal = typeSelect.value;
                 var paid = hasPaid(cat);
-                var timeVal = startTime.value;
+                var timeVal = startTimeHidden.value;
                 var canSubmit = cat && (paid ? typeVal : getFreeId(cat)) && timeVal;
 
                 submitBtn.disabled = !canSubmit || msg.dataset.submitting === 'true';
@@ -561,12 +595,32 @@
 
                 templeNotice.style.display = cat === 'temple_visit' ? '' : 'none';
                 typeSelect.value = '';
-                startTime.value = '';
+                updateFlatpickr(cat);
                 updateButton();
             });
 
             typeSelect.addEventListener('change', updateButton);
-            startTime.addEventListener('change', updateButton);
+
+            if (typeof flatpickr !== 'undefined' && startTimePicker) {
+                fp = flatpickr(startTimePicker, {
+                    enableTime: true,
+                    dateFormat: "Y-m-d H:i",
+                    minDate: "today",
+                    disable: [function(date) {
+                        return !isDayAvailable(date, categorySelect.value);
+                    }],
+                    onChange: function(selectedDates, dateStr) {
+                        startTimeHidden.value = dateStr;
+                        timeError.style.display = 'none';
+                        if (dateStr && !isTimeValid(new Date(dateStr), categorySelect.value)) {
+                            timeError.textContent = 'Selected time is outside available hours for this category.';
+                            timeError.style.display = '';
+                            startTimeHidden.value = '';
+                        }
+                        updateButton();
+                    }
+                });
+            }
 
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -597,6 +651,9 @@
                         msg.textContent = 'Appointment confirmed! Tracking code: ' + result.data.appointment_code;
                         msg.classList.add('bg-green-100/10', 'text-green-400', 'border-green-400/20');
                         form.reset();
+                        if (fp) fp.clear();
+                        startTimeHidden.value = '';
+                        timeError.style.display = 'none';
                         typeSelect.innerHTML = '<option value="">Select Type</option>';
                         typeWrapper.style.display = 'none';
                         freeWrapper.style.display = 'none';

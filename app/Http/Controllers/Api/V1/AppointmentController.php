@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\ConsultationCategory;
 use App\Models\ConsultationType;
 use App\Models\Appointment;
 use App\Models\GlobalSetting;
@@ -139,26 +140,18 @@ class AppointmentController extends Controller
 
     protected function isAvailable(ConsultationType $type, \Carbon\Carbon $time)
     {
-        $dayName = $time->format('l'); // Monday, Tuesday, etc.
-        $hour = $time->hour;
-        $minute = $time->minute;
+        $category = ConsultationCategory::where('slug', $type->category)->first();
+
+        if (!$category || !$category->availability) {
+            return false;
+        }
+
+        $dayOfWeek = $time->dayOfWeek; // 0=Sunday, 6=Saturday
         $timeString = $time->format('H:i');
 
-        if ($type->category === 'temple_visit') {
-            // Monday – Wednesday: 10:00 AM – 4:00 PM
-            // Thursday: 7:00 AM – 6:00 PM
-            // Friday: 10:00 AM – 4:00 PM
-            // Saturday: 7:00 AM – 6:00 PM
-            // Sunday: 10:00 AM – 4:00 PM
-            if (in_array($dayName, ['Monday', 'Tuesday', 'Wednesday', 'Friday', 'Sunday'])) {
-                return $timeString >= '10:00' && $timeString <= '16:00';
-            } elseif (in_array($dayName, ['Thursday', 'Saturday'])) {
-                return $timeString >= '07:00' && $timeString <= '18:00';
-            }
-        } elseif ($type->category === 'lord_uzih') {
-            // Tuesday, Wednesday, Friday: 10:00 AM – 4:00 PM
-            if (in_array($dayName, ['Tuesday', 'Wednesday', 'Friday'])) {
-                return $timeString >= '10:00' && $timeString <= '16:00';
+        foreach ($category->availability as $slot) {
+            if (in_array($dayOfWeek, $slot['days']) && $timeString >= $slot['start'] && $timeString <= $slot['end']) {
+                return true;
             }
         }
 

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->boolean('is_free')->default(false);
-            $table->decimal('price', 10, 2)->nullable();
             $table->text('description')->nullable();
             $table->integer('sort_order')->default(0);
             $table->timestamps();

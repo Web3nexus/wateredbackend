@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\ConsultationCategories\Schemas;
 
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -26,20 +28,31 @@ class ConsultationCategoryForm
                     ->unique(ignoreRecord: true),
                 Toggle::make('is_free')
                     ->label('Free Category')
-                    ->helperText('If enabled, appointments in this category can be booked without payment.')
-                    ->live()
-                    ->afterStateUpdated(function ($set, $state) {
-                        if ($state) {
-                            $set('price', null);
-                        }
-                    }),
-                TextInput::make('price')
-                    ->label('Price (₦)')
-                    ->numeric()
-                    ->prefix('₦')
-                    ->step(0.01)
-                    ->placeholder('e.g. 50000.00')
-                    ->visible(fn($get) => !$get('is_free')),
+                    ->helperText('If enabled, appointments in this category can be booked without payment.'),
+                Repeater::make('availability')
+                    ->schema([
+                        Select::make('days')
+                            ->multiple()
+                            ->options([
+                                0 => 'Sunday',
+                                1 => 'Monday',
+                                2 => 'Tuesday',
+                                3 => 'Wednesday',
+                                4 => 'Thursday',
+                                5 => 'Friday',
+                                6 => 'Saturday',
+                            ])
+                            ->required(),
+                        TimePicker::make('start')
+                            ->required()
+                            ->seconds(false),
+                        TimePicker::make('end')
+                            ->required()
+                            ->seconds(false)
+                            ->after('start'),
+                    ])
+                    ->columnSpanFull()
+                    ->helperText('Set available day and time slots. At least one slot is required for bookings to be allowed.'),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 TextInput::make('sort_order')

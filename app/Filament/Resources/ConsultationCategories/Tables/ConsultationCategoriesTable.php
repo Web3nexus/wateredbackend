@@ -23,10 +23,6 @@ class ConsultationCategoriesTable
                 IconColumn::make('is_free')
                     ->label('Free')
                     ->boolean(),
-                TextColumn::make('price')
-                    ->label('Price')
-                    ->money('NGN')
-                    ->visible(fn($record) => $record && !$record->is_free),
                 TextColumn::make('description')
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
