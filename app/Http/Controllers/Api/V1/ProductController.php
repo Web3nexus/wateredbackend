@@ -91,7 +91,7 @@ class ProductController extends Controller
                         'callback_url' => route('payment.callback'),
                         'currency' => 'NGN',
                         'metadata' => [
-                            'cancel_action' => 'https://cancelurl.com',
+                            'cancel_action' => 'https://mywatered.com',
                         ],
                     ]);
                 if ($response->successful()) {

@@ -203,7 +203,7 @@ class AppointmentController extends Controller
                     'metadata' => [
                         'appointment_id' => $appointment->id,
                         'type' => 'appointment',
-                        'cancel_action' => 'https://cancelurl.com',
+                        'cancel_action' => 'https://mywatered.com',
                     ]
                 ]);
 

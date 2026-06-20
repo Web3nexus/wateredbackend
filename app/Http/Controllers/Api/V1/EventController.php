@@ -273,16 +273,18 @@ class EventController extends Controller
                         'email' => $validated['email'] ?? $user?->email,
                         'phone' => $validated['phone'] ?? $user?->phone,
                         'event_title' => $event->title,
-                        'cancel_action' => 'https://cancelurl.com',
+                        'cancel_action' => 'https://mywatered.com',
                     ],
                     'callback_url' => route('payment.callback'),
                 ]);
 
             if ($response->successful()) {
                 $result = $response->json();
+                $paystackData = $result['data'];
+                $paystackData['callback_url'] = route('payment.callback');
                 return response()->json([
                     'message' => 'Payment initialized',
-                    'data' => $result['data']
+                    'data' => $paystackData,
                 ]);
             }
 
