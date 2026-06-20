@@ -514,7 +514,7 @@
 
             function isDayAvailable(date, catSlug) {
                 var c = findCategory(catSlug);
-                if (!c || !c.availability || c.availability.length === 0) return true;
+                if (!c || !c.availability || c.availability.length === 0) return false;
                 var day = date.getDay();
                 return c.availability.some(function(slot) { return slot.days.indexOf(day) !== -1; });
             }

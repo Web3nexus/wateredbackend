@@ -135,6 +135,11 @@ class AppointmentController extends Controller
         } else {
             // If free (e.g., Visit the Temple), confirm immediately
             $appointment->update(['appointment_status' => 'confirmed', 'payment_status' => 'paid']);
+            try {
+                Mail::to($appointment->email)->send(new UserAppointmentConfirmationMail($appointment));
+            } catch (\Exception $e) {
+                Log::error('Failed to send free appointment confirmation: ' . $e->getMessage());
+            }
         }
 
         // Notify Admin Immediately
@@ -143,6 +148,8 @@ class AppointmentController extends Controller
         return response()->json([
             'data' => $appointment,
             'payment_url' => $paymentUrl,
+            'callback_url' => route('payment.callback'),
+            'reference' => $paymentUrl ? ($appointment->appointment_code ?? $appointment->id) : null,
             'message' => 'Appointment created successfully.'
         ], 201);
     }
@@ -195,7 +202,8 @@ class AppointmentController extends Controller
                     'callback_url' => route('payment.callback'),
                     'metadata' => [
                         'appointment_id' => $appointment->id,
-                        'type' => 'appointment'
+                        'type' => 'appointment',
+                        'cancel_action' => 'https://cancelurl.com',
                     ]
                 ]);
 

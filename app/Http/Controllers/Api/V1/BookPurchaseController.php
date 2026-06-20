@@ -50,6 +50,9 @@ class BookPurchaseController extends Controller
                         'reference' => $reference,
                         'callback_url' => route('payment.callback'),
                         'currency' => 'NGN',
+                        'metadata' => [
+                            'cancel_action' => 'https://cancelurl.com',
+                        ],
                     ]);
                 if ($response->successful()) {
                     $authorizationUrl = $response->json('data.authorization_url');

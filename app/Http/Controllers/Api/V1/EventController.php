@@ -273,6 +273,7 @@ class EventController extends Controller
                         'email' => $validated['email'] ?? $user?->email,
                         'phone' => $validated['phone'] ?? $user?->phone,
                         'event_title' => $event->title,
+                        'cancel_action' => 'https://cancelurl.com',
                     ],
                     'callback_url' => route('payment.callback'),
                 ]);

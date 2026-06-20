@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\GlobalSetting;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Mail\SubscriptionConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SubscriptionService
 {
@@ -171,6 +173,15 @@ class SubscriptionService
                 'transaction_id' => $providerTransactionId,
                 'expires_at' => $finalExpiresAt->toIso8601String(),
             ]);
+
+            try {
+                Mail::to($user->email)->queue(new SubscriptionConfirmationMail($subscription));
+            } catch (\Throwable $e) {
+                Log::error('SubscriptionService: Failed to send confirmation email', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return $subscription;
         });

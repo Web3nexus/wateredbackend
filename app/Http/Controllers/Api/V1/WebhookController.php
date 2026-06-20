@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Appointment;
 use App\Mail\UserAppointmentConfirmationMail;
+use App\Mail\EventBookingConfirmationMail;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -279,7 +280,7 @@ class WebhookController extends Controller
                 return;
             }
 
-            $event->registrations()->create([
+            $registration = $event->registrations()->create([
                 'user_id' => $metadata['user_id'] ?? null,
                 'full_name' => $metadata['full_name'] ?? null,
                 'email' => $metadata['email'] ?? null,
@@ -290,6 +291,14 @@ class WebhookController extends Controller
                 'payment_status' => 'completed',
                 'payment_method' => $data['channel'],
             ]);
+        }
+
+        if ($registration && $registration->email) {
+            try {
+                Mail::to($registration->email)->send(new EventBookingConfirmationMail($registration));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send event booking confirmation: ' . $e->getMessage());
+            }
         }
     }
 
